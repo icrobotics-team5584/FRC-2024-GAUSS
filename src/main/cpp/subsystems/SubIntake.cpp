@@ -10,18 +10,7 @@
 
 using namespace frc2::cmd;
 
-SubIntake::SubIntake() {
-  frc::SmartDashboard::PutString("Intake/Intake Deploy State: ", "Intake retracted");
-  _intakeMotorSpin.RestoreFactoryDefaults();
-  _intakeMotorSpin.SetSmartCurrentLimit(60);
-  _intakeMotorSpin.SetPeriodicFramePeriod(rev::CANSparkLowLevel::PeriodicFrame::kStatus0, 500);
-  _intakeMotorSpin.SetPeriodicFramePeriod(rev::CANSparkLowLevel::PeriodicFrame::kStatus1, 500);
-  _intakeMotorSpin.SetPeriodicFramePeriod(rev::CANSparkLowLevel::PeriodicFrame::kStatus2, 500);
-  _intakeMotorSpin.SetPeriodicFramePeriod(rev::CANSparkLowLevel::PeriodicFrame::kStatus3, 500);
-  _intakeMotorSpin.SetPeriodicFramePeriod(rev::CANSparkLowLevel::PeriodicFrame::kStatus4, 500);
-  _intakeMotorSpin.SetPeriodicFramePeriod(rev::CANSparkLowLevel::PeriodicFrame::kStatus5, 500);
-  _intakeMotorSpin.SetPeriodicFramePeriod(rev::CANSparkLowLevel::PeriodicFrame::kStatus6, 500);
-}
+SubIntake::SubIntake() {}
 
 frc2::CommandPtr SubIntake::Outtake() {
   return Run([this]{ _intakeMotorSpin.Set(-1);}).FinallyDo([this]{_intakeMotorSpin.Set(0);});
