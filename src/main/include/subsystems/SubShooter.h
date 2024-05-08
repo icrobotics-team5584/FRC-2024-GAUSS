@@ -11,11 +11,19 @@
 #include <rev/CANSparkMax.h>
 #include <frc2/command/commands.h>
 #include "frc/Encoder.h"
+#include <frc/controller/SimpleMotorFeedforward.h>
+#include <units/velocity.h>
 
 class SubShooter : public frc2::SubsystemBase {
  public:
   SubShooter();
 
+  static SubShooter& GetInstance() {
+    static SubShooter inst;
+    return inst;
+  }
+
+  void UpdatePIDFF();
   /**
    * Will be called periodically whenever the CommandScheduler runs.
    */
@@ -34,4 +42,22 @@ class SubShooter : public frc2::SubsystemBase {
   frc::Encoder _rightEncoder{dio::ShooterFlywheelEncoderRightChannelA, dio::ShooterFlywheelEncoderRightChannelB, false, frc::Encoder::EncodingType::k1X};
   frc::PIDController _leftShooterPID{ShooterP, ShooterI, ShooterD};
   frc::PIDController _rightShooterPID{ShooterP, ShooterI, ShooterD};
+
+  double _leftEncoderPositionPrev = 0;
+  double _rightEncoderPositionPrev = 0;
+  double _leftEncoderDif = 0;
+  double _rightEncoderDif = 0;
+  double _leftPastVelocityAverage = 0;
+  double _rightPastVelocityAverage = 0;
+
+  std::array <double, 3> _leftPastVelocityMeasurements{0, 0, 0};
+  std::array <double, 3> _rightPastVelocityMeasurements{0, 0, 0};
+
+  frc::SimpleMotorFeedforward <units::turns> _shooterFeedForward {kS, kV, kA};
+
+  static constexpr units::volt_t kS = 0_V;
+  static constexpr decltype(1_V / 1_tps) kV = 0 / 1_tps;
+  static constexpr decltype(1_V / 1_tr_per_s_sq) kA = 0_V / 1tr_per_s_sq;
+
+  units::turns_per_second_t CurrentShooterTarget = 0_tps;
   };
