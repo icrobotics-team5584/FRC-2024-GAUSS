@@ -5,6 +5,8 @@ namespace canid{
     constexpr int ShooterPivotMotor  = 9;
     constexpr int ShooterFlywheelMotorLeft  = 10;
     constexpr int ShooterFlywheelMotorRight  = 11;
+    constexpr int IntakeMotor  = 12;
+
 }
 
 namespace dio{
