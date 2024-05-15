@@ -14,6 +14,7 @@
 #include <frc/controller/SimpleMotorFeedforward.h>
 #include <units/velocity.h>
 #include "ctre/phoenix6/TalonFX.hpp"
+#include <frc/simulation/DCMotorSim.h>
 
 class SubShooter : public frc2::SubsystemBase {
  public:
@@ -35,6 +36,8 @@ class SubShooter : public frc2::SubsystemBase {
    */
   void Periodic() override;
 
+  void SimulationPeriodic() override;
+
  private:
   ctre::phoenix6::hardware::TalonFX _ShooterFlywheelMotorLeft {canid::ShooterFlywheelMotorLeft};
   ctre::phoenix6::hardware::TalonFX _ShooterFlywheelMotorRight {canid::ShooterFlywheelMotorRight};
@@ -50,4 +53,7 @@ class SubShooter : public frc2::SubsystemBase {
   static constexpr double _flywheelD = 0;
   static constexpr double _flywheelV = 0.2;
 
+  //Simulation stuff
+  frc::sim::DCMotorSim _leftSim{frc::DCMotor::Falcon500(), 1, 0.005_kg_sq_m};
+  frc::sim::DCMotorSim _rightSim{frc::DCMotor::Falcon500(), 1, 0.005_kg_sq_m};
 };

@@ -23,7 +23,6 @@ SubShooter::SubShooter(){
 // This method will be called once per scheduler run
 void SubShooter::Periodic() {
 frc::SmartDashboard::PutNumber("ShooterSpeed", _ShooterFlywheelMotorLeft.GetVelocity().GetValue().value());
-frc::SmartDashboard::PutNumber("ShooterTargetSpeed", _ShooterFlywheelMotorLeft.GetPIDVelocity_Reference().GetValue().value());
 }
 
 frc2::CommandPtr SubShooter::CmdSetShooterSpeaker(){
@@ -49,4 +48,12 @@ frc2::CommandPtr SubShooter::CmdSetShooterOff(){
         _ShooterFlywheelMotorLeft.SetControl(_flywheelVelocity.WithVelocity(ShooterOff));
         _ShooterFlywheelMotorRight.SetControl(_flywheelVelocity.WithVelocity(ShooterOff));
         });
+}
+
+void SubShooter::SimulationPeriodic() {
+    auto& leftState = _ShooterFlywheelMotorLeft.GetSimState();
+    _leftSim.SetInputVoltage(leftState.GetMotorVoltage());
+    _leftSim.Update(20_ms);
+    leftState.SetRawRotorPosition(_leftSim.GetAngularPosition());
+    leftState.SetRotorVelocity(_leftSim.GetAngularVelocity());
 }
