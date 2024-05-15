@@ -7,19 +7,28 @@
 #include <frc2/command/Commands.h>
 #include <rev/CANSparkLowLevel.h>
 
-
+ 
 using namespace frc2::cmd;
 
 SubIntake::SubIntake() {}
 
 frc2::CommandPtr SubIntake::Outtake() {
-  return Run([this]{ _intakeMotorSpin.Set(-1);}).FinallyDo([this]{_intakeMotorSpin.Set(0);});
+  return Run([this]{ _intakeMotor.Set(-1);}).FinallyDo([this]{_intakeMotor.Set(0);});
 }
 
 frc2::CommandPtr SubIntake::Intake() {
-  return Run([this]{ _intakeMotorSpin.Set(1);}).FinallyDo([this]{_intakeMotorSpin.Set(0);});
+  return Run([this]{ _intakeMotor.Set(1);}).Until([this]{return CheckifIntakehasNote();}).FinallyDo([this]{_intakeMotor.Set(0);});
 }
 
+bool SubIntake::CheckifIntakehasNote() {
+  if ( _IntakeLineBreak.Get() == true) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
 // This method will be called once per scheduler run
-void SubIntake::Periodic() {}
+void SubIntake::Periodic() {
+  frc::SmartDashboard::PutNumber("Intake/Speed", _intakeMotor.Get());
+}

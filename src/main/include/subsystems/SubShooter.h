@@ -24,7 +24,7 @@ class SubShooter : public frc2::SubsystemBase {
  private:
   ICSparkMax _shooterPivotMotor{canid::ShooterPivotMotor, 50_A};
   ICSparkMax _shooterFlywheelMotorLeft{canid::ShooterFlywheelMotorLeft, 30_A};
-  ICSparkMax _shooterFlywheelMotorRight{canid::_ShooterFlywheelMotorRight, 30_A};
+  ICSparkMax _shooterFlywheelMotorRight{canid::ShooterFlywheelMotorRight, 30_A};
 
   static constexpr double ShooterP = 0;
   static constexpr double ShooterI = 0;

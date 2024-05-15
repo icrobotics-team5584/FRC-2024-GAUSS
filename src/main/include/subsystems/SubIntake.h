@@ -7,6 +7,7 @@
 #include <frc2/command/SubsystemBase.h>
 #include <rev/CANSparkMax.h>
 #include "Constants.h"
+#include <frc/DigitalInput.h>
 
 class SubIntake : public frc2::SubsystemBase {
  public:
@@ -23,6 +24,8 @@ class SubIntake : public frc2::SubsystemBase {
 //Define commands for intake
   frc2::CommandPtr Intake();
   frc2::CommandPtr Outtake();
+  bool CheckifIntakehasNote();
+  frc::DigitalInput _IntakeLineBreak{dio::IntakeLineBreak};
 
   //Defind functions for intake
   void Periodic() override;
@@ -32,5 +35,5 @@ class SubIntake : public frc2::SubsystemBase {
   // Components (e.g. motor controllers and sensors) should generally be
   // declared private and exposed only through public methods.
 
-  rev::CANSparkMax _intakeMotorSpin{canid::IntakeMotor, rev::CANSparkMax::MotorType::kBrushless};
+  rev::CANSparkMax _intakeMotor{canid::IntakeMotor, rev::CANSparkMax::MotorType::kBrushless};
 };
