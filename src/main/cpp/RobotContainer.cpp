@@ -14,6 +14,8 @@ RobotContainer::RobotContainer() {
 void RobotContainer::ConfigureBindings() {
   _controller.LeftBumper().WhileTrue(SubShooter::GetInstance().CmdSetShooterSpeaker());
   _controller.RightBumper().WhileTrue(SubShooter::GetInstance().CmdSetShooterAmp());
+  _controller.LeftTrigger().WhileTrue(SubShooter::GetInstance().CmdSetShooterOff());
+  _controller.RightTrigger().WhileTrue(SubShooter::GetInstance().CmdSetShooterPassing());
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
