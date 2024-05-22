@@ -22,17 +22,8 @@ namespace canid{
     constexpr int DriveBaseBackLeftDrive = 1; //done
     constexpr int DriveBaseBackLeftTurn = 4;
     constexpr int DriveBaseBackLeftEncoder = 11; //done
-
-
-
-
 }
 
 namespace dio{
     constexpr int IntakeLineBreak = 1;
-    constexpr int ShooterFlywheelEncoderLeftChannelA = 0;
-    constexpr int ShooterFlywheelEncoderLeftChannelB = 1;
-    constexpr int ShooterFlywheelEncoderRightChannelA = 2;
-    constexpr int ShooterFlywheelEncoderRightChannelB = 3;
-    
 }
