@@ -18,7 +18,7 @@ void SubPivot::Periodic() {}
 
 frc2::CommandPtr SubPivot::CmdSetPivotAngle(units::degree_t targetAngle){
     return RunOnce([this, targetAngle]{
-        _pivotMotor.SetPositionTarget(targetAngle);
+        _pivotMotor.SetPositionTarget(targetAngle, _pivotFF.Calculate(targetAngle, 0_tps));
     });
 }
 
