@@ -24,9 +24,6 @@ class SubIntake : public frc2::SubsystemBase {
 //Define commands for intake
   frc2::CommandPtr Intake();
   frc2::CommandPtr Outtake();
-  bool CheckifIntakehasNote();
-  frc::DigitalInput _IntakeLineBreak{dio::IntakeLineBreak};
-
   //Defind functions for intake
   void Periodic() override;
 

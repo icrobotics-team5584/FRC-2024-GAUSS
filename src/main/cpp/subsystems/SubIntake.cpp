@@ -17,16 +17,9 @@ frc2::CommandPtr SubIntake::Outtake() {
 }
 
 frc2::CommandPtr SubIntake::Intake() {
-  return Run([this]{ _intakeMotor.Set(1);}).Until([this]{return CheckifIntakehasNote();}).FinallyDo([this]{_intakeMotor.Set(0);});
+return Run([this]{ _intakeMotor.Set(1);}).FinallyDo([this]{_intakeMotor.Set(0);});
 }
 
-bool SubIntake::CheckifIntakehasNote() {
-  if ( _IntakeLineBreak.Get() == true) {
-    return true;
-  } else {
-    return false;
-  }
-}
 
 // This method will be called once per scheduler run
 void SubIntake::Periodic() {
