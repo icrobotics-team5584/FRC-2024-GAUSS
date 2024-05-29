@@ -7,6 +7,8 @@
 #include "subsystems/SubPivot.h"
 #include "subsystems/SubIntake.h"
 #include "subsystems/SubShooter.h"
+#include "stdio.h"
+#include "iostream"
 
 namespace cmd {
 using namespace frc2::cmd;
@@ -22,12 +24,15 @@ frc2::CommandPtr CmdShootSpeaker(){
     .Until([] {return !SubFeeder::GetInstance().GetFeederState();})
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
 }
+//DO WHAT WAS DONE TO AMP TO EVERYTHING ELSE!
 frc2::CommandPtr CmdShootAmp(){
-    return Run([]{
-        SubShooter::GetInstance().CmdSetShooterAmp();
-        SubFeeder::GetInstance().FeedToIntake();
-    })
-    .Until([] {return !SubFeeder::GetInstance().GetFeederState();})
+    return Parallel(
+        SubPivot::GetInstance().CmdSetPivotAngle(90_deg),
+        SubShooter::GetInstance().CmdSetShooterAmp(),
+        SubFeeder::GetInstance().FeedToIntake()
+    )
+    //.Until([] {return !SubFeeder::GetInstance().GetFeederState();})
+    .Until([] {return false;})
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
 }
 frc2::CommandPtr CmdShootPassing(){
