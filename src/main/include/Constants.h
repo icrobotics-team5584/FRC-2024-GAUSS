@@ -2,10 +2,11 @@
 
 
 namespace canid{
-    constexpr int ShooterPivotMotor  = 9;
-    constexpr int ShooterFlywheelMotorLeft  = 10;
-    constexpr int ShooterFlywheelMotorRight  = 11;
-    constexpr int IntakeMotor  = 12;
+    constexpr int ShooterPivotMotor  = 13;
+    constexpr int ShooterFlywheelMotorLeft  = 14;
+    constexpr int ShooterFlywheelMotorRight  = 15;
+    constexpr int IntakeMotor  = 16;
+    constexpr int FeederMotor = 17;
 
     constexpr int DriveBaseFrontRightDrive = 7; //done
     constexpr int DriveBaseFrontRightTurn = 8;
@@ -22,8 +23,15 @@ namespace canid{
     constexpr int DriveBaseBackLeftDrive = 1; //done
     constexpr int DriveBaseBackLeftTurn = 4;
     constexpr int DriveBaseBackLeftEncoder = 11; //done
+
+
+    
 }
 
 namespace dio{
     constexpr int IntakeLineBreak = 1;
+
+    constexpr int FeederPointSwitch = 1;
+
+
 }
