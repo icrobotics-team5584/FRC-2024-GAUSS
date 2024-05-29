@@ -11,6 +11,12 @@
 
 class SubFeeder : public frc2::SubsystemBase {
  public:
+
+  static SubFeeder& GetInstance() {
+    static SubFeeder inst;
+    return inst;
+  }
+
   SubFeeder();
 
   frc2::CommandPtr FeedToShooter();

@@ -6,15 +6,19 @@
 
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/button/CommandXboxController.h>
+#include <frc/XboxController.h>
+#include <frc2/command/button/CommandXboxController.h>
+#include <frc2/command/button/JoystickButton.h>
 
 class RobotContainer {
  public:
   RobotContainer();
 
   frc2::CommandPtr GetAutonomousCommand();
+  frc2::CommandPtr Rumble(double force, units::second_t duration);
 
  private:
   void ConfigureBindings();
-
-  frc2::CommandXboxController _controller{0};
+  frc2::CommandXboxController _driverController{0};
+  frc2::CommandXboxController _operatorController{1};
 };
