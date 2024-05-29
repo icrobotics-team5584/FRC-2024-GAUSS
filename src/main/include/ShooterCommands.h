@@ -16,5 +16,5 @@
  * Command will *not* work!
  */
 namespace cmd {
-  frc2::CommandPtr Intake();
+  frc2::CommandPtr CmdIntake();
 }

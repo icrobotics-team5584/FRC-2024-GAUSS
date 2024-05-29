@@ -9,16 +9,8 @@
 
 namespace cmd {
 using namespace frc2::cmd;
-frc2::CommandPtr Intake() {
-    return Run ([] {
-        SubFeeder::GetInstance().FeedToIntake();
-        SubPivot::GetInstance().CmdSetPivotAngle(20_deg);
-        //spin intake
-        })
-    .Until([] {return SubFeeder::GetInstance().GetFeederState();})
-    .AndThen([] {
-        //Stop feeder
-        //spin intake reversed
-    });
-    };
+frc2::CommandPtr CmdIntake(){
+    return SubIntake::GetInstance().Intake().AlongWith(SubFeeder::GetInstance().FeedToIntake())
+    .Until([]{return SubFeeder::GetInstance().GetFeederState();});
+}
 }
