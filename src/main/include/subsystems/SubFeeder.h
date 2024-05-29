@@ -17,6 +17,11 @@ class SubFeeder : public frc2::SubsystemBase {
   frc2::CommandPtr FeedToIntake();
 
   bool GetFeederState();
+
+  static SubFeeder& GetInstance(){
+    static SubFeeder inst;
+    return inst;
+  }
   
   /**
    * Will be called periodically whenever the CommandScheduler runs.
