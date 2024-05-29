@@ -24,9 +24,14 @@ namespace canid{
     constexpr int DriveBaseBackLeftTurn = 4;
     constexpr int DriveBaseBackLeftEncoder = 11; //done
 
+
     
 }
 
 namespace dio{
     constexpr int IntakeLineBreak = 1;
+
+    constexpr int FeederPointSwitch = 1;
+
+
 }

@@ -7,6 +7,7 @@
 #include <frc2/command/SubsystemBase.h>
 #include "utilities/ICSparkMax.h"
 #include "Constants.h"
+#include <frc/DigitalInput.h>
 
 class SubFeeder : public frc2::SubsystemBase {
  public:
@@ -14,6 +15,8 @@ class SubFeeder : public frc2::SubsystemBase {
 
   frc2::CommandPtr FeedToShooter();
   frc2::CommandPtr FeedToIntake();
+
+  bool GetFeederState();
   
   /**
    * Will be called periodically whenever the CommandScheduler runs.
@@ -26,4 +29,6 @@ class SubFeeder : public frc2::SubsystemBase {
 
   //motors
   ICSparkMax _feederMotor{canid::FeederMotor, 40_A};
+
+  frc::DigitalInput _feederPointSwitch{dio::FeederPointSwitch};
 };
