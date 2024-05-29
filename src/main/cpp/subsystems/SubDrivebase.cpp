@@ -264,7 +264,7 @@ frc2::CommandPtr SubDrivebase::SyncSensorBut() {
 }
 
 frc::Rotation2d SubDrivebase::GetHeading() {
-  return -_gyro.GetRotation2d();
+  return _gyro.GetRotation2d();
 }
 
 // Calculate robot's velocity over past time step (20 ms)

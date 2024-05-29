@@ -23,11 +23,11 @@
 
 class SubDrivebase : public frc2::SubsystemBase {
  public:
+  SubDrivebase();
   static SubDrivebase &GetInstance() {
     static SubDrivebase inst;
     return inst;
   }
-  SubDrivebase();
   void Periodic() override;
   void SimulationPeriodic() override;
   void Drive(units::meters_per_second_t xSpeed, units::meters_per_second_t ySpeed,
@@ -86,10 +86,10 @@ class SubDrivebase : public frc2::SubsystemBase {
 
 
   // Test drive base
-  const double FRONT_RIGHT_MAG_OFFSET = -0.37353515625;
+  const double FRONT_RIGHT_MAG_OFFSET = -0.87353515625;
   const double FRONT_LEFT_MAG_OFFSET = -0.4423828125;
   const double BACK_RIGHT_MAG_OFFSET = -0.959228515625;
-  const double BACK_LEFT_MAG_OFFSET = -0.32177734375;
+  const double BACK_LEFT_MAG_OFFSET = -0.82177734375;
 
 
 
