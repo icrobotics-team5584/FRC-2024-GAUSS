@@ -29,7 +29,7 @@ class SubVision : public frc2::SubsystemBase {
    */
   void Periodic() override;
   void SimulationPeriodic() override;
-  
+
 private:
   std::string CAM_NAME1 = "arducam";
 
@@ -44,6 +44,6 @@ private:
   //     _camToBot.Inverse()};
 
   photon::SimVisionSystem _visionSim{CAM_NAME1, 45_deg, _camToBot, 15_m,
-                                        360,         240,    0.0001}
-  
+                                        360,         240,    0.0001};
+                                        
 };
