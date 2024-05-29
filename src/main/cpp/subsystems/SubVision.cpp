@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 #include "subsystems/SubVision.h"
+#include "subsystems/SubDrivebase.h"
 
 SubVision::SubVision() {
   for (int i = 0; i <= 18; i++) {
@@ -23,7 +24,7 @@ void SubVision::Periodic() {}
 
 
 void SubVision::SimulationPeriodic() {
-  _visionSim.ProcessFrame(SubDriveBase::GetInstance().GetPose());
+  _visionSim.ProcessFrame(SubDrivebase::GetInstance().GetPose());
 };
 
 
