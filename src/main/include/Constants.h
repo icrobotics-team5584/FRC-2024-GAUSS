@@ -26,4 +26,9 @@ namespace canid{
 
 namespace dio{
     constexpr int IntakeLineBreak = 1;
+    constexpr int ShooterFlywheelEncoderLeftChannelA = 0;
+    constexpr int ShooterFlywheelEncoderLeftChannelB = 1;
+    constexpr int ShooterFlywheelEncoderRightChannelA = 2;
+    constexpr int ShooterFlywheelEncoderRightChannelB = 3;
+    
 }

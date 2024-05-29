@@ -5,6 +5,7 @@
 #pragma once
 
 #include <frc2/command/CommandPtr.h>
+#include "subsystems/SubDriveBase.h"
 #include <frc2/command/button/CommandXboxController.h>
 
 class RobotContainer {
@@ -16,5 +17,5 @@ class RobotContainer {
  private:
   void ConfigureBindings();
 
-  frc2::CommandXboxController _controller{0};
+  frc2::CommandXboxController driverController {0};
 };
