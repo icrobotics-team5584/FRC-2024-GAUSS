@@ -5,6 +5,7 @@
 #pragma once
 
 #include <frc2/command/CommandPtr.h>
+#include <frc2/command/button/CommandXboxController.h>
 #include <frc/XboxController.h>
 #include <frc2/command/button/CommandXboxController.h>
 #include <frc2/command/button/JoystickButton.h>

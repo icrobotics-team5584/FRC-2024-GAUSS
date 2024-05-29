@@ -11,27 +11,49 @@
 #include <rev/CANSparkMax.h>
 #include <frc2/command/commands.h>
 #include "frc/Encoder.h"
+#include <frc/controller/SimpleMotorFeedforward.h>
+#include <units/velocity.h>
+#include "ctre/phoenix6/TalonFX.hpp"
+#include <frc/simulation/DCMotorSim.h>
 
 class SubShooter : public frc2::SubsystemBase {
  public:
   SubShooter();
 
+  static SubShooter& GetInstance() {
+    static SubShooter inst;
+    return inst;
+  }
+
+  frc2::CommandPtr CmdSetShooterSpeaker();
+  frc2::CommandPtr CmdSetShooterAmp();
+  frc2::CommandPtr CmdSetShooterPassing();
+  frc2::CommandPtr CmdSetShooterOff();
+  frc2::CommandPtr CmdCheckLeftSpeed();
+  frc2::CommandPtr CmdCheckRightSpeed();
   /**
    * Will be called periodically whenever the CommandScheduler runs.
    */
   void Periodic() override;
 
+  void SimulationPeriodic() override;
+
  private:
-  ICSparkMax _shooterPivotMotor{canid::ShooterPivotMotor, 50_A};
-  ICSparkMax _shooterFlywheelMotorLeft{canid::ShooterFlywheelMotorLeft, 30_A};
-  ICSparkMax _shooterFlywheelMotorRight{canid::ShooterFlywheelMotorRight, 30_A};
+  ctre::phoenix6::hardware::TalonFX _ShooterFlywheelMotorLeft {canid::ShooterFlywheelMotorLeft};
+  ctre::phoenix6::hardware::TalonFX _ShooterFlywheelMotorRight {canid::ShooterFlywheelMotorRight};
+  ctre::phoenix6::controls::VelocityVoltage _flywheelVelocity{0_tps, 0_tr_per_s_sq, true, 0_V, 0, false};
+  
+  units::turns_per_second_t ShooterOff = 0_tps;
+  units::turns_per_second_t SpeakerSpeed = 60_tps;
+  units::turns_per_second_t PassingSpeed = 55_tps;
+  units::turns_per_second_t AmpSpeed = 15_tps;
 
-  static constexpr double ShooterP = 0;
-  static constexpr double ShooterI = 0;
-  static constexpr double ShooterD = 0;
+  static constexpr double _flywheelP = 2;
+  static constexpr double _flywheelI = 0;
+  static constexpr double _flywheelD = 0;
+  static constexpr double _flywheelV = 0.112;
 
-  frc::Encoder _leftEncoder{dio::ShooterFlywheelEncoderLeftChannelA, dio::ShooterFlywheelEncoderLeftChannelB, false, frc::Encoder::EncodingType::k1X};
-  frc::Encoder _rightEncoder{dio::ShooterFlywheelEncoderRightChannelA, dio::ShooterFlywheelEncoderRightChannelB, false, frc::Encoder::EncodingType::k1X};
-  frc::PIDController _leftShooterPID{ShooterP, ShooterI, ShooterD};
-  frc::PIDController _rightShooterPID{ShooterP, ShooterI, ShooterD};
-  };
+  //Simulation stuff
+  frc::sim::DCMotorSim _leftSim{frc::DCMotor::Falcon500(), 1, 0.005_kg_sq_m};
+  frc::sim::DCMotorSim _rightSim{frc::DCMotor::Falcon500(), 1, 0.005_kg_sq_m};
+};
