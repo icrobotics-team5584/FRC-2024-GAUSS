@@ -11,12 +11,23 @@
 
 class SubFeeder : public frc2::SubsystemBase {
  public:
+
+  static SubFeeder& GetInstance() {
+    static SubFeeder inst;
+    return inst;
+  }
+
   SubFeeder();
 
   frc2::CommandPtr FeedToShooter();
   frc2::CommandPtr FeedToIntake();
 
   bool GetFeederState();
+
+  static SubFeeder& GetInstance(){
+    static SubFeeder inst;
+    return inst;
+  }
   
   /**
    * Will be called periodically whenever the CommandScheduler runs.
