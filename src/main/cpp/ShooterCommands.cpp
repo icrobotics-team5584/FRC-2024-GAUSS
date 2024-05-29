@@ -22,4 +22,20 @@ frc2::CommandPtr CmdShootSpeaker(){
     .Until([] {return !SubFeeder::GetInstance().GetFeederState();})
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
 }
+frc2::CommandPtr CmdShootAmp(){
+    return Run([]{
+        SubShooter::GetInstance().CmdSetShooterAmp();
+        SubFeeder::GetInstance().FeedToIntake();
+    })
+    .Until([] {return !SubFeeder::GetInstance().GetFeederState();})
+    .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
+}
+frc2::CommandPtr CmdShootPassing(){
+    return Run([]{
+        SubShooter::GetInstance().CmdSetShooterPassing();
+        SubFeeder::GetInstance().FeedToIntake();
+    })
+    .Until([] {return !SubFeeder::GetInstance().GetFeederState();})
+    .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
+}
 }
