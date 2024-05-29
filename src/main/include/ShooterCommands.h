@@ -17,4 +17,5 @@
  */
 namespace cmd {
   frc2::CommandPtr CmdIntake();
+  frc2::CommandPtr CmdShootSpeaker();
 }
