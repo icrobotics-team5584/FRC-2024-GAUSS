@@ -181,19 +181,18 @@ frc2::CommandPtr SubDrivebase::JoystickDrive(frc2::CommandXboxController& contro
 
 void SubDrivebase::Drive(units::meters_per_second_t xSpeed, units::meters_per_second_t ySpeed,
                          units::degrees_per_second_t rot, bool fieldRelative) {
-  // Get states of all swerve modules
+  
+  // Optionally convert speeds to field relative
+  auto speeds = fieldRelative
+                    ? frc::ChassisSpeeds::FromFieldRelativeSpeeds(xSpeed, ySpeed, rot, GetHeading())
+                    : frc::ChassisSpeeds{xSpeed, ySpeed, rot};
 
-  auto invert = 1;
-  if (frc::RobotBase::IsSimulation()) {
-    invert = -1;
-  } else {
-    invert = 1;
-  }
-  auto states = _kinematics.ToSwerveModuleStates(frc::ChassisSpeeds::Discretize(
-      fieldRelative
-          ? frc::ChassisSpeeds::FromFieldRelativeSpeeds(xSpeed, ySpeed, rot, GetHeading() * invert)
-          : frc::ChassisSpeeds{xSpeed, ySpeed, rot},
-      -200_ms));
+  // Discretize to get rid of translational drift while rotating
+  constexpr bool inSim = frc::RobotBase::IsSimulation();
+  speeds = frc::ChassisSpeeds::Discretize(speeds, inSim ? 200_ms : -200_ms);
+
+  // Get states of all swerve modules
+  auto states = _kinematics.ToSwerveModuleStates(speeds);
 
   // Set speed limit and apply speed limit to all modules
   _kinematics.DesaturateWheelSpeeds(
@@ -226,7 +225,7 @@ void SubDrivebase::Drive(units::meters_per_second_t xSpeed, units::meters_per_se
   if (frc::RobotBase::IsSimulation()) {
     units::radian_t radPer20ms = rot * 20_ms;
     units::degree_t newHeading = GetHeading().RotateBy(radPer20ms).Degrees();
-    _gyro.SetAngleAdjustment(-newHeading.value());  // negative to switch to CW from CCW
+    _gyro.SetAngleAdjustment(newHeading.value());  // negative to switch to CW from CCW
   }
 }
 

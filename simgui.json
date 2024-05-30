@@ -26,7 +26,20 @@
       }
     }
   },
-  "NetworkTables View": {
-    "visible": false
+  "NetworkTables": {
+    "transitory": {
+      "SmartDashboard": {
+        "Drivebase": {
+          "double[]##v_/SmartDashboard/Drivebase/true swerve states": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      }
+    }
+  },
+  "NetworkTables Info": {
+    "visible": true
   }
 }
