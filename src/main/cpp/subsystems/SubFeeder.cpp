@@ -13,3 +13,7 @@ return Run([this]{ _feederMotor.Set(1);}).FinallyDo([this]{_feederMotor.Set(0);}
 
 // This method will be called once per scheduler run
 void SubFeeder::Periodic() {}
+
+bool SubFeeder::GetFeederState(){
+    return false;
+}
