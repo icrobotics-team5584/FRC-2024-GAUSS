@@ -38,7 +38,7 @@ private:
   std::string CAM_NAME1 = "arducam";
 
   frc::Transform3d _camToBot{{-196_mm, 41_mm, -680_mm}, {}}; // arducam
-  
+
   frc::AprilTagFieldLayout _tagLayout = frc::AprilTagFieldLayout::LoadField(frc::AprilTagField::k2024Crescendo);
 
   // photonlib::PhotonPoseEstimator _visionPoseEstimator{
@@ -46,7 +46,12 @@ private:
   //     photonlib::PoseStrategy::MULTI_TAG_PNP,
   //     photonlib::PhotonCamera{CAM_NAME1},
   //     _camToBot.Inverse()};
+  
+  
+  
+  photon::PhotonCamera camera{"photonvision"};
 
+  
   photon::SimVisionSystem _visionSim{CAM_NAME1, 45_deg, _camToBot, 15_m,
                                         360,         240,    0.0001};
                                         

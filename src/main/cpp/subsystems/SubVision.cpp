@@ -16,8 +16,16 @@ SubVision::SubVision() {
   }
 }
 
+
+
+
+
 // This method will be called once per scheduler run
-void SubVision::Periodic() {}
+void SubVision::Periodic() {
+  const auto& result = camera.GetLatestResult();
+  units::degree_t _pitchtotarget = units::degree_t{result.GetBestTarget().GetPitch()};
+  }
+
 
 
 
