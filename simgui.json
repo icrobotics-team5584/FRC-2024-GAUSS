@@ -9,22 +9,28 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Climber/Mech Display": "Mechanism2d",
       "/SmartDashboard/Drivebase/Vision/Rotation Controller: ": "ProfiledPIDController",
       "/SmartDashboard/field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/Climber/Mech Display": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/field": {
         "bottom": 1476,
         "height": 8.210550308227539,
         "left": 150,
         "right": 2961,
         "top": 79,
-        "width": 16.541748046875,
-        "window": {
-          "visible": true
-        }
+        "width": 16.541748046875
       }
     }
+  },
+  "NetworkTables Info": {
+    "visible": true
   },
   "NetworkTables View": {
     "visible": false
