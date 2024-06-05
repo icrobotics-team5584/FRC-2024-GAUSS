@@ -19,7 +19,6 @@
 #include "utilities/SwerveModule.h"
 #include <frc2/command/button/CommandXboxController.h>
 #include <frc2/command/sysid/SysIdRoutine.h>
-#include "utilities/BotVars.h"
 
 class SubDrivebase : public frc2::SubsystemBase {
  public:
