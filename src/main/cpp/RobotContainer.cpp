@@ -8,8 +8,16 @@
 #include "subsystems/SubShooter.h"
 #include "subsystems/SubPivot.h"
 #include "ShooterCommands.h"
+#include "subsystems/SubDrivebase.h"
 
 RobotContainer::RobotContainer() {
+
+    SubDrivebase::GetInstance();
+  SubDrivebase::GetInstance().SetDefaultCommand(
+    SubDrivebase::GetInstance().JoystickDrive(_driverController, false)
+  );
+
+  
   ConfigureBindings();
 }
 
@@ -25,7 +33,7 @@ void RobotContainer::ConfigureBindings() {
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
-  return frc2::cmd::Print("No autonomous command configured");
+  return frc2::cmd::Print("No autonomous command configured"); 
 }
 
 frc2::CommandPtr RobotContainer::Rumble(double force, units::second_t duration) {
