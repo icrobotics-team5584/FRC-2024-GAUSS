@@ -13,7 +13,3 @@ frc2::CommandPtr SubFeeder::FeedToIntake() {
 }
 // This method will be called once per scheduler run
 void SubFeeder::Periodic() {}
-
-bool SubFeeder::GetFeederState() {
-    return _feederPointSwitch.Get();
-}

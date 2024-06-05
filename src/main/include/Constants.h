@@ -32,14 +32,5 @@ namespace canid{
 }
 
 namespace dio{
-    constexpr int IntakeLineBreak = 0;
-
-    constexpr int ShooterLineBreak = 1;
-
-    constexpr int ShooterLeftEncoderA = 2;
-    constexpr int ShooterLeftEncoderB = 3;
-    constexpr int ShooterRightEncoderA = 4;
-    constexpr int ShooterRightEncoderB = 5;
-
-
+constexpr int ShooterLineBreak = 1;
 }
