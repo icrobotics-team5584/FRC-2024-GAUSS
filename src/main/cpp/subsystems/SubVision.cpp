@@ -16,16 +16,12 @@ SubVision::SubVision() {
   }
 }
 
-
-
-
-
 // This method will be called once per scheduler run
 void SubVision::Periodic() {
   const auto& result = camera.GetLatestResult();
-  units::degree_t _pitchtotarget = units::degree_t{result.GetBestTarget().GetPitch()};
+  double _pitchtotarget = {result.GetBestTarget().GetPitch()};
+  frc::SmartDashboard::PutNumber("April Pitch", _pitchtotarget);
   }
-
 
 void SubVision::SimulationPeriodic() {
   _visionSim.ProcessFrame(SubDrivebase::GetInstance().GetPose());
