@@ -20,4 +20,5 @@ namespace cmd {
   frc2::CommandPtr CmdShootSpeaker();
   frc2::CommandPtr CmdShootAmp();
   frc2::CommandPtr CmdShootPassing();
+  frc2::CommandPtr CmdShootNeutral();
 }

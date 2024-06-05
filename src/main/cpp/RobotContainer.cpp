@@ -14,11 +14,12 @@ RobotContainer::RobotContainer() {
 }
 
 void RobotContainer::ConfigureBindings() {
-  _driverController.LeftBumper().WhileTrue(SubShooter::GetInstance().CmdSetShooterSpeaker());
+  _driverController.LeftBumper().WhileTrue(cmd::CmdShootSpeaker());
   _driverController.RightBumper().WhileTrue(cmd::CmdShootAmp());
-  _driverController.LeftTrigger().WhileTrue(SubShooter::GetInstance().CmdSetShooterOff());
-  _driverController.RightTrigger().WhileTrue(SubShooter::GetInstance().CmdSetShooterPassing());
+  _driverController.RightTrigger().WhileTrue(cmd::CmdShootPassing());
+  _driverController.X().WhileTrue(cmd::CmdShootNeutral());
   _driverController.RightTrigger().WhileTrue(cmd::CmdIntake());
+  _driverController.LeftTrigger().WhileTrue(SubShooter::GetInstance().CmdSetShooterOff()); 
   _driverController.Y().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(10_deg));
   _driverController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(40_deg));
   _driverController.LeftTrigger().WhileTrue(SubIntake::GetInstance().Intake().AndThen(Rumble(1, 0.3_s)));

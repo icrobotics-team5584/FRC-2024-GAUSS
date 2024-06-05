@@ -17,11 +17,13 @@ frc2::CommandPtr CmdIntake(){
     .Until([]{return SubFeeder::GetInstance().GetFeederState();});
 }
 frc2::CommandPtr CmdShootSpeaker(){
-    return Run([]{
-        SubShooter::GetInstance().CmdSetShooterSpeaker();
-        SubFeeder::GetInstance().FeedToIntake();
-    })
-    .Until([] {return !SubFeeder::GetInstance().GetFeederState();})
+    return Parallel(
+        SubPivot::GetInstance().CmdSetPivotAngle(40_deg),
+        SubShooter::GetInstance().CmdSetShooterSpeaker(),
+        SubFeeder::GetInstance().FeedToIntake()
+    )
+    //.Until([] {return !SubFeeder::GetInstance().GetFeederState();})
+    .Until([] {return false;})
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
 }
 //DO WHAT WAS DONE TO AMP TO EVERYTHING ELSE!
@@ -36,11 +38,17 @@ frc2::CommandPtr CmdShootAmp(){
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
 }
 frc2::CommandPtr CmdShootPassing(){
-    return Run([]{
-        SubShooter::GetInstance().CmdSetShooterPassing();
-        SubFeeder::GetInstance().FeedToIntake();
-    })
-    .Until([] {return !SubFeeder::GetInstance().GetFeederState();})
+    return Parallel(
+        SubPivot::GetInstance().CmdSetPivotAngle(30_deg),
+        SubShooter::GetInstance().CmdSetShooterPassing(),
+        SubFeeder::GetInstance().FeedToIntake()
+    )
+    //.Until([] {return !SubFeeder::GetInstance().GetFeederState();})
+    .Until([] {return false;})
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
+}
+
+frc2::CommandPtr CmdShootNeutral() {
+    return SubShooter::GetInstance().CmdSetShooterSpeaker();
 }
 }
