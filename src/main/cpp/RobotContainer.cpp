@@ -7,6 +7,7 @@
 #include <frc2/command/Commands.h>
 #include "subsystems/SubShooter.h"
 #include "subsystems/SubPivot.h"
+#include "subsystems/SubDrivebase.h"
 
 RobotContainer::RobotContainer() {
   ConfigureBindings();
@@ -20,10 +21,14 @@ void RobotContainer::ConfigureBindings() {
   _driverController.Y().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(10_deg));
   _driverController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(40_deg));
   _driverController.LeftTrigger().WhileTrue(SubIntake::GetInstance().Intake().AndThen(Rumble(1, 0.3_s)));
+  SubDrivebase::GetInstance();
+  SubDrivebase::GetInstance().SetDefaultCommand(
+    SubDrivebase::GetInstance().JoystickDrive(_driverController, false)
+  );
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
-  return frc2::cmd::Print("No autonomous command configured");
+  return frc2::cmd::Print("No autonomous command configured"); 
 }
 
 frc2::CommandPtr RobotContainer::Rumble(double force, units::second_t duration) {
