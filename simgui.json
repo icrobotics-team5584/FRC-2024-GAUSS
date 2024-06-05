@@ -1,120 +1,32 @@
 {
   "HALProvider": {
     "Other Devices": {
-      " Talon FX (v6)[10]": {
-        "header": {
-          "open": true
-        }
-      },
-      " Talon FX (v6)[11]": {
-        "header": {
-          "open": true
-        }
+      "window": {
+        "visible": false
       }
     }
   },
   "NTProvider": {
     "types": {
-      "/FMSInfo": "FMSInfo"
-    }
-  },
-  "NetworkTables": {
-    "transitory": {
-      "SmartDashboard": {
-        "Pivot": {
-          "Motor": {
-            "open": true
-          },
-          "open": true
-        },
-        "open": true
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Drivebase/Vision/Rotation Controller: ": "ProfiledPIDController",
+      "/SmartDashboard/field": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/field": {
+        "bottom": 1476,
+        "height": 8.210550308227539,
+        "left": 150,
+        "right": 2961,
+        "top": 79,
+        "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
       }
     }
   },
-  "NetworkTables Info": {
-    "visible": true
-  },
-  "Plot": {
-    "Plot <0>": {
-      "plots": [
-        {
-          "backgroundColor": [
-            0.0,
-            0.0,
-            0.0,
-            0.8500000238418579
-          ],
-          "height": 332,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/ShooterSpeed"
-            }
-          ]
-        }
-      ]
-    },
-    "Plot <1>": {
-      "plots": [
-        {
-          "backgroundColor": [
-            0.0,
-            0.0,
-            0.0,
-            0.8500000238418579
-          ],
-          "height": 332,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/Pivot/Motor/Position"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/Pivot/Motor/Position Target"
-            }
-          ]
-        }
-      ]
-    },
-    "Plot <2>": {
-      "plots": [
-        {
-          "backgroundColor": [
-            0.0,
-            0.0,
-            0.0,
-            0.8500000238418579
-          ],
-          "height": 332,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/ShooterSpeed"
-            }
-          ]
-        }
-      ]
-    }
+  "NetworkTables View": {
+    "visible": false
   }
 }
