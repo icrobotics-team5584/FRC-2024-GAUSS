@@ -7,7 +7,12 @@
 #include <frc2/command/Commands.h>
 #include "subsystems/SubDrivebase.h"
 
+#include <pathplanner/lib/path/PathPlannerPath.h>
+
 RobotContainer::RobotContainer() {
+
+  std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("NewPath.traj");
+  std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("NewPath2.traj");
   ConfigureBindings();
 }
 
