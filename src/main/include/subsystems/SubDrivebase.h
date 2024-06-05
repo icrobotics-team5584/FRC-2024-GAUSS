@@ -61,6 +61,7 @@ class SubDrivebase : public frc2::SubsystemBase {
   double MAX_ANGULAR_JOYSTICK_ACCEL = 3;
 
   // Commands
+  frc2::CommandPtr GetAutoCommand();
   frc2::CommandPtr JoystickDrive(frc2::CommandXboxController& controller, bool optionalRotationControl);
   frc2::CommandPtr SyncSensorBut();
   frc2::CommandPtr ResetGyroCmd();

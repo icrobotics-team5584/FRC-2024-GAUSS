@@ -7,13 +7,11 @@
 #include <frc/RobotBase.h>
 #include <units/time.h>
 #include <frc/DriverStation.h>
-#include <pathplanner/lib/auto/AutoBuilder.h>
-#include <pathplanner/lib/util/HolonomicPathFollowerConfig.h>
-#include <pathplanner/lib/util/PIDConstants.h>
 #include <frc2/command/Commands.h>
 #include "subsystems/SubDrivebase.h"
 #include <frc/filter/SlewRateLimiter.h>
 #include <iostream>
+#include <choreo/lib/Choreo.h>
 
 SubDrivebase::SubDrivebase() {
   frc::SmartDashboard::PutNumber("Drivebase/Config/MaxVelocity", MAX_VELOCITY.value());
@@ -30,56 +28,6 @@ SubDrivebase::SubDrivebase() {
   _gyro.Calibrate();
   Rcontroller.EnableContinuousInput(0_deg, 360_deg);
   frc::SmartDashboard::PutData("field", &_fieldDisplay);
-
-  using namespace pathplanner;
-  AutoBuilder::configureHolonomic(
-      [this]() { return GetPose(); },  // Robot pose supplier
-      [this](frc::Pose2d pose) {
-        auto alliance = frc::DriverStation::GetAlliance();
-        if (alliance) {
-          if (alliance.value() == frc::DriverStation::Alliance::kBlue) {
-            ResetGyroHeading(pose.Rotation().RotateBy(180_deg).Degrees());
-          } else {
-            ResetGyroHeading(pose.Rotation().Degrees());
-          }
-        }
-
-        SetPose(pose);
-      },  // Method to reset odometry (will be called if your auto has a starting pose)
-      [this]() {
-        return GetRobotRelativeSpeeds();
-      },  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-      [this](frc::ChassisSpeeds speeds) {
-        _sidewaysSpeedRequest = speeds.vy;  // TEST!
-        _forwardSpeedRequest = speeds.vx;
-        _rotationSpeedRequest = -speeds.omega;
-        _fieldOrientedRequest = false;
-        // Drive(speeds.vx, speeds.vy, -speeds.omega, false);
-      },  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
-      HolonomicPathFollowerConfig(
-          PIDConstants(2, 0.0, 0.0),    // Translation PID constants
-          PIDConstants(0.5, 0.0, 0.0),  // Rotation PID constants
-          MAX_VELOCITY,                 // Max module speed, in m/s
-          432_mm,  // Drive base radius in meters. Distance from robot center to furthest module.
-                   // NEEDS TO BE CHECKED AND MADE ACCURATE!!
-          ReplanningConfig(
-              false, false, 1_m,
-              0.25_m)  // Default path replanning config. See the API for the options here
-          ),
-
-      []() {
-        // Boolean supplier that controls when the path will be mirrored for the red alliance
-        // This will flip the path being followed to the red side of the field.
-        // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-        auto alliance = frc::DriverStation::GetAlliance();
-        if (alliance) {
-          return alliance.value() == frc::DriverStation::Alliance::kRed;
-        }
-        std::cout << "Failed to detect alliance\n";
-        return false;
-      },
-      this  // Reference to this subsystem to set requirements
-  );
 }
 
 // This method will be called once per scheduler run
@@ -386,4 +334,31 @@ void SubDrivebase::SetNeutralMode(ctre::phoenix6::signals::NeutralModeValue mode
 
 units::degree_t SubDrivebase::GetPitch() {
   return _gyro.GetPitch() * 1_deg;
+}
+
+frc2::CommandPtr SubDrivebase::GetAutoCommand() {
+  //Auto configuration
+  using namespace choreolib;
+  ChoreoTrajectory path = Choreo::GetTrajectory("main");
+  frc2::CommandPtr AutoCommand = Choreo::ChoreoSwerveCommandFactory(
+    path,
+    [this] () { return GetPose(); },
+    frc::PIDController(2,0,0),
+    frc::PIDController(2,0,0),
+    frc::PIDController(0.5,0,0),
+    [this] (frc::ChassisSpeeds speeds) {
+      _sidewaysSpeedRequest = speeds.vy;  // TEST!
+      _forwardSpeedRequest = speeds.vx;
+      _rotationSpeedRequest = -speeds.omega;
+      _fieldOrientedRequest = false;
+    },
+    [this] () { 
+      auto alliance = frc::DriverStation::GetAlliance();
+      if (alliance) {
+        return alliance == frc::DriverStation::Alliance::kBlue;
+      }
+    }
+  );
+  SetPose(path.GetInitialPose());
+  return AutoCommand;
 }
