@@ -6,6 +6,7 @@
 
 #include <frc2/command/SubsystemBase.h>
 #include <photon/PhotonCamera.h>
+#include "Robot.h"
 #include <units/length.h>
 #include <units/angle.h>
 #include <frc/apriltag/AprilTagFieldLayout.h>
@@ -23,7 +24,10 @@ class SubVision : public frc2::SubsystemBase {
  public:
   SubVision();
 
-
+  static SubVision& GetInstance() {
+    static SubVision inst;
+    return inst;
+  }
   /**
    * Will be called periodically whenever the CommandScheduler runs.
    */
@@ -35,7 +39,7 @@ private:
 
   frc::Transform3d _camToBot{{-196_mm, 41_mm, -680_mm}, {}}; // arducam
   
-  frc::AprilTagFieldLayout _tagLayout{frc::filesystem::GetDeployDirectory() + "/AprilTags.json"};
+  frc::AprilTagFieldLayout _tagLayout = frc::AprilTagFieldLayout::LoadField(frc::AprilTagField::k2024Crescendo);
 
   // photonlib::PhotonPoseEstimator _visionPoseEstimator{
   //     _tagLayout,

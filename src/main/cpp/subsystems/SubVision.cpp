@@ -21,8 +21,6 @@ void SubVision::Periodic() {}
 
 
 
-
-
 void SubVision::SimulationPeriodic() {
   _visionSim.ProcessFrame(SubDrivebase::GetInstance().GetPose());
 };

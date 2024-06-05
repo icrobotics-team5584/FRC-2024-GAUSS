@@ -8,9 +8,11 @@
 #include "subsystems/SubShooter.h"
 #include "subsystems/SubPivot.h"
 #include "subsystems/SubDrivebase.h"
+#include "subsystems/SubVision.h"
 
 RobotContainer::RobotContainer() {
   ConfigureBindings();
+  SubVision::GetInstance();
 }
 
 void RobotContainer::ConfigureBindings() {
