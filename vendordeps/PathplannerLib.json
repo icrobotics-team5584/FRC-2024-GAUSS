@@ -11,6 +11,7 @@
     "javaDependencies": [
         {
             "groupId": "com.pathplanner.lib",
+            
             "artifactId": "PathplannerLib-java",
             "version": "2024.2.3"
         }

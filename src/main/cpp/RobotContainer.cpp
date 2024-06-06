@@ -9,6 +9,8 @@
 #include "subsystems/SubPivot.h"
 #include "subsystems/SubDrivebase.h"
 
+#include <pathplanner/lib/path/PathPlannerPath.h>
+
 RobotContainer::RobotContainer() {
 
     SubDrivebase::GetInstance();
@@ -17,6 +19,8 @@ RobotContainer::RobotContainer() {
   );
 
   
+  std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("NewPath");
+  // std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("NewPath2.traj");
   ConfigureBindings();
 }
 
