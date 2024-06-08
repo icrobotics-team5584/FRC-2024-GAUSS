@@ -24,10 +24,12 @@ frc2::CommandPtr CmdShootSpeaker(){
     return Parallel(
         SubPivot::GetInstance().CmdPivotFromVision([]{return SubVision::GetInstance().GetTagPitch();}),
         SubShooter::GetInstance().CmdSetShooterSpeaker(),
-        SubFeeder::GetInstance().FeedToIntake()
+        Sequence(
+            WaitUntil([]{return SubPivot::GetInstance().IsOnTarget();}),
+            WaitUntil([]{return SubShooter::GetInstance().IsOnTarget();}),
+            SubFeeder::GetInstance().FeedToShooter()
+        )
     )
-    //.Until([] {return !SubFeeder::GetInstance().CheckHasNote();})
-    .Until([] {return false;})
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
 }
 frc2::CommandPtr CmdShootAmp(){

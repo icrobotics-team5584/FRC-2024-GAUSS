@@ -26,6 +26,7 @@ SubPivot::SubPivot(){
 // This method will be called once per scheduler run
 void SubPivot::Periodic() {
     frc::SmartDashboard::PutString("Pivot/CurrentCommand", (GetCurrentCommand()->GetName()));
+    frc::SmartDashboard::PutBoolean("Target/PivotOnTarget", IsOnTarget());
 }
 
 frc2::CommandPtr SubPivot::CmdSetPivotAngle(units::degree_t targetAngle){
@@ -46,4 +47,9 @@ void SubPivot::SimulationPeriodic(){
     _pivotSim.Update(20_ms);
 
     _pivotMotor.UpdateSimEncoder(_pivotSim.GetAngle(), _pivotSim.GetVelocity());
+}
+
+bool SubPivot::IsOnTarget() {
+    auto tolerance = 1_deg;
+    return units::math::abs( _pivotMotor.GetPosError()) < tolerance;
 }

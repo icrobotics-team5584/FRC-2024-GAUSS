@@ -28,6 +28,9 @@ public:
   void Periodic() override;
   void SimulationPeriodic() override;
 
+  //functions
+  bool IsOnTarget();
+
 private:
   // Components (e.g. motor controllers and sensors) should generally be
   // declared private and exposed only through public methods.

@@ -4,8 +4,11 @@
 
 #include "subsystems/SubFeeder.h"
 #include <frc2/command/commands.h>
+#include <frc/smartdashboard/SmartDashboard.h>
 
-SubFeeder::SubFeeder() = default;
+SubFeeder::SubFeeder() {
+    frc::SmartDashboard::PutData("Feeder/Motor", (wpi::Sendable*)&_feederMotor);
+}
 
 frc2::CommandPtr SubFeeder::FeedToIntake() {
 return Run([this]{ _feederMotor.Set(1);}).FinallyDo([this]{_feederMotor.Set(0);});
@@ -16,7 +19,8 @@ return Run([this]{ _feederMotor.Set(-1);}).FinallyDo([this]{_feederMotor.Set(0);
 }
 
 // This method will be called once per scheduler run
-void SubFeeder::Periodic() {}
+void SubFeeder::Periodic() {
+}
 
 bool SubFeeder::CheckHasNote(){
     return false;
