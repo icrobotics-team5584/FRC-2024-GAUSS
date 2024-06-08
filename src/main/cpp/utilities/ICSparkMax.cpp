@@ -192,15 +192,22 @@ units::volt_t ICSparkMax::GetSimVoltage() {
       break;
 
     case Mode::kVelocity:
+      // Spark internal PID uses native units (motor shaft RPM)
+      // so divide by conversion factor to use that
       output =
-          units::volt_t{_simController.Calculate(GetVelocity().value(), _velocityTarget.value()) +
+          units::volt_t{_simController.Calculate(GetVelocity().value(), _velocityTarget.value()) /
+                            _encoder.GetVelocityConversionFactor() +
                         _simFF * _velocityTarget.value()};
       break;
 
     case Mode::kPosition:
-      output =
-          units::volt_t{_simController.Calculate(GetPosition().value(), _positionTarget.value()) +
-                        _simFF * _positionTarget.value()};
+      // Spark internal PID uses native units (motor shaft rotations)
+      // so divide by conversion factor to use that
+      output = units::volt_t{
+          _simController.Calculate(GetPosition().value(),
+                                   _positionTarget.value()) /
+              _encoder.GetPositionConversionFactor() +
+          _simFF * _positionTarget.value()};
       break;
 
     case Mode::kVoltage:
