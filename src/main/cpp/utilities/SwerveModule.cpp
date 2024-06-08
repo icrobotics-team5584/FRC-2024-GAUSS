@@ -26,6 +26,7 @@ SwerveModule::SwerveModule(int canDriveMotorID, int canTurnMotorID, int canTurnE
 
   //Config Turn Motor
   ConfigTurnMotor();
+  SyncSensors();
 
   // Config Driving Motor
   _canDriveMotor.GetConfigurator().Apply(TalonFXConfiguration{});

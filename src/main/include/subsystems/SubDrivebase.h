@@ -38,7 +38,6 @@ class SubDrivebase : public frc2::SubsystemBase {
   void DriveToPose(frc::Pose2d targetPose);
   void RotateToZero(units::degree_t rotationError);
   void TranslateToZero(units::degree_t translationError);
-  bool IsAtPose(frc::Pose2d pose);
   void DisplayTrajectory(std::string name, frc::Trajectory trajectory);
   void SetNeutralMode(ctre::phoenix6::signals::NeutralModeValue mode);
   void SetPose(frc::Pose2d pose);
@@ -46,6 +45,7 @@ class SubDrivebase : public frc2::SubsystemBase {
   void UpdateOdometry();
   void SyncSensors();
   
+  bool IsAtPose(frc::Pose2d pose);
   units::degree_t GetPitch();
   frc::Pose2d GetPose();
   frc::Rotation2d GetHeading();
@@ -73,24 +73,17 @@ class SubDrivebase : public frc2::SubsystemBase {
 
  private:
   AHRS _gyro{frc::SerialPort::kMXP};
+
+  // Swerve modules
   frc::Translation2d _frontLeftLocation{+0.281_m, +0.281_m};
   frc::Translation2d _frontRightLocation{+0.281_m, -0.281_m};
   frc::Translation2d _backLeftLocation{-0.281_m, +0.281_m};
   frc::Translation2d _backRightLocation{-0.281_m, -0.281_m};
 
-  // const double FRONT_RIGHT_MAG_OFFSET = BotVars::Choose(-0.01904296875, -0.875732); //-0.875732 <- Low Modules | Raised modules -> -0.01904296875;  
-  // const double FRONT_LEFT_MAG_OFFSET = BotVars::Choose(-0.670898, -0.443359);       //-0.443359 <- Low Modules | Raised modules -> -0.670898;        
-  // const double BACK_RIGHT_MAG_OFFSET = BotVars::Choose(-0.900146484375, -0.959473); //-0.959473 <- Low Modules | Raised modules -> -0.900146484375;  
-  // const double BACK_LEFT_MAG_OFFSET = BotVars::Choose(-0.453125, -0.825928);        //-0.825928 <- Low Modules | Raised modules -> -0.453125;         
-
-
-  // Test drive base
-  const double FRONT_RIGHT_MAG_OFFSET = -0.87353515625;
-  const double FRONT_LEFT_MAG_OFFSET = -0.4423828125;
-  const double BACK_RIGHT_MAG_OFFSET = -0.959228515625;
-  const double BACK_LEFT_MAG_OFFSET = -0.82177734375;
-
-
+  const double FRONT_RIGHT_MAG_OFFSET = -0.375732;
+  const double FRONT_LEFT_MAG_OFFSET = -0.941406;
+  const double BACK_RIGHT_MAG_OFFSET = -0.462891;
+  const double BACK_LEFT_MAG_OFFSET = -0.329590;
 
   SwerveModule _frontLeft{canid::DriveBaseFrontLeftDrive, canid::DriveBaseFrontLeftTurn,
                           canid::DriveBaseFrontLeftEncoder, FRONT_LEFT_MAG_OFFSET};
@@ -101,6 +94,7 @@ class SubDrivebase : public frc2::SubsystemBase {
   SwerveModule _backRight{canid::DriveBaseBackRightDrive, canid::DriveBaseBackRightTurn,
                           canid::DriveBaseBackRightEncoder, BACK_RIGHT_MAG_OFFSET};
 
+  // Control objects
   frc::SwerveDriveKinematics<4> _kinematics{_frontLeftLocation, _frontRightLocation,
                                             _backLeftLocation, _backRightLocation};
 
@@ -110,6 +104,7 @@ class SubDrivebase : public frc2::SubsystemBase {
       6, 0, 0.3, {MAX_ANGULAR_VELOCITY, MAX_ANG_ACCEL}};
   frc::HolonomicDriveController _driveController{Xcontroller, Ycontroller, Rcontroller};
 
+  // Pose estimation
   frc::SwerveDrivePoseEstimator<4> _poseEstimator{
       _kinematics,
       _gyro.GetRotation2d(),
@@ -122,7 +117,7 @@ class SubDrivebase : public frc2::SubsystemBase {
   frc::Field2d _fieldDisplay;
   frc::Pose2d _prevPose;  // Used for velocity calculations
 
-  // Drive variables
+  // Drive requests
   units::meters_per_second_t _forwardSpeedRequest = 0_mps;
   units::meters_per_second_t _sidewaysSpeedRequest = 0_mps;
   units::degrees_per_second_t _rotationSpeedRequest = 0_deg_per_s;

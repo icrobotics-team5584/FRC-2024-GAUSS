@@ -138,9 +138,10 @@ void SubDrivebase::SimulationPeriodic() {
   _backRight.UpdateSim(20_ms);
 }
 
-frc2::CommandPtr SubDrivebase::JoystickDrive(frc2::CommandXboxController& controller,
+frc2::CommandPtr SubDrivebase::JoystickDrive(frc2::CommandXboxController &controller,
                                              bool ignoreJoystickRotation) {
-  return Run([this, &controller, ignoreJoystickRotation] {
+  return Run([this, &controller, ignoreJoystickRotation]
+             {
     double deadband = 0.08;
     auto velocity =
         frc::SmartDashboard::GetNumber("Drivebase/Config/MaxVelocity", MAX_VELOCITY.value()) *
@@ -160,38 +161,21 @@ frc2::CommandPtr SubDrivebase::JoystickDrive(frc2::CommandXboxController& contro
         _xspeedLimiter.Calculate(frc::ApplyDeadband(controller.GetLeftX(), deadband)) * velocity;
 
     // when optionalRotationContro is false,
-    if (frc::RobotBase::IsSimulation()) {
-      _sidewaysSpeedRequest = -sidewaysSpeed;
-      _forwardSpeedRequest = -forwardSpeed;
-      if (ignoreJoystickRotation == false) {
-        _rotationSpeedRequest = -rotationSpeed;
-      }
-      _fieldOrientedRequest = true;
-
-    } else {
-      _forwardSpeedRequest = forwardSpeed;
-      _sidewaysSpeedRequest = sidewaysSpeed;
-      if (ignoreJoystickRotation == false) {
-        _rotationSpeedRequest = rotationSpeed;
-      }
-      _fieldOrientedRequest = true;
-    }
-  });
+    _sidewaysSpeedRequest = -sidewaysSpeed;
+    _forwardSpeedRequest = -forwardSpeed;
+    _fieldOrientedRequest = true;
+    if (!ignoreJoystickRotation) {
+      _rotationSpeedRequest = -rotationSpeed;
+    } });
 }
 
 void SubDrivebase::Drive(units::meters_per_second_t xSpeed, units::meters_per_second_t ySpeed,
                          units::degrees_per_second_t rot, bool fieldRelative) {
   // Get states of all swerve modules
 
-  auto invert = 1;
-  if (frc::RobotBase::IsSimulation()) {
-    invert = -1;
-  } else {
-    invert = 1;
-  }
   auto states = _kinematics.ToSwerveModuleStates(frc::ChassisSpeeds::Discretize(
       fieldRelative
-          ? frc::ChassisSpeeds::FromFieldRelativeSpeeds(xSpeed, ySpeed, rot, GetHeading() * invert)
+          ? frc::ChassisSpeeds::FromFieldRelativeSpeeds(xSpeed, ySpeed, rot, GetHeading())
           : frc::ChassisSpeeds{xSpeed, ySpeed, rot},
       -200_ms));
 
