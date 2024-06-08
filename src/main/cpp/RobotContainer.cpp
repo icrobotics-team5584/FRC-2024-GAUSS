@@ -23,18 +23,30 @@ RobotContainer::RobotContainer() {
 }
 
 void RobotContainer::ConfigureBindings() {
+  //Driver
+
   //Triggers
-  _driverController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker());
   _driverController.RightTrigger().WhileTrue(cmd::CmdIntake());
-  _driverController.LeftTrigger().WhileTrue(SubIntake::GetInstance().Intake().AndThen(Rumble(1, 0.3_s)));
   //Bumpers
-  _driverController.RightBumper().WhileTrue(cmd::CmdShootPassing());
-  _driverController.LeftBumper().WhileTrue(cmd::CmdShootNeutral());
+  
   //Letters
-  _driverController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(65_deg));
-  _driverController.B().WhileTrue(cmd::CmdShootAmp());
+  
   //POV
-  POVHelper::Left(&_driverController).ToggleOnTrue(SubShooter::GetInstance().CmdSetShooterOff());
+  
+
+  //Operator
+
+  //Triggers
+  _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker());
+  //Bumpers
+  _operatorController.RightBumper().WhileTrue(cmd::CmdShootPassing());
+  _operatorController.LeftBumper().WhileTrue(cmd::CmdShootNeutral());
+  //Letters
+  _operatorController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(65_deg));
+  _operatorController.B().WhileTrue(cmd::CmdShootAmp());
+  //POV
+  POVHelper::Left(&_operatorController).OnTrue(SubShooter::GetInstance().CmdSetShooterOff());
+  POVHelper::Right(&_operatorController).WhileTrue(cmd::CmdOuttake());
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
