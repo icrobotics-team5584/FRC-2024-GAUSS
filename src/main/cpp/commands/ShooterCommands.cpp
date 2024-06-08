@@ -13,8 +13,11 @@
 namespace cmd {
 using namespace frc2::cmd;
 frc2::CommandPtr CmdIntake(){
-    return SubIntake::GetInstance().Intake().AlongWith(SubFeeder::GetInstance().FeedToIntake())
-    .Until([]{return SubFeeder::GetInstance().GetFeederState();});
+    return SubIntake::GetInstance().Intake().AlongWith(SubFeeder::GetInstance().FeedToShooter())
+    .Until([]{return SubFeeder::GetInstance().CheckHasNote();});
+}
+frc2::CommandPtr CmdOuttake(){
+    return SubIntake::GetInstance().Outtake().AlongWith(SubFeeder::GetInstance().FeedToIntake());
 }
 frc2::CommandPtr CmdShootSpeaker(){
     return Parallel(
@@ -22,11 +25,10 @@ frc2::CommandPtr CmdShootSpeaker(){
         SubShooter::GetInstance().CmdSetShooterSpeaker(),
         SubFeeder::GetInstance().FeedToIntake()
     )
-    //.Until([] {return !SubFeeder::GetInstance().GetFeederState();})
+    //.Until([] {return !SubFeeder::GetInstance().CheckHasNote();})
     .Until([] {return false;})
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
 }
-//DO WHAT WAS DONE TO AMP TO EVERYTHING ELSE!
 frc2::CommandPtr CmdShootAmp(){
     return Parallel(
         SubPivot::GetInstance().CmdSetPivotAngle(90_deg),
