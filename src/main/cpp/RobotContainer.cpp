@@ -11,12 +11,14 @@
 #include "utilities/POVHelper.h"
 #include "subsystems/SubDrivebase.h"
 #include "subsystems/SubFeeder.h"
+#include "subsystems/SubVision.h"
 
 RobotContainer::RobotContainer(){
   SubDrivebase::GetInstance().SetDefaultCommand(
       SubDrivebase::GetInstance().JoystickDrive(_driverController, false));
 
   ConfigureBindings();
+  SubVision::GetInstance();
 }
 
 void RobotContainer::ConfigureBindings() {
