@@ -7,7 +7,7 @@
 #include <frc2/command/Commands.h>
 #include "subsystems/SubShooter.h"
 #include "subsystems/SubPivot.h"
-#include "ShooterCommands.h"
+#include "commands/ShooterCommands.h"
 #include "utilities/POVHelper.h"
 #include "subsystems/SubDrivebase.h"
 
