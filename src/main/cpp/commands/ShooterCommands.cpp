@@ -7,6 +7,7 @@
 #include "subsystems/SubPivot.h"
 #include "subsystems/SubIntake.h"
 #include "subsystems/SubShooter.h"
+#include "subsystems/SubVision.h"
 #include "stdio.h"
 #include "iostream"
 
@@ -21,7 +22,7 @@ frc2::CommandPtr CmdOuttake(){
 }
 frc2::CommandPtr CmdShootSpeaker(){
     return Parallel(
-        SubPivot::GetInstance().CmdSetPivotAngle(40_deg),
+        SubPivot::GetInstance().CmdPivotFromVision([]{return SubVision::GetInstance().GetTagPitch();}),
         SubShooter::GetInstance().CmdSetShooterSpeaker(),
         SubFeeder::GetInstance().FeedToIntake()
     )

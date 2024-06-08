@@ -34,10 +34,13 @@ class SubVision : public frc2::SubsystemBase {
   void Periodic() override;
   void SimulationPeriodic() override;
 
+  units::degree_t GetTagPitch();
+
+
 private:
   std::string CAM_NAME1 = "arducam";
 
-  frc::Transform3d _camToBot{{-196_mm, 41_mm, -680_mm}, {}}; // arducam
+  frc::Transform3d _camToBot{{0_mm, -200_mm, -150_mm}, {}}; // arducam
 
   frc::AprilTagFieldLayout _tagLayout = frc::AprilTagFieldLayout::LoadField(frc::AprilTagField::k2024Crescendo);
 
@@ -49,10 +52,10 @@ private:
   
   
   
-  photon::PhotonCamera camera{"photonvision"};
+  photon::PhotonCamera camera{CAM_NAME1};
 
   
-  photon::SimVisionSystem _visionSim{CAM_NAME1, 45_deg, _camToBot, 15_m,
+  photon::SimVisionSystem _visionSim{CAM_NAME1, 120_deg, _camToBot, 15_m,
                                         360,         240,    0.0001};
                                         
 };

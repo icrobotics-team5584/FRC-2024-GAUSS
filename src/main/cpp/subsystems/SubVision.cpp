@@ -27,4 +27,9 @@ void SubVision::SimulationPeriodic() {
   _visionSim.ProcessFrame(SubDrivebase::GetInstance().GetPose());
 };
 
+units::degree_t SubVision::GetTagPitch() {
+  const auto& result = camera.GetLatestResult();
+  double pitchToTarget = {result.GetBestTarget().GetPitch()};
+  return pitchToTarget * 1_deg;
+}
 
