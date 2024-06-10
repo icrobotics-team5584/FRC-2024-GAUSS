@@ -86,9 +86,10 @@ void SubDrivebase::SimulationPeriodic() {
   _backRight.UpdateSim(20_ms);
 }
 
-frc2::CommandPtr SubDrivebase::JoystickDrive(frc2::CommandXboxController& controller,
+frc2::CommandPtr SubDrivebase::JoystickDrive(frc2::CommandXboxController &controller,
                                              bool ignoreJoystickRotation) {
-  return Run([this, &controller, ignoreJoystickRotation] {
+  return Run([this, &controller, ignoreJoystickRotation]
+             {
     double deadband = 0.08;
     auto velocity =
         frc::SmartDashboard::GetNumber("Drivebase/Config/MaxVelocity", MAX_VELOCITY.value()) *
@@ -108,23 +109,12 @@ frc2::CommandPtr SubDrivebase::JoystickDrive(frc2::CommandXboxController& contro
         _xspeedLimiter.Calculate(frc::ApplyDeadband(controller.GetLeftX(), deadband)) * velocity;
 
     // when optionalRotationContro is false,
-    if (frc::RobotBase::IsSimulation()) {
-      _sidewaysSpeedRequest = -sidewaysSpeed;
-      _forwardSpeedRequest = -forwardSpeed;
-      if (ignoreJoystickRotation == false) {
-        _rotationSpeedRequest = -rotationSpeed;
-      }
-      _fieldOrientedRequest = true;
-
-    } else {
-      _forwardSpeedRequest = forwardSpeed;
-      _sidewaysSpeedRequest = sidewaysSpeed;
-      if (ignoreJoystickRotation == false) {
-        _rotationSpeedRequest = rotationSpeed;
-      }
-      _fieldOrientedRequest = true;
-    }
-  });
+    _sidewaysSpeedRequest = -sidewaysSpeed;
+    _forwardSpeedRequest = -forwardSpeed;
+    _fieldOrientedRequest = true;
+    if (!ignoreJoystickRotation) {
+      _rotationSpeedRequest = -rotationSpeed;
+    } });
 }
 
 void SubDrivebase::Drive(units::meters_per_second_t xSpeed, units::meters_per_second_t ySpeed,
@@ -173,7 +163,7 @@ void SubDrivebase::Drive(units::meters_per_second_t xSpeed, units::meters_per_se
   if (frc::RobotBase::IsSimulation()) {
     units::radian_t radPer20ms = rot * 20_ms;
     units::degree_t newHeading = GetHeading().RotateBy(radPer20ms).Degrees();
-    _gyro.SetAngleAdjustment(newHeading.value());  // negative to switch to CW from CCW
+    _gyro.SetAngleAdjustment(-newHeading.value());  // negative to switch to CW from CCW
   }
 }
 

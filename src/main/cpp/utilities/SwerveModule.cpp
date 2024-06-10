@@ -26,6 +26,7 @@ SwerveModule::SwerveModule(int canDriveMotorID, int canTurnMotorID, int canTurnE
 
   //Config Turn Motor
   ConfigTurnMotor();
+  SyncSensors();
   frc::SmartDashboard::PutData("swerve/turn motor "+std::to_string(canTurnMotorID), (wpi::Sendable*)&_canTurnMotor);
 
   // Config Driving Motor

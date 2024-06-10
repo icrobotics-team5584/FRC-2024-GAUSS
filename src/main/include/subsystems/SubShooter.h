@@ -29,8 +29,7 @@ class SubShooter : public frc2::SubsystemBase {
   frc2::CommandPtr CmdSetShooterAmp();
   frc2::CommandPtr CmdSetShooterPassing();
   frc2::CommandPtr CmdSetShooterOff();
-  frc2::CommandPtr CmdCheckLeftSpeed();
-  frc2::CommandPtr CmdCheckRightSpeed();
+  bool IsOnTarget();
   /**
    * Will be called periodically whenever the CommandScheduler runs.
    */
@@ -41,7 +40,7 @@ class SubShooter : public frc2::SubsystemBase {
  private:
   ctre::phoenix6::hardware::TalonFX _ShooterFlywheelMotorLeft {canid::ShooterFlywheelMotorLeft};
   ctre::phoenix6::hardware::TalonFX _ShooterFlywheelMotorRight {canid::ShooterFlywheelMotorRight};
-  ctre::phoenix6::controls::VelocityVoltage _flywheelVelocity{0_tps, 0_tr_per_s_sq, true, 0_V, 0, false};
+  ctre::phoenix6::controls::VelocityVoltage _flywheelTargetVelocity{0_tps, 0_tr_per_s_sq, true, 0_V, 0, false};
   
   units::turns_per_second_t ShooterOff = 0_tps;
   units::turns_per_second_t SpeakerSpeed = 60_tps;
