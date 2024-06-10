@@ -51,8 +51,7 @@ void RobotContainer::ConfigureBindings() {
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
-  // return frc2::cmd::Print("No autonomous command configured"); 
-  return SubDrivebase::GetInstance().GetAutoCommand();
+  return frc2::cmd::Print("No autonomous command configured"); 
 }
 
 frc2::CommandPtr RobotContainer::Rumble(double force, units::second_t duration) {

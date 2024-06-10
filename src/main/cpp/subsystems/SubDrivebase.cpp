@@ -11,7 +11,6 @@
 #include "subsystems/SubDrivebase.h"
 #include <frc/filter/SlewRateLimiter.h>
 #include <iostream>
-#include <choreo/lib/Choreo.h>
 
 SubDrivebase::SubDrivebase() {
   frc::SmartDashboard::PutNumber("Drivebase/Config/MaxVelocity", MAX_VELOCITY.value());
@@ -325,29 +324,3 @@ units::degree_t SubDrivebase::GetPitch() {
   return _gyro.GetPitch() * 1_deg;
 }
 
-frc2::CommandPtr SubDrivebase::GetAutoCommand() {
-  //Auto configuration
-  using namespace choreolib;
-  ChoreoTrajectory path = Choreo::GetTrajectory("main");
-  frc2::CommandPtr AutoCommand = Choreo::ChoreoSwerveCommandFactory(
-    path,
-    [this] () { return GetPose(); },
-    frc::PIDController(2,0,0),
-    frc::PIDController(2,0,0),
-    frc::PIDController(0.5,0,0),
-    [this] (frc::ChassisSpeeds speeds) {
-      _sidewaysSpeedRequest = speeds.vy;  // TEST!
-      _forwardSpeedRequest = speeds.vx;
-      _rotationSpeedRequest = -speeds.omega;
-      _fieldOrientedRequest = false;
-    },
-    [this] () { 
-      auto alliance = frc::DriverStation::GetAlliance();
-      if (alliance) {
-        return alliance == frc::DriverStation::Alliance::kBlue;
-      }
-    }
-  );
-  SetPose(path.GetInitialPose());
-  return AutoCommand;
-}
