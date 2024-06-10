@@ -9,16 +9,17 @@
 
 SubPivot::SubPivot(){
     _pivotMotor.SetPIDFF(_pivotP, _pivotI, _pivotD);
+    _pivotMotor.SetConversionFactor(1/PIVOT_GEAR_RATIO);
 
     frc::SmartDashboard::PutData("Pivot/Motor", (wpi::Sendable*)&_pivotMotor);
 
     //Setup shooter pitch table
-    _pitchTable.insert(64_deg, 90_deg);
-    _pitchTable.insert(32_deg, 84_deg);
-    _pitchTable.insert(16_deg, 70_deg);
-    _pitchTable.insert(8_deg, 58_deg);
-    _pitchTable.insert(4_deg, 49_deg);
-    _pitchTable.insert(2_deg, 45_deg);
+    _pitchTable.insert(-20_deg, 90_deg);
+    _pitchTable.insert(-15_deg, 84_deg);
+    _pitchTable.insert(-9_deg, 70_deg);
+    _pitchTable.insert(0_deg, 58_deg);
+    _pitchTable.insert(9_deg, 49_deg);
+    _pitchTable.insert(17_deg, 45_deg);
 }
 
 
