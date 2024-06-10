@@ -32,7 +32,8 @@ frc2::CommandPtr CmdOuttake(){
 
 frc2::CommandPtr CmdShootSpeaker(){
     return Parallel(
-        SubPivot::GetInstance().CmdPivotFromVision([]{return SubVision::GetInstance().GetTagPitch();}),
+        SubPivot::GetInstance().CmdPivotFromVision([]{    /*default value = 60 degrees(Subwoofer shot)*/
+            return SubVision::GetInstance().GetSpeakerPitch().value_or(60_deg);}),
         SubShooter::GetInstance().CmdSetShooterSpeaker(),
         CmdFeedOnceOnTarget()
     )
