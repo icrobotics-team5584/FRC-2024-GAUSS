@@ -11,11 +11,11 @@ SubFeeder::SubFeeder() {
 }
 
 frc2::CommandPtr SubFeeder::FeedToIntake() {
-return Run([this]{ _feederMotor.Set(1);}).FinallyDo([this]{_feederMotor.Set(0);});
+return Run([this]{ _feederMotor.SetDutyCycle(1);}).FinallyDo([this]{_feederMotor.SetDutyCycle(0);});
 }
 
 frc2::CommandPtr SubFeeder::FeedToShooter() {
-return Run([this]{ _feederMotor.Set(-1);}).FinallyDo([this]{_feederMotor.Set(0);});
+return Run([this]{ _feederMotor.SetDutyCycle(-1);}).FinallyDo([this]{_feederMotor.SetDutyCycle(0);});
 }
 
 // This method will be called once per scheduler run

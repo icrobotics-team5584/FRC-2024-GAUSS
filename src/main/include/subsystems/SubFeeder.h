@@ -8,6 +8,7 @@
 #include "utilities/ICSparkMax.h"
 #include "Constants.h"
 #include <frc/DigitalInput.h>
+#include <rev/CANSparkMax.h>
 
 class SubFeeder : public frc2::SubsystemBase {
  public:
