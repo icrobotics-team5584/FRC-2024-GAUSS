@@ -1,9 +1,8 @@
 #include "utilities/ICSparkMax.h"
 
 ICSparkMax::ICSparkMax(int deviceID, units::ampere_t currentLimit)
-    : ICSparkBase(this, currentLimit),
-      rev::CANSparkMax(deviceID, rev::CANSparkLowLevel::MotorType::kBrushless) {
-}
+    : rev::CANSparkMax(deviceID, rev::CANSparkLowLevel::MotorType::kBrushless),
+      ICSparkBase(this, currentLimit) {}
 
 void ICSparkMax::Set(double speed) { ICSparkBase::SetDutyCycle(speed); }
 

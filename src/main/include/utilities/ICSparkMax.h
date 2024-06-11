@@ -12,7 +12,7 @@
  * - Uses C++ units
  * - Encoder and pid functions are built into this class
  */
-class ICSparkMax : public ICSparkBase, public rev::CANSparkMax {
+class ICSparkMax : public rev::CANSparkMax, public ICSparkBase {
  public:
   ICSparkMax(int deviceID, units::ampere_t currentLimit);
 
