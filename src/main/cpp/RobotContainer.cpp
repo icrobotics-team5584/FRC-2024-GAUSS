@@ -12,7 +12,7 @@
 #include "subsystems/SubDrivebase.h"
 #include "subsystems/SubFeeder.h"
 #include "subsystems/SubVision.h"
-
+#include <pathplanner/lib/commands/PathPlannerAuto.h>
 
 RobotContainer::RobotContainer(){
   SubDrivebase::GetInstance().SetDefaultCommand(
@@ -52,7 +52,8 @@ void RobotContainer::ConfigureBindings() {
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
-  return frc2::cmd::Print("No autonomous command configured"); 
+  //return frc2::cmd::Print("No autonomous command configured"); 
+  return pathplanner::PathPlannerAuto("Pathplanner_auto_test").ToPtr();
 }
 
 frc2::CommandPtr RobotContainer::Rumble(double force, units::second_t duration) {
