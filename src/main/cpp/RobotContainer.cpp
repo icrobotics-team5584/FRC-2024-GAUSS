@@ -20,6 +20,8 @@ RobotContainer::RobotContainer(){
 
   ConfigureBindings();
   SubVision::GetInstance();
+
+  _autoChooser.AddOption("Pathplanner_auto_test", "Pathplanner_auto_test");
 }
 
 void RobotContainer::ConfigureBindings() {
@@ -52,8 +54,13 @@ void RobotContainer::ConfigureBindings() {
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
-  //return frc2::cmd::Print("No autonomous command configured"); 
-  return pathplanner::PathPlannerAuto("Pathplanner_auto_test").ToPtr();
+  auto _autoSelected = _autoChooser.GetSelected();
+  //units::second_t delay = _delayChooser.GetSelected() * 0.01_s;
+  units::second_t delay = 0.01_s;
+  return frc2::cmd::Wait(delay)
+      .AndThen(pathplanner::PathPlannerAuto(_autoSelected).ToPtr());
+      // .AlongWith(SubClimber::GetInstance().ClimberAutoReset().AndThen(
+      //     SubClimber::GetInstance().ClimberPosition(SubClimber::_ClimberPosStow)));
 }
 
 frc2::CommandPtr RobotContainer::Rumble(double force, units::second_t duration) {
