@@ -77,3 +77,11 @@ std::optional<units::degree_t> SubVision::GetSpeakerPitch(){
     return {};
   }
 }
+
+bool SubVision::IsFacingTarget(){
+  if (-2_deg < GetSpeakerYaw() && GetSpeakerYaw() < 2_deg){
+    return true;
+  } else {
+    return false;
+  }
+}

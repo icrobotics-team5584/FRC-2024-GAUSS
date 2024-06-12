@@ -37,8 +37,8 @@ class SubVision : public frc2::SubsystemBase {
   std::optional<photon::PhotonTrackedTarget> GetSpeakerTarget();
   std::optional<units::degree_t> GetSpeakerYaw();
   std::optional<units::degree_t> GetSpeakerPitch();
-
   
+  bool IsFacingTarget();
 
 private:
   std::string CAM_NAME1 = "arducam";

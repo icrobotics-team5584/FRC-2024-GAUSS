@@ -22,6 +22,7 @@ frc2::CommandPtr CmdFeedOnceOnTarget() {
     return Sequence(
             WaitUntil([]{return SubPivot::GetInstance().IsOnTarget();}),
             WaitUntil([]{return SubShooter::GetInstance().IsOnTarget();}),
+            WaitUntil([]{return SubVision::GetInstance().IsFacingTarget();}),
             SubFeeder::GetInstance().FeedToShooter()
         );
 }
@@ -30,11 +31,12 @@ frc2::CommandPtr CmdOuttake(){
     return SubIntake::GetInstance().Outtake().AlongWith(SubFeeder::GetInstance().FeedToIntake());
 }
 
-frc2::CommandPtr CmdShootSpeaker(){
+frc2::CommandPtr CmdShootSpeaker(frc2::CommandXboxController& controller){
     return Parallel(
         SubPivot::GetInstance().CmdPivotFromVision([]{    /*default value = 60 degrees(Subwoofer shot)*/
             return SubVision::GetInstance().GetSpeakerPitch().value_or(60_deg);}),
         SubShooter::GetInstance().CmdSetShooterSpeaker(),
+        CmdAimAtSpeakerWithVision(controller),
         CmdFeedOnceOnTarget()
     )
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});

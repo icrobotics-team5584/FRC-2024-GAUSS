@@ -26,8 +26,8 @@ void RobotContainer::ConfigureBindings() {
 
   //Triggers
   _driverController.RightTrigger().WhileTrue(cmd::CmdIntake());
-  //Bumpers
   _driverController.LeftTrigger().WhileTrue(cmd::CmdAimAtSpeakerWithVision(_driverController));
+  //Bumpers
   
   //Letters
   
@@ -36,7 +36,8 @@ void RobotContainer::ConfigureBindings() {
   //Operator
 
   //Triggers
-  _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker());
+  _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker(_driverController));
+  
   //Bumpers
   _operatorController.RightBumper().WhileTrue(cmd::CmdShootPassing());
   _operatorController.LeftBumper().WhileTrue(cmd::CmdShootNeutral());
