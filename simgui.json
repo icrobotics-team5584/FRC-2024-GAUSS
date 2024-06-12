@@ -16,11 +16,17 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Chosen Path": "String Chooser",
       "/SmartDashboard/Drivebase/Vision/Rotation Controller: ": "ProfiledPIDController",
       "/SmartDashboard/arducam Sim Field": "Field2d",
       "/SmartDashboard/field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/Chosen Path": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/field": {
         "bottom": 1476,
         "height": 8.210550308227539,
@@ -37,6 +43,12 @@
   "NetworkTables": {
     "transitory": {
       "SmartDashboard": {
+        "Chosen Path": {
+          "open": true,
+          "string[]##v_/SmartDashboard/Chosen Path/options": {
+            "open": true
+          }
+        },
         "Feeder": {
           "Motor": {
             "open": true

@@ -13,6 +13,7 @@
 #include "subsystems/SubFeeder.h"
 #include "subsystems/SubVision.h"
 #include <pathplanner/lib/commands/PathPlannerAuto.h>
+#include <frc/smartdashboard/SmartDashboard.h>
 
 RobotContainer::RobotContainer(){
   SubDrivebase::GetInstance().SetDefaultCommand(
@@ -22,6 +23,8 @@ RobotContainer::RobotContainer(){
   SubVision::GetInstance();
 
   _autoChooser.AddOption("Pathplanner_auto_test", "Pathplanner_auto_test");
+  _autoChooser.AddOption("New Auto", "New Auto");
+  frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
 }
 
 void RobotContainer::ConfigureBindings() {
