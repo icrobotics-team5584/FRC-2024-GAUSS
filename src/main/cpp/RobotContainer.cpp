@@ -27,6 +27,7 @@ void RobotContainer::ConfigureBindings() {
   //Triggers
   _driverController.RightTrigger().WhileTrue(cmd::CmdIntake());
   //Bumpers
+  _driverController.LeftTrigger().WhileTrue(cmd::CmdAimAtSpeakerWithVision(_driverController));
   
   //Letters
   

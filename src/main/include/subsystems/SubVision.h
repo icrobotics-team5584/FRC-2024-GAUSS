@@ -34,9 +34,11 @@ class SubVision : public frc2::SubsystemBase {
   void Periodic() override;
   void SimulationPeriodic() override;
 
-  units::degree_t GetTagPitch();
+  std::optional<photon::PhotonTrackedTarget> GetSpeakerTarget();
+  std::optional<units::degree_t> GetSpeakerYaw();
   std::optional<units::degree_t> GetSpeakerPitch();
 
+  
 
 private:
   std::string CAM_NAME1 = "arducam";
