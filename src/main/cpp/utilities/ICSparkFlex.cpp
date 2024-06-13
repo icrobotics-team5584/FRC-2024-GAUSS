@@ -2,12 +2,19 @@
 
 ICSparkFlex::ICSparkFlex(int deviceID, units::ampere_t currentLimit)
     : rev::CANSparkFlex(deviceID, rev::CANSparkLowLevel::MotorType::kBrushless),
-      ICSparkBase(this, currentLimit) {}
+      ICSpark(this,
+                  GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor,
+                             VORTEX_ENCODER_RESOLUTION),
+                  currentLimit) {}
 
-void ICSparkFlex::Set(double speed) { ICSparkBase::SetDutyCycle(speed); }
+void ICSparkFlex::Set(double speed) { ICSpark::SetDutyCycle(speed); }
 
 void ICSparkFlex::SetVoltage(units::volt_t output) {
-  ICSparkBase::SetVoltage(output);
+  ICSpark::SetVoltage(output);
 }
 
-void ICSparkFlex::StopMotor() { ICSparkBase::Stop(); }
+void ICSparkFlex::StopMotor() { ICSpark::Stop(); }
+
+void ICSparkFlex::UseExternalEncoder(int countsPerRev) {
+    ICSpark::UseRelativeEncoder(CANSparkFlex::GetExternalEncoder(countsPerRev));
+}

@@ -22,15 +22,18 @@
  * - Uses C++ units
  * - Encoder and pid functions are built into this class
  */
-class ICSparkBase : public wpi::Sendable {
+class ICSpark : public wpi::Sendable {
  public:
   /**
    * Create a new object to control a SPARK motor controller.
    *
    * @param currentLimit Value used for spark smart current limiting
+   * @param inbultEncoder rvalue reference to the encoder built into the NEO
    * @param spark Reference to the spark to control
    */
-  ICSparkBase(rev::CANSparkBase* spark, units::ampere_t currentLimit);
+  ICSpark(rev::CANSparkBase* spark,
+              rev::SparkRelativeEncoder&& inbuiltEncoder,
+              units::ampere_t currentLimit);
 
   /**
    * Sets position of motor
@@ -124,7 +127,7 @@ class ICSparkBase : public wpi::Sendable {
   /**
    * Gets the current closed loop control type.
    */
-  rev::CANSparkMax::ControlType GetControlType() { return _controlType; };
+  rev::CANSparkBase::ControlType GetControlType() { return _controlType; };
 
   /**
    * Get the velocity of the motor.
@@ -208,11 +211,14 @@ class ICSparkBase : public wpi::Sendable {
   void SetClosedLoopOutputRange(double minOutputPercent, double maxOutputPercent);
 
   /**
-   * Switch to using an external absolute encoder connected to the data port on the SPARK MAX.
+   * Switch to using an external absolute encoder connected to the data port on
+   * the SPARK. To use a relative encoder, check the Spark Max and Spark Flex
+   * specific implimentation. The Max uses "Alternate encoders" while the Flex
+   * uses "External encoders"
    *
-   * @param zeroOffset the position that is reported as zero. It is influenced by the absolute
-   * encoder's position conversion factor, and whether it is inverted. So set those parameters
-   * before calling this.
+   * @param zeroOffset the position that is reported as zero. It is influenced
+   * by the absolute encoder's position conversion factor, and whether it is
+   * inverted. So set those parameters before calling this.
    */
   void UseAbsoluteEncoder(units::turn_t zeroOffset = 0_tr);
 
@@ -244,14 +250,21 @@ class ICSparkBase : public wpi::Sendable {
   // Sendable setup, called automatically when this is passed into smartDashbaord::PutData()
   void InitSendable(wpi::SendableBuilder& builder) override;
   
+ protected:
+  // Use a relative (alternarte for Max, external for Flex) encoder as the feedback device.
+  template <std::derived_from<rev::RelativeEncoder> RelEncoder>
+  void UseRelativeEncoder(RelEncoder&& encoder) {
+    _encoder.UseRelative(std::move(encoder));
+    _pidController.SetFeedbackDevice(_encoder.GetPIDFeedbackDevice());
+  }
 
  private:
   rev::CANSparkBase* _spark;
-  using Mode = rev::CANSparkMax::ControlType;
+  using Mode = rev::CANSparkBase::ControlType;
 
   // Related REVLib objects
   rev::SparkPIDController _pidController{_spark->GetPIDController()};
-  ICSparkEncoder _encoder{_spark->GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor, 42)};
+  ICSparkEncoder _encoder;
 
   // PID simulation configuration
   bool _updatingTargetFromSendable = false;

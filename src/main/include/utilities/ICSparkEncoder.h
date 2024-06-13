@@ -1,28 +1,31 @@
 #pragma once
 
 #include <rev/CANSparkMax.h>
+#include <rev/CANSparkFlex.h>
+#include <rev/RelativeEncoder.h>
+#include <memory>
 
 class ICSparkEncoder {
  public:
   ICSparkEncoder(rev::SparkRelativeEncoder&& inbuilt);
-  enum EncoderType { INBUILT, ABSOLUTE, ALTERNATE };
+  enum EncoderType { INBUILT, ABSOLUTE, RELATIVE };
 
+  void SetPosition(double pos);
+  void SetConversionFactor(double rotationsToDesired);
+  void UseRelative(rev::SparkMaxAlternateEncoder&& encoder);
+  void UseRelative(rev::SparkFlexExternalEncoder&& encoder);
+  void UseAbsolute(rev::SparkAbsoluteEncoder&& encoder);
+  
   double GetPosition();
   double GetVelocity();
-  void SetPosition(double pos);
   double GetPositionConversionFactor();
   double GetVelocityConversionFactor();
-  void SetConversionFactor(double rotationsToDesired);
-  void UseAlternate(rev::SparkMaxAlternateEncoder&& encoder);
-  void UseAbsolute(rev::SparkAbsoluteEncoder&& encoder);
-  rev::SparkRelativeEncoder& GetInbuilt();
-  rev::SparkAbsoluteEncoder& GetAbsolute();
-  rev::SparkMaxAlternateEncoder& GetAlternate();
+  const rev::MotorFeedbackSensor& GetPIDFeedbackDevice();
 
  private:
   rev::SparkRelativeEncoder _inbuilt;
   std::unique_ptr<rev::SparkAbsoluteEncoder> _absolute;
-  std::unique_ptr<rev::SparkMaxAlternateEncoder> _alternate;
+  std::unique_ptr<rev::RelativeEncoder> _relative;
   double _absoluteSimPos = 0;
   EncoderType _selected = INBUILT;
 };
