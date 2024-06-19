@@ -1,0 +1,37 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.3965782523155213,
+      "y": 7.340753555297852
+    },
+    "rotation": -1.6472884015797303e-25
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "AA1.1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "AA1.2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "AA1.3"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": true
+}
