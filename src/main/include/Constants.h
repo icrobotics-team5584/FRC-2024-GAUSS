@@ -3,15 +3,16 @@
 
 namespace canid{
     constexpr int ShooterPivotMotor  = 13;
-    constexpr int ShooterFlywheelMotorLeft  = 14;
-    constexpr int ShooterFlywheelMotorRight  = 15;
+    constexpr int ShooterPivotEncoder  = 14;
+    constexpr int ShooterFlywheelMotorLeft  = 15;
+    constexpr int ShooterFlywheelMotorRight  = 16;
 
-    constexpr int IntakeMotor  = 16;
+    constexpr int IntakeMotor  = 17;
 
-    constexpr int FeederMotor = 19;
+    constexpr int FeederMotor = 20;
     
-    constexpr int ClimberMain = 17;
-    constexpr int ClimberSecond = 18;
+    constexpr int ClimberMain = 18;
+    constexpr int ClimberSecond = 19;
 
     constexpr int DriveBaseFrontRightDrive = 1;
     constexpr int DriveBaseFrontRightTurn = 2;

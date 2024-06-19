@@ -5,6 +5,7 @@
 #include "subsystems/SubPivot.h"
 #include <frc2/command/commands.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <units/angle.h>
 
 
 SubPivot::SubPivot(){
