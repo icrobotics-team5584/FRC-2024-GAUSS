@@ -143,4 +143,18 @@ class SubDrivebase : public frc2::SubsystemBase {
                                    .velocity(_frontRight.GetSpeed());
                              },
                              this}};
+
+  //Saum's Cool Simulation stuff
+frc::SwerveDrivePoseEstimator<4> _simPoseEstimator{
+      _kinematics,
+      _gyro.GetRotation2d(),
+      {frc::SwerveModulePosition{0_m, _frontLeft.GetAngle()},
+       frc::SwerveModulePosition{0_m, _frontRight.GetAngle()},
+       frc::SwerveModulePosition{0_m, _backLeft.GetAngle()},
+       frc::SwerveModulePosition{0_m, _backRight.GetAngle()}},
+      frc::Pose2d()};
+
+public:
+  frc::Pose2d GetSimPose();
+
 };

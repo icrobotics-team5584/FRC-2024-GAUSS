@@ -136,6 +136,18 @@ void SubDrivebase::SimulationPeriodic() {
   _frontRight.UpdateSim(20_ms);
   _backLeft.UpdateSim(20_ms);
   _backRight.UpdateSim(20_ms);
+
+  auto fl = _frontLeft.GetPosition();
+  auto fr = _frontRight.GetPosition();
+  auto bl = _backLeft.GetPosition();
+  auto br = _backRight.GetPosition();
+
+  _simPoseEstimator.Update(GetHeading(), {fl, fr, bl, br});
+  DisplayPose("simRobotPose", _simPoseEstimator.GetEstimatedPosition());
+}
+
+frc::Pose2d SubDrivebase::GetSimPose(){
+  return _simPoseEstimator.GetEstimatedPosition();
 }
 
 frc2::CommandPtr SubDrivebase::JoystickDrive(frc2::CommandXboxController &controller,

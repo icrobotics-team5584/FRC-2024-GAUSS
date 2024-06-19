@@ -5,6 +5,7 @@
 #include "subsystems/SubVision.h"
 #include "subsystems/SubDrivebase.h"
 #include <frc/DriverStation.h>
+#include "commands/VisionCommands.h"
 
 SubVision::SubVision() {
   for (int i = 0; i <= 18; i++) {
@@ -15,6 +16,12 @@ SubVision::SubVision() {
       SubDrivebase::GetInstance().DisplayPose(fmt::format("tag{}", i), pose.value().ToPose2d());
     }
   }
+
+  SetDefaultCommand(cmd::AddVisionMeasurement());
+}
+
+std::optional<photon::EstimatedRobotPose> SubVision::GetPose() {
+  return _visionPoseEstimator.Update();
 }
 
 // This method will be called once per scheduler run
@@ -26,7 +33,7 @@ void SubVision::Periodic() {
   }
 
 void SubVision::SimulationPeriodic() {
-  _visionSim.ProcessFrame(SubDrivebase::GetInstance().GetPose());
+  _visionSim.ProcessFrame(SubDrivebase::GetInstance().GetSimPose());
 };
 
 std::optional<photon::PhotonTrackedTarget> SubVision::GetSpeakerTarget() {
@@ -84,4 +91,5 @@ bool SubVision::IsFacingTarget(){
   } else {
     return false;
   }
+
 }

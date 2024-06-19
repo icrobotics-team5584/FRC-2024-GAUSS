@@ -62,7 +62,8 @@
   "NetworkTables Info": {
     "Clients": {
       "open": true
-    }
+    },
+    "visible": true
   },
   "Plot": {
     "Plot <0>": {
@@ -211,7 +212,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 332
+          "height": 0
         }
       ]
     }

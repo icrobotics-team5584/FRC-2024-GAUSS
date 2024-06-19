@@ -37,23 +37,27 @@ class SubVision : public frc2::SubsystemBase {
   std::optional<photon::PhotonTrackedTarget> GetSpeakerTarget();
   std::optional<units::degree_t> GetSpeakerYaw();
   std::optional<units::degree_t> GetSpeakerPitch();
+  std::optional<photon::EstimatedRobotPose> GetPose();
   
   bool IsFacingTarget();
 
 private:
   std::string CAM_NAME1 = "arducam";
 
-  frc::Transform3d _camToBot{{0_mm, -200_mm, -150_mm}, {}}; // arducam
+  frc::Transform3d _camToBot{{0_mm, -200_mm, -150_mm}, {}}; // arducam FIX
 
   frc::AprilTagFieldLayout _tagLayout = frc::AprilTagFieldLayout::LoadField(frc::AprilTagField::k2024Crescendo);
 
-  // photonlib::PhotonPoseEstimator _visionPoseEstimator{
-  //     _tagLayout,
-  //     photonlib::PoseStrategy::MULTI_TAG_PNP,
-  //     photonlib::PhotonCamera{CAM_NAME1},
-  //     _camToBot.Inverse()};
+  photon::PhotonPoseEstimator _visionPoseEstimator{
+      _tagLayout,
+      photon::PoseStrategy::MULTI_TAG_PNP_ON_COPROCESSOR,
+      photon::PhotonCamera{CAM_NAME1},
+      _camToBot.Inverse()};
   
   
+
+
+
   
   photon::PhotonCamera camera{CAM_NAME1};
 
