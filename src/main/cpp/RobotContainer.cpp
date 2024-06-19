@@ -14,9 +14,18 @@
 #include "subsystems/SubVision.h"
 
 RobotContainer::RobotContainer(){
+
+  std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("BA1.1.traj");
+  std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("BA1.2.traj");
+  std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("BA1.3.traj");
+  std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("BA1.4.traj");
+  std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("BA1.5.traj");
+  std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("NewPath.traj");
+  std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("NewPath2.traj");
+
   SubDrivebase::GetInstance().SetDefaultCommand(
       SubDrivebase::GetInstance().JoystickDrive(_driverController, false));
-
+  
   ConfigureBindings();
   SubVision::GetInstance();
 }
