@@ -11,6 +11,7 @@
 #include <frc/system/plant/DCMotor.h>
 #include <frc/controller/ArmFeedforward.h>
 #include <wpi/interpolating_map.h>
+#include <ctre/phoenix6/CANcoder.hpp>
 
 class SubPivot : public frc2::SubsystemBase {
 public:
@@ -36,6 +37,7 @@ private:
   // declared private and exposed only through public methods.
 
   ICSparkMax _pivotMotor{canid::ShooterPivotMotor, 20_A};
+  ctre::phoenix6::hardware::CANcoder _shooterPivotEncoder{canid::ShooterPivotEncoder};
 
   static constexpr double _pivotP = 100;
   static constexpr double _pivotI = 0;

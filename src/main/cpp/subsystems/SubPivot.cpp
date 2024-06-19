@@ -10,6 +10,7 @@
 
 SubPivot::SubPivot(){
     _pivotMotor.SetPIDFF(_pivotP, _pivotI, _pivotD);
+    _pivotMotor.SetPosition(_shooterPivotEncoder.GetPosition().GetValue());
 
     frc::SmartDashboard::PutData("Pivot/Motor", (wpi::Sendable*)&_pivotMotor);
 
