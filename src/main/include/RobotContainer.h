@@ -9,6 +9,7 @@
 #include <frc/XboxController.h>
 #include <frc2/command/button/JoystickButton.h>
 #include "subsystems/SubDriveBase.h"
+#include <frc/smartdashboard/SendableChooser.h>
 
 class RobotContainer {
  public:
@@ -21,4 +22,6 @@ class RobotContainer {
   void ConfigureBindings();
   frc2::CommandXboxController _driverController{0};
   frc2::CommandXboxController _operatorController{1};
+
+  frc::SendableChooser<std::string> _autoChooser;
 };

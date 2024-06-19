@@ -12,6 +12,8 @@
 #include "subsystems/SubDrivebase.h"
 #include "subsystems/SubFeeder.h"
 #include "subsystems/SubVision.h"
+#include <pathplanner/lib/commands/PathPlannerAuto.h>
+#include <frc/smartdashboard/SmartDashboard.h>
 
 RobotContainer::RobotContainer(){
 
@@ -28,6 +30,10 @@ RobotContainer::RobotContainer(){
   
   ConfigureBindings();
   SubVision::GetInstance();
+
+  _autoChooser.AddOption("Pathplanner_auto_test", "Pathplanner_auto_test");
+  _autoChooser.AddOption("New Auto", "New Auto");
+  frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
 }
 
 void RobotContainer::ConfigureBindings() {
@@ -60,7 +66,13 @@ void RobotContainer::ConfigureBindings() {
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
-  return frc2::cmd::Print("No autonomous command configured"); 
+  auto _autoSelected = _autoChooser.GetSelected();
+  //units::second_t delay = _delayChooser.GetSelected() * 0.01_s;
+  units::second_t delay = 0.01_s;
+  return frc2::cmd::Wait(delay)
+      .AndThen(pathplanner::PathPlannerAuto(_autoSelected).ToPtr());
+      // .AlongWith(SubClimber::GetInstance().ClimberAutoReset().AndThen(
+      //     SubClimber::GetInstance().ClimberPosition(SubClimber::_ClimberPosStow)));
 }
 
 frc2::CommandPtr RobotContainer::Rumble(double force, units::second_t duration) {
