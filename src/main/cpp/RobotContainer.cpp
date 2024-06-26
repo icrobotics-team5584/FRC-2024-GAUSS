@@ -25,10 +25,6 @@ RobotContainer::RobotContainer(){
 }
 
 void RobotContainer::ConfigureBindings() {
-  //Climber
-
-  // _driverController.A().OnTrue(SubClimber::GetInstance().ClimberPosition(1.5_m));
-  // _driverController.B().OnTrue(SubClimber::GetInstance().ClimberPosition(0_m));
   //Driver
 
   //Triggers
@@ -49,6 +45,8 @@ void RobotContainer::ConfigureBindings() {
   //Letters
   _operatorController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(65_deg));
   _operatorController.B().WhileTrue(cmd::CmdShootAmp());
+  _operatorController.Y().OnTrue(SubClimber::GetInstance().ClimberPosition(0.4_m));
+  _operatorController.X().OnTrue(SubClimber::GetInstance().ClimberPosition(0.05_m));
   //POV
   POVHelper::Left(&_operatorController).OnTrue(SubShooter::GetInstance().CmdSetShooterOff());
   POVHelper::Right(&_operatorController).WhileTrue(cmd::CmdOuttake());
