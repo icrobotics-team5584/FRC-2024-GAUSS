@@ -5,10 +5,12 @@
 #include "subsystems/SubPivot.h"
 #include <frc2/command/commands.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <units/angle.h>
 
 
 SubPivot::SubPivot(){
     _pivotMotor.SetPIDFF(_pivotP, _pivotI, _pivotD);
+    _pivotMotor.SetPosition(_shooterPivotEncoder.GetPosition().GetValue());
     _pivotMotor.SetConversionFactor(1/PIVOT_GEAR_RATIO);
 
     frc::SmartDashboard::PutData("Pivot/Motor", (wpi::Sendable*)&_pivotMotor);

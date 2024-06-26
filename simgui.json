@@ -10,6 +10,9 @@
         "header": {
           "open": true
         }
+      },
+      "window": {
+        "visible": false
       }
     }
   },
@@ -33,7 +36,10 @@
         "left": 150,
         "right": 2961,
         "top": 79,
-        "width": 16.541748046875
+        "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
       }
     }
   },
@@ -45,19 +51,21 @@
             "open": true
           }
         },
-        "Intake": {
-          "open": true
-        },
         "Pivot": {
           "Motor": {
             "open": true
           },
           "open": true
         },
-        "Target": {
+        "Shooter": {
           "open": true
         },
         "open": true
+      },
+      "photonvision": {
+        "arducam": {
+          "open": true
+        }
       }
     }
   },
@@ -156,7 +164,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 425,
+          "height": 0,
           "series": [
             {
               "color": [
@@ -199,6 +207,22 @@
           ],
           "yaxis2": true,
           "yaxis3": true
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    },
+    "Plot <4>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 0
         }
       ]
     }
