@@ -10,6 +10,7 @@
 #include <frc/simulation/SingleJointedArmSim.h>
 #include <frc/system/plant/DCMotor.h>
 #include <frc/controller/ArmFeedforward.h>
+#include <wpi/interpolating_map.h>
 
 class SubPivot : public frc2::SubsystemBase {
 public:
@@ -18,12 +19,17 @@ public:
     static SubPivot inst;
     return inst;
   }
+  //commands
   frc2::CommandPtr CmdSetPivotAngle(units::degree_t targetAngle);
+  frc2::CommandPtr CmdPivotFromVision(std::function<units::degree_t()> tagAngle);
   /**
    * Will be called periodically whenever the CommandScheduler runs.
    */
   void Periodic() override;
   void SimulationPeriodic() override;
+
+  //functions
+  bool IsOnTarget();
 
 private:
   // Components (e.g. motor controllers and sensors) should generally be
@@ -40,13 +46,16 @@ private:
   static constexpr auto PIVOT_V = 0_V/1_tps;
   static constexpr auto PIVOT_A = 0_V/1_tr_per_s_sq;
   
-  static constexpr double PIVOT_GEAR_RATIO = 175;
+  static constexpr double PIVOT_GEAR_RATIO = 196;
   static constexpr units::meter_t SHOOTER_LENGTH = 0.523_m;
   static constexpr units::kilogram_t SHOOTER_MASS = 6.9_kg;
-  static constexpr units::degree_t SHOOTER_MIN_ANGLE = 10_deg;
+  static constexpr units::degree_t SHOOTER_MIN_ANGLE = 0_deg;
   static constexpr units::degree_t SHOOTER_MAX_ANGLE = 100_deg;
 
   frc::ArmFeedforward _pivotFF{PIVOT_S, PIVOT_G, PIVOT_V, PIVOT_A};
+
+  //Shooter table
+  wpi::interpolating_map<units::degree_t, units::degree_t> _pitchTable;
 
   //simulating pivot in smartdashboard
   frc::sim::SingleJointedArmSim _pivotSim{
@@ -63,3 +72,4 @@ private:
 
 // 6.9kg
 // 523mm
+//Encoder is on 4:1 ratio!

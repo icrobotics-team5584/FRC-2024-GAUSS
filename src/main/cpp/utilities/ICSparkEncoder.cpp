@@ -31,6 +31,14 @@ double ICSparkEncoder::GetVelocity() {
   }
 }
 
+double ICSparkEncoder::GetPositionConversionFactor() {
+  return _inbuilt.GetPositionConversionFactor();
+}
+
+double ICSparkEncoder::GetVelocityConversionFactor() {
+  return _inbuilt.GetVelocityConversionFactor();
+}
+
 void ICSparkEncoder::SetPosition(double pos) {
   if(_alternate){
     _alternate->SetPosition(pos);

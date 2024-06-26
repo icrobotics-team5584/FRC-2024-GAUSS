@@ -4,16 +4,24 @@
 
 #include "subsystems/SubFeeder.h"
 #include <frc2/command/commands.h>
+#include <frc/smartdashboard/SmartDashboard.h>
 
-SubFeeder::SubFeeder() = default;
+SubFeeder::SubFeeder() {
+    frc::SmartDashboard::PutData("Feeder/Motor", (wpi::Sendable*)&_feederMotor);
+}
 
 frc2::CommandPtr SubFeeder::FeedToIntake() {
-    return StartEnd([this] {_feederMotor.Set(1);},
-                    [this] {_feederMotor.Set(1);});
+return Run([this]{ _feederMotor.Set(1);}).FinallyDo([this]{_feederMotor.Set(0);});
 }
-// This method will be called once per scheduler run
-void SubFeeder::Periodic() {}
 
-bool SubFeeder::GetFeederState() {
-    return _feederPointSwitch.Get();
+frc2::CommandPtr SubFeeder::FeedToShooter() {
+return Run([this]{ _feederMotor.Set(-1);}).FinallyDo([this]{_feederMotor.Set(0);});
+}
+
+// This method will be called once per scheduler run
+void SubFeeder::Periodic() {
+}
+
+bool SubFeeder::CheckHasNote(){
+    return false;
 }

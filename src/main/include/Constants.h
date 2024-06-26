@@ -26,19 +26,19 @@ namespace canid{
 
     constexpr int ClimberMain = 17;
     constexpr int ClimberSecond = 18;
+    constexpr int ShooterPivotMotor  = 13;
+    constexpr int ShooterFlywheelMotorLeft  = 14;
+    constexpr int ShooterFlywheelMotorRight  = 15;
 
+    constexpr int IntakeMotor  = 16;
+
+    constexpr int FeederMotor = 19;
     
+    constexpr int ClimberMain = 17;
+    constexpr int ClimberSecond = 18;
+
 }
 
 namespace dio{
-    constexpr int IntakeLineBreak = 0;
-
-    constexpr int ShooterLineBreak = 1;
-
-    constexpr int ShooterLeftEncoderA = 2;
-    constexpr int ShooterLeftEncoderB = 3;
-    constexpr int ShooterRightEncoderA = 4;
-    constexpr int ShooterRightEncoderB = 5;
-
-
+constexpr int ShooterLineBreak = 1;
 }
