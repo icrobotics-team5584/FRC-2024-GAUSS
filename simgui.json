@@ -10,6 +10,9 @@
         "header": {
           "open": true
         }
+      },
+      "window": {
+        "visible": false
       }
     }
   },
@@ -45,27 +48,24 @@
             "open": true
           }
         },
-        "Intake": {
-          "open": true
-        },
         "Pivot": {
           "Motor": {
             "open": true
-          },
-          "open": true
-        },
-        "Target": {
-          "open": true
+          }
         },
         "open": true
+      },
+      "photonvision": {
+        "arducam": {
+          "open": true
+        }
       }
     }
   },
   "NetworkTables Info": {
     "Clients": {
       "open": true
-    },
-    "visible": true
+    }
   },
   "Plot": {
     "Plot <0>": {
@@ -156,7 +156,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 425,
+          "height": 0,
           "series": [
             {
               "color": [
@@ -199,6 +199,22 @@
           ],
           "yaxis2": true,
           "yaxis3": true
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    },
+    "Plot <4>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 332
         }
       ]
     }
