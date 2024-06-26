@@ -46,8 +46,7 @@ frc2::CommandPtr CmdShootAmp(){
         SubShooter::GetInstance().CmdSetShooterAmp(),
         CmdFeedOnceOnTarget()
     )
-    //.Until([] {return !SubFeeder::GetInstance().GetFeederState();})
-    .Until([] {return false;})
+    .Until([] {return !SubFeeder::GetInstance().CheckHasNote();})
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
 }
 
@@ -57,8 +56,7 @@ frc2::CommandPtr CmdShootPassing(){
         SubShooter::GetInstance().CmdSetShooterPassing(),
         CmdFeedOnceOnTarget()
     )
-    //.Until([] {return !SubFeeder::GetInstance().GetFeederState();})
-    .Until([] {return false;})
+    .Until([] {return !SubFeeder::GetInstance().CheckHasNote();})
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
 }
 

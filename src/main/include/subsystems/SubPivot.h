@@ -49,10 +49,10 @@ private:
   static constexpr auto PIVOT_A = 0_V/1_tr_per_s_sq;
   
   static constexpr double PIVOT_GEAR_RATIO = 252;
-  static constexpr units::meter_t SHOOTER_LENGTH = 0.523_m;
-  static constexpr units::kilogram_t SHOOTER_MASS = 6.9_kg;
+  static constexpr units::meter_t SHOOTER_LENGTH = 0.47200_m;
+  static constexpr units::kilogram_t SHOOTER_MASS = 8_kg;
   static constexpr units::degree_t SHOOTER_MIN_ANGLE = 0_deg;
-  static constexpr units::degree_t SHOOTER_MAX_ANGLE = 100_deg;
+  static constexpr units::degree_t SHOOTER_MAX_ANGLE = 100_deg; //Needs to be double checked with amp
 
   frc::ArmFeedforward _pivotFF{PIVOT_S, PIVOT_G, PIVOT_V, PIVOT_A};
 
