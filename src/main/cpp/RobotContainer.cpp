@@ -5,6 +5,7 @@
 #include "RobotContainer.h"
 #include "subsystems/SubIntake.h"
 #include <frc2/command/Commands.h>
+#include "subsystems/SubClimber.h"
 #include "subsystems/SubShooter.h"
 #include "subsystems/SubPivot.h"
 #include "commands/ShooterCommands.h"
@@ -17,11 +18,17 @@ RobotContainer::RobotContainer(){
   SubDrivebase::GetInstance().SetDefaultCommand(
       SubDrivebase::GetInstance().JoystickDrive(_driverController, false));
 
+  SubClimber::GetInstance();
+  
   ConfigureBindings();
   SubVision::GetInstance();
 }
 
 void RobotContainer::ConfigureBindings() {
+  //Climber
+
+  // _driverController.A().OnTrue(SubClimber::GetInstance().ClimberPosition(1.5_m));
+  // _driverController.B().OnTrue(SubClimber::GetInstance().ClimberPosition(0_m));
   //Driver
 
   //Triggers
