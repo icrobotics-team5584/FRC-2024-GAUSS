@@ -10,27 +10,33 @@
         "header": {
           "open": true
         }
+      },
+      "window": {
+        "visible": false
       }
     }
   },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Climber/Mech Display": "Mechanism2d",
       "/SmartDashboard/Drivebase/Vision/Rotation Controller: ": "ProfiledPIDController",
       "/SmartDashboard/arducam Sim Field": "Field2d",
       "/SmartDashboard/field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/Climber/Mech Display": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/field": {
         "bottom": 1476,
         "height": 8.210550308227539,
         "left": 150,
         "right": 2961,
         "top": 79,
-        "width": 16.541748046875,
-        "window": {
-          "visible": true
-        }
+        "width": 16.541748046875
       }
     }
   },
@@ -42,27 +48,24 @@
             "open": true
           }
         },
-        "Intake": {
-          "open": true
-        },
         "Pivot": {
           "Motor": {
             "open": true
-          },
-          "open": true
-        },
-        "Target": {
-          "open": true
+          }
         },
         "open": true
+      },
+      "photonvision": {
+        "arducam": {
+          "open": true
+        }
       }
     }
   },
   "NetworkTables Info": {
     "Clients": {
       "open": true
-    },
-    "visible": true
+    }
   },
   "Plot": {
     "Plot <0>": {
@@ -153,7 +156,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 425,
+          "height": 0,
           "series": [
             {
               "color": [
@@ -196,6 +199,22 @@
           ],
           "yaxis2": true,
           "yaxis3": true
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    },
+    "Plot <4>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 332
         }
       ]
     }

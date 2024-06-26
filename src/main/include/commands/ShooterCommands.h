@@ -7,6 +7,7 @@
 #include <frc2/command/Command.h>
 #include <frc2/command/CommandHelper.h>
 #include <frc2/command/commands.h>
+#include <frc2/command/button/CommandXboxController.h>
 
 /**
  * An example command.
@@ -18,9 +19,10 @@
 namespace cmd {
   frc2::CommandPtr CmdIntake();
   frc2::CommandPtr CmdOuttake();
-  frc2::CommandPtr CmdShootSpeaker();
+  frc2::CommandPtr CmdShootSpeaker(frc2::CommandXboxController& controller);
   frc2::CommandPtr CmdShootAmp();
   frc2::CommandPtr CmdShootPassing();
   frc2::CommandPtr CmdShootNeutral();
   frc2::CommandPtr CmdFeedOnceOnTarget();
+  frc2::CommandPtr CmdAimAtSpeakerWithVision(frc2::CommandXboxController& controller);
 }
