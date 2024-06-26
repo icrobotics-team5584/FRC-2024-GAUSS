@@ -6,7 +6,6 @@
 #include <frc2/command/commands.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 
-frc::DigitalInput _shooterLineBreak{dio::ShooterLineBreak};
 
 
 SubFeeder::SubFeeder() {
@@ -26,7 +25,7 @@ void SubFeeder::Periodic() {
 }
 
 bool SubFeeder::CheckHasNote(){
-    if(_shooterLineBreak.Get()){
+    if(_feederPointSwitch.Get()){
     return true;
   }
 
