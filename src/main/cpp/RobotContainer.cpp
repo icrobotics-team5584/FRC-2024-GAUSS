@@ -27,8 +27,9 @@ RobotContainer::RobotContainer(){
 void RobotContainer::ConfigureBindings() {
   //Climber
 
-  // _driverController.A().OnTrue(SubClimber::GetInstance().ClimberPosition(1.5_m));
-  // _driverController.B().OnTrue(SubClimber::GetInstance().ClimberPosition(0_m));
+  // Test commands for sim
+  _driverController.A().OnTrue(SubClimber::GetInstance().ClimberPosition(1.5_m));
+  _driverController.B().OnTrue(SubClimber::GetInstance().ClimberPosition(0_m));
   //Driver
 
   //Triggers
