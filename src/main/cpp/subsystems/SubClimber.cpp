@@ -57,9 +57,9 @@ void SubClimber::SimulationPeriodic() {
     rElvSim.Update(20_ms);
     _rClimbMotor.UpdateSimEncoder(DistanceToTurn(rElvSim.GetPosition()), DistanceToTurn(rElvSim.GetVelocity()));
 
-    mechLeftElevator->SetLength(TurnToDistance(_lClimbMotor.GetPosition()).value());
-    mechRightElevator->SetLength(TurnToDistance(_rClimbMotor.GetPosition()).value());
-    mechTar->SetLength(TargetDistance.value());
+    mechLeftElevator->SetLength(TurnToDistance(_lClimbMotor.GetPosition()).value() * 4);
+    mechRightElevator->SetLength(TurnToDistance(_rClimbMotor.GetPosition()).value() * 4);
+    mechTar->SetLength(TargetDistance.value() * 4);
 }
 
 //Unit translation from meters to climber motor rotations(turns)
