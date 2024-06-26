@@ -35,6 +35,7 @@ class SubVision : public frc2::SubsystemBase {
   void SimulationPeriodic() override;
 
   units::degree_t GetTagPitch();
+  std::optional<units::degree_t> GetSpeakerPitch();
 
 
 private:
