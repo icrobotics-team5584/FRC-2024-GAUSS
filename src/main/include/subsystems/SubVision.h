@@ -41,7 +41,7 @@ class SubVision : public frc2::SubsystemBase {
 private:
   std::string CAM_NAME1 = "arducam";
 
-  frc::Transform3d _camToBot{{150_mm, 364.315_mm, 149.24_mm}, {}}; // arducam
+  frc::Transform3d _camToBot{{150_mm, 364.315_mm, 149.24_mm}, {0, 18.125, 0}}; // arducam
 
   frc::AprilTagFieldLayout _tagLayout = frc::AprilTagFieldLayout::LoadField(frc::AprilTagField::k2024Crescendo);
 
