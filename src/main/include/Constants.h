@@ -2,30 +2,41 @@
 
 
 namespace canid{
-    constexpr int ShooterPivotMotor  = 9;
-    constexpr int ShooterFlywheelMotorLeft  = 10;
-    constexpr int ShooterFlywheelMotorRight  = 11;
-    constexpr int IntakeMotor  = 12;
+ constexpr int ShooterPivotMotor  = 13;
+    constexpr int ShooterFlywheelMotorLeft  = 14;
+    constexpr int ShooterFlywheelMotorRight  = 15;
+    constexpr int IntakeMotor  = 16;
     constexpr int FeederMotor = 17;
 
     constexpr int DriveBaseFrontRightDrive = 1; //done
     constexpr int DriveBaseFrontRightTurn = 2;
-    constexpr int DriveBaseFrontRightEncoder = 15; //done
+    constexpr int DriveBaseFrontRightEncoder = 3; //done
 
-    constexpr int DriveBaseFrontLeftDrive = 3;
-    constexpr int DriveBaseFrontLeftTurn = 4; //6
-    constexpr int DriveBaseFrontLeftEncoder = 16;
+    constexpr int DriveBaseFrontLeftDrive = 4;
+    constexpr int DriveBaseFrontLeftTurn = 5; //6
+    constexpr int DriveBaseFrontLeftEncoder = 6;
         
-    constexpr int DriveBaseBackRightDrive = 5; //done
-    constexpr int DriveBaseBackRightTurn = 6;
-    constexpr int DriveBaseBackRightEncoder = 17; //done
+    constexpr int DriveBaseBackRightDrive = 7; //done
+    constexpr int DriveBaseBackRightTurn = 8;
+    constexpr int DriveBaseBackRightEncoder = 9; //done
 
-    constexpr int DriveBaseBackLeftDrive = 7; //done
-    constexpr int DriveBaseBackLeftTurn = 8;
-    constexpr int DriveBaseBackLeftEncoder = 18; //done
+    constexpr int DriveBaseBackLeftDrive = 10; //done
+    constexpr int DriveBaseBackLeftTurn = 11;
+    constexpr int DriveBaseBackLeftEncoder = 12; //done
 
-    constexpr int ClimberMain = 13;
-    constexpr int ClimberSecond = 14;    
+    constexpr int ClimberMain = 17;
+    constexpr int ClimberSecond = 18;
+    constexpr int ShooterPivotMotor  = 13;
+    constexpr int ShooterFlywheelMotorLeft  = 14;
+    constexpr int ShooterFlywheelMotorRight  = 15;
+
+    constexpr int IntakeMotor  = 16;
+
+    constexpr int FeederMotor = 19;
+    
+    constexpr int ClimberMain = 17;
+    constexpr int ClimberSecond = 18;
+
 }
 
 namespace dio{

@@ -6,7 +6,7 @@
 
 #include <frc2/command/Command.h>
 #include <frc2/command/CommandHelper.h>
-#include <frc2/command/Commands.h>
+#include <frc2/command/commands.h>
 
 /**
  * An example command.
@@ -16,5 +16,11 @@
  * Command will *not* work!
  */
 namespace cmd {
-  
+  frc2::CommandPtr CmdIntake();
+  frc2::CommandPtr CmdOuttake();
+  frc2::CommandPtr CmdShootSpeaker();
+  frc2::CommandPtr CmdShootAmp();
+  frc2::CommandPtr CmdShootPassing();
+  frc2::CommandPtr CmdShootNeutral();
+  frc2::CommandPtr CmdFeedOnceOnTarget();
 }

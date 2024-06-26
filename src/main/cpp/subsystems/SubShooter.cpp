@@ -22,32 +22,52 @@ SubShooter::SubShooter(){
 
 // This method will be called once per scheduler run
 void SubShooter::Periodic() {
-frc::SmartDashboard::PutNumber("ShooterSpeed", _ShooterFlywheelMotorLeft.GetVelocity().GetValue().value());
+frc::SmartDashboard::PutNumber("Shooter/SpeedLeft", _ShooterFlywheelMotorLeft.GetVelocity().GetValue().value());
+frc::SmartDashboard::PutNumber("Shooter/SpeedRight", _ShooterFlywheelMotorRight.GetVelocity().GetValue().value());
+frc::SmartDashboard::PutBoolean("Target/FlywheelOnTarget", IsOnTarget());
 }
 
 frc2::CommandPtr SubShooter::CmdSetShooterSpeaker(){
     return RunOnce([this]{
-        _ShooterFlywheelMotorLeft.SetControl(_flywheelVelocity.WithVelocity(SpeakerSpeed));
-        _ShooterFlywheelMotorRight.SetControl(_flywheelVelocity.WithVelocity(SpeakerSpeed));
+        _ShooterFlywheelMotorLeft.SetControl(_flywheelTargetVelocity.WithVelocity(SpeakerSpeed));
+        _ShooterFlywheelMotorRight.SetControl(_flywheelTargetVelocity.WithVelocity(SpeakerSpeed));
         });
 }
 frc2::CommandPtr SubShooter::CmdSetShooterAmp(){
     return RunOnce([this]{
-        _ShooterFlywheelMotorLeft.SetControl(_flywheelVelocity.WithVelocity(AmpSpeed));
-        _ShooterFlywheelMotorRight.SetControl(_flywheelVelocity.WithVelocity(AmpSpeed));
+        _ShooterFlywheelMotorLeft.SetControl(_flywheelTargetVelocity.WithVelocity(AmpSpeed));
+        _ShooterFlywheelMotorRight.SetControl(_flywheelTargetVelocity.WithVelocity(AmpSpeed));
         });
 }
 frc2::CommandPtr SubShooter::CmdSetShooterPassing(){
     return RunOnce([this]{
-        _ShooterFlywheelMotorLeft.SetControl(_flywheelVelocity.WithVelocity(PassingSpeed));
-        _ShooterFlywheelMotorRight.SetControl(_flywheelVelocity.WithVelocity(PassingSpeed));
+        _ShooterFlywheelMotorLeft.SetControl(_flywheelTargetVelocity.WithVelocity(PassingSpeed));
+        _ShooterFlywheelMotorRight.SetControl(_flywheelTargetVelocity.WithVelocity(PassingSpeed));
         });
 }
 frc2::CommandPtr SubShooter::CmdSetShooterOff(){
     return RunOnce([this]{
-        _ShooterFlywheelMotorLeft.SetControl(_flywheelVelocity.WithVelocity(ShooterOff));
-        _ShooterFlywheelMotorRight.SetControl(_flywheelVelocity.WithVelocity(ShooterOff));
+        _ShooterFlywheelMotorLeft.SetControl(_flywheelTargetVelocity.WithVelocity(ShooterOff));
+        _ShooterFlywheelMotorRight.SetControl(_flywheelTargetVelocity.WithVelocity(ShooterOff));
         });
+}
+
+bool SubShooter::IsOnTarget() {
+    auto tolerance = 10_rpm;
+    auto target = _flywheelTargetVelocity.Velocity;
+    auto leftVelocity = _ShooterFlywheelMotorLeft.GetVelocity().GetValue();
+    auto rightVelocity = _ShooterFlywheelMotorRight.GetVelocity().GetValue();
+    if (
+        units::math::abs(target - leftVelocity) < tolerance
+        && units::math::abs(target - rightVelocity) < tolerance
+        )
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void SubShooter::SimulationPeriodic() {
@@ -56,4 +76,10 @@ void SubShooter::SimulationPeriodic() {
     _leftSim.Update(20_ms);
     leftState.SetRawRotorPosition(_leftSim.GetAngularPosition());
     leftState.SetRotorVelocity(_leftSim.GetAngularVelocity());
+
+    auto& rightState = _ShooterFlywheelMotorRight.GetSimState();
+    _rightSim.SetInputVoltage(rightState.GetMotorVoltage());
+    _rightSim.Update(20_ms);
+    rightState.SetRawRotorPosition(_rightSim.GetAngularPosition());
+    rightState.SetRotorVelocity(_rightSim.GetAngularVelocity());
 }

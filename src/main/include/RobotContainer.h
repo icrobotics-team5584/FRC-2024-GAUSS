@@ -7,10 +7,8 @@
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/button/CommandXboxController.h>
 #include <frc/XboxController.h>
-#include <frc2/command/button/CommandXboxController.h>
 #include <frc2/command/button/JoystickButton.h>
 #include "subsystems/SubDriveBase.h"
-#include <frc2/command/button/CommandXboxController.h>
 
 class RobotContainer {
  public:

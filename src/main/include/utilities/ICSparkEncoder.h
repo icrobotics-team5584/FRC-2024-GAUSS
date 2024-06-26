@@ -10,6 +10,8 @@ class ICSparkEncoder {
   double GetPosition();
   double GetVelocity();
   void SetPosition(double pos);
+  double GetPositionConversionFactor();
+  double GetVelocityConversionFactor();
   void SetConversionFactor(double rotationsToDesired);
   void UseAlternate(rev::SparkMaxAlternateEncoder&& encoder);
   void UseAbsolute(rev::SparkAbsoluteEncoder&& encoder);
