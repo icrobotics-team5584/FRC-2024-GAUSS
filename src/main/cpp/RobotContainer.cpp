@@ -50,6 +50,7 @@ void RobotContainer::ConfigureBindings() {
   //POV
   POVHelper::Left(&_operatorController).OnTrue(SubShooter::GetInstance().CmdSetShooterOff());
   POVHelper::Right(&_operatorController).WhileTrue(cmd::CmdOuttake());
+  POVHelper::Down(&_operatorController).WhileTrue(SubClimber::GetInstance().ClimberAutoReset());
 
   //Robot triggers
   frc2::Trigger{[]{return SubFeeder::GetInstance().CheckHasNote();}}.OnTrue(Rumble(1, 0.3_s));  
