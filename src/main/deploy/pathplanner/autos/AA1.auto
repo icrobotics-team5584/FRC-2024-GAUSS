@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.6569604277610779,
-      "y": 6.759908199310303
+      "x": 1.3595974445343018,
+      "y": 5.610667705535889
     },
-    "rotation": 61.029233875909
+    "rotation": 4.71479023555271e-28
   },
   "command": {
     "type": "sequential",
@@ -34,6 +34,12 @@
                     {
                       "type": "named",
                       "data": {
+                        "name": "SetSubwooferAngle"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
                         "name": "Shoot"
                       }
                     },
@@ -46,19 +52,13 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Shoot"
+                        "name": "FullSequenceShoot"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
                         "pathName": "AA1.2"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Shoot"
                       }
                     },
                     {
@@ -70,7 +70,25 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "Shoot"
+                        "name": "FullSequenceShoot"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "AA1.4"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "AA1.5"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "FullSequenceShoot"
                       }
                     }
                   ]

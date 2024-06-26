@@ -19,9 +19,12 @@ RobotContainer::RobotContainer(){
 
   pathplanner::NamedCommands::registerCommand("Intake", SubIntake::GetInstance().Intake());
   pathplanner::NamedCommands::registerCommand("FeedToShooter", SubIntake::GetInstance().FeedToShooter());
+  pathplanner::NamedCommands::registerCommand("FullSequenceShoot", ShooterCommands::GetInstance.CmdShootSpeaker().());
+  pathplanner::NamedCommands::registerCommand("Shoot", ShooterCommands::GetInstance.CmdShootNeutral().());
+  pathplanner::NamedCommands::registerCommand("SetSubwooferAngle", SubShooter::GetInstance.CmdSetShooterSpeaker().());
 
-  std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("NewPath.traj");
-  std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("NewPath2.traj");
+
+  std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("AA1.1");
 
   SubDrivebase::GetInstance().SetDefaultCommand(
       SubDrivebase::GetInstance().JoystickDrive(_driverController, false));
@@ -29,8 +32,8 @@ RobotContainer::RobotContainer(){
   ConfigureBindings();
   SubVision::GetInstance();
 
-  _autoChooser.AddOption("Pathplanner_auto_test", "Pathplanner_auto_test");
-  _autoChooser.AddOption("New Auto", "New Auto");
+  _autoChooser.AddOption("AA1", "4NoteAuto");
+
   frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
 }
 
