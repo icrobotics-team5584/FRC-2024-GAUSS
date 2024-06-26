@@ -17,6 +17,9 @@
 
 RobotContainer::RobotContainer(){
 
+  pathplanner::NamedCommands::registerCommand("Intake", SubIntake::GetInstance().Intake());
+  pathplanner::NamedCommands::registerCommand("FeedToShooter", SubIntake::GetInstance().FeedToShooter());
+
   std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("NewPath.traj");
   std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("NewPath2.traj");
 
