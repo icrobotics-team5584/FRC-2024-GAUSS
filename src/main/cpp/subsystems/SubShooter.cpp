@@ -16,8 +16,9 @@ SubShooter::SubShooter(){
     flywheelConfig.Voltage.PeakForwardVoltage = 12;
     flywheelConfig.Voltage.PeakReverseVoltage = 0;
 
-    _ShooterFlywheelMotorLeft.GetConfigurator().Apply(flywheelConfig);
     _ShooterFlywheelMotorRight.GetConfigurator().Apply(flywheelConfig);
+    flywheelConfig.MotorOutput.Inverted = ctre::phoenix6::signals::InvertedValue::Clockwise_Positive;
+    _ShooterFlywheelMotorLeft.GetConfigurator().Apply(flywheelConfig);
 }
 
 // This method will be called once per scheduler run
