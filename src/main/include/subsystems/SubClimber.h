@@ -81,7 +81,7 @@ class SubClimber : public frc2::SubsystemBase {
   ICSparkMax _rClimbMotor{canid::ClimberSecond, 60_A};
 
   // Motor Setup
-  static constexpr double gearRatio = 26.44444444;
+  static constexpr double gearRatio = 45;
   static constexpr double lP = 5, lI = 0.0, lD = 0.0, lF = 0,
   
                           rP = 5, rI = 0.0, rD = 0.0, rF = 0;
