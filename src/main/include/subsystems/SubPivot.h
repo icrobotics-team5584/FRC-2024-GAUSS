@@ -36,14 +36,14 @@ private:
   // Components (e.g. motor controllers and sensors) should generally be
   // declared private and exposed only through public methods.
 
-  ICSparkMax _pivotMotor{canid::ShooterPivotMotor, 5_A};
+  ICSparkMax _pivotMotor{canid::ShooterPivotMotor, 20_A};
   ctre::phoenix6::hardware::CANcoder _shooterPivotEncoder{canid::ShooterPivotEncoder};
 
-  static constexpr double _pivotP = 0;
+  static constexpr double _pivotP = 21;
   static constexpr double _pivotI = 0;
   static constexpr double _pivotD = 0;
 
-  static constexpr auto PIVOT_G = 0.47_V;
+  static constexpr auto PIVOT_G = 4_V;
   static constexpr auto PIVOT_S = 0_V;
   static constexpr auto PIVOT_V = 0_V/1_tps;
   static constexpr auto PIVOT_A = 0_V/1_tr_per_s_sq;

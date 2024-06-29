@@ -33,13 +33,14 @@ void RobotContainer::ConfigureBindings() {
   //Bumpers
   
   //Letters
-  
+  _driverController.Y().OnTrue(SubDrivebase::GetInstance().ResetGyroCmd());
   //POV
 
   //Operator
 
   //Triggers
   _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker(_driverController));
+  
   
   //Bumpers
   _operatorController.RightBumper().WhileTrue(cmd::CmdShootPassing());

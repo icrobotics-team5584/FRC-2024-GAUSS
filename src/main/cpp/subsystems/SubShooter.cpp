@@ -17,7 +17,7 @@ SubShooter::SubShooter(){
     flywheelConfig.Voltage.PeakReverseVoltage = 0;
 
     _ShooterFlywheelMotorRight.GetConfigurator().Apply(flywheelConfig);
-    flywheelConfig.MotorOutput.Inverted = ctre::phoenix6::signals::InvertedValue::Clockwise_Positive;
+    flywheelConfig.MotorOutput.Inverted = ctre::phoenix6::signals::InvertedValue::CounterClockwise_Positive;
     _ShooterFlywheelMotorLeft.GetConfigurator().Apply(flywheelConfig);
 }
 
