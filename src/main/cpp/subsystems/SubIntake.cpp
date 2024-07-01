@@ -10,7 +10,9 @@
  
 using namespace frc2::cmd;
 
-SubIntake::SubIntake() {}
+SubIntake::SubIntake() {
+  _intakeMotor.SetInverted(false);
+}
 
 frc2::CommandPtr SubIntake::Outtake() {
   return Run([this]{ _intakeMotor.Set(-1);}).FinallyDo([this]{_intakeMotor.Set(0);});

@@ -5,21 +5,29 @@
 #include "subsystems/SubPivot.h"
 #include <frc2/command/commands.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <units/angle.h>
 
 
 SubPivot::SubPivot(){
+    ctre::phoenix6::configs::CANcoderConfiguration pivotConfig{};
+    pivotConfig.MagnetSensor.MagnetOffset = 0.5164954444444444;
+
+    _shooterPivotEncoder.GetConfigurator().Apply(pivotConfig);
+
     _pivotMotor.SetPIDFF(_pivotP, _pivotI, _pivotD);
     _pivotMotor.SetConversionFactor(1/PIVOT_GEAR_RATIO);
+    _pivotMotor.SetPosition(_shooterPivotEncoder.GetPosition().GetValue());
+    _pivotMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
 
     frc::SmartDashboard::PutData("Pivot/Motor", (wpi::Sendable*)&_pivotMotor);
 
     //Setup shooter pitch table
-    _pitchTable.insert(-20_deg, 90_deg);
-    _pitchTable.insert(-15_deg, 84_deg);
-    _pitchTable.insert(-9_deg, 70_deg);
-    _pitchTable.insert(0_deg, 58_deg);
-    _pitchTable.insert(9_deg, 49_deg);
-    _pitchTable.insert(17_deg, 45_deg);
+    _pitchTable.insert(-20_deg, 65_deg);
+    _pitchTable.insert(-15_deg, 55_deg);
+    _pitchTable.insert(-9_deg, 40_deg);
+    _pitchTable.insert(0_deg, 28_deg);
+    _pitchTable.insert(9_deg, 20_deg);
+    _pitchTable.insert(17_deg, 15_deg);
 }
 
 
