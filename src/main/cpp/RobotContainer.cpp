@@ -14,14 +14,14 @@
 #include "subsystems/SubVision.h"
 #include <pathplanner/lib/commands/PathPlannerAuto.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <pathplanner/lib/auto/NamedCommands.h>
 
 RobotContainer::RobotContainer(){
 
   pathplanner::NamedCommands::registerCommand("Intake", SubIntake::GetInstance().Intake());
-  pathplanner::NamedCommands::registerCommand("FeedToShooter", SubIntake::GetInstance().FeedToShooter());
-  pathplanner::NamedCommands::registerCommand("FullSequenceShoot", ShooterCommands::GetInstance.CmdShootSpeaker().());
-  pathplanner::NamedCommands::registerCommand("Shoot", ShooterCommands::GetInstance.CmdShootNeutral().());
-  pathplanner::NamedCommands::registerCommand("SetSubwooferAngle", SubShooter::GetInstance.CmdSetShooterSpeaker().());
+  pathplanner::NamedCommands::registerCommand("FeedToShooter", SubFeeder::GetInstance().FeedToShooter());
+  pathplanner::NamedCommands::registerCommand("FullSequenceShoot", cmd::CmdShootSpeaker());
+  pathplanner::NamedCommands::registerCommand("SetSubwooferAngle", SubShooter::GetInstance().CmdSetShooterOff());
 
 
   std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("AA1.1");
