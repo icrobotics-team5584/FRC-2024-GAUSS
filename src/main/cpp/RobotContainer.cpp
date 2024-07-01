@@ -40,6 +40,8 @@ void RobotContainer::ConfigureBindings() {
 
   //Triggers
   _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker(_driverController));
+  _operatorController.LeftTrigger().WhileTrue(SubShooter::GetInstance().CmdSetShooterAmp());
+  
   
   
   //Bumpers

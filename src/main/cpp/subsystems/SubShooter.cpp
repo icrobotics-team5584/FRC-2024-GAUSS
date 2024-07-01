@@ -5,6 +5,7 @@
 #include "subsystems/SubShooter.h"
 #include "frc/smartdashboard/SmartDashboard.h"
 
+
 using namespace frc2::cmd;
 
 SubShooter::SubShooter(){
@@ -26,6 +27,8 @@ void SubShooter::Periodic() {
 frc::SmartDashboard::PutNumber("Shooter/SpeedLeft", _ShooterFlywheelMotorLeft.GetVelocity().GetValue().value());
 frc::SmartDashboard::PutNumber("Shooter/SpeedRight", _ShooterFlywheelMotorRight.GetVelocity().GetValue().value());
 frc::SmartDashboard::PutBoolean("Target/FlywheelOnTarget", IsOnTarget());
+frc::SmartDashboard::PutNumber("Shooter/LeftCurrent", _ShooterFlywheelMotorLeft.GetStatorCurrent().GetValue().value());
+frc::SmartDashboard::PutNumber("Shooter/RightCurrent", _ShooterFlywheelMotorRight.GetStatorCurrent().GetValue().value());
 }
 
 frc2::CommandPtr SubShooter::CmdSetShooterSpeaker(){
@@ -54,7 +57,7 @@ frc2::CommandPtr SubShooter::CmdSetShooterOff(){
 }
 
 bool SubShooter::IsOnTarget() {
-    auto tolerance = 10_rpm;
+    auto tolerance = 1_tps;
     auto target = _flywheelTargetVelocity.Velocity;
     auto leftVelocity = _ShooterFlywheelMotorLeft.GetVelocity().GetValue();
     auto rightVelocity = _ShooterFlywheelMotorRight.GetVelocity().GetValue();

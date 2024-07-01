@@ -23,6 +23,7 @@ void SubVision::Periodic() {
   double _pitchtotarget = {result.GetBestTarget().GetPitch()};
   frc::SmartDashboard::PutNumber("Vision/April Pitch", _pitchtotarget);
   frc::SmartDashboard::PutNumber("Vision/Speaker Pitch", GetSpeakerPitch().value_or(-1000_deg).value());
+  frc::SmartDashboard::PutNumber("Target/YawOnTarget", IsFacingTarget());
   }
 
 void SubVision::SimulationPeriodic() {
@@ -76,6 +77,20 @@ std::optional<units::degree_t> SubVision::GetSpeakerPitch(){
   } else {
     return {};
   }
+}
+
+std::optional<units::degree_t> SubVision::GetLatestSpeakerPitch(){
+  static frc::Timer timer;
+  static std::optional<units::degree_t> latestPitch = std::nullopt;
+  auto optionalSpeakerPitch = GetSpeakerPitch();
+  if (optionalSpeakerPitch.has_value()) {
+      latestPitch = optionalSpeakerPitch.value();
+      timer.Restart();
+  }
+  if (timer.Get() >= 10_s) {
+      latestPitch = std::nullopt;
+  }
+  return latestPitch;
 }
 
 bool SubVision::IsFacingTarget(){

@@ -47,10 +47,10 @@ class SubShooter : public frc2::SubsystemBase {
   units::turns_per_second_t PassingSpeed = 55_tps;
   units::turns_per_second_t AmpSpeed = 15_tps;
 
-  static constexpr double _flywheelP = 2;
+  static constexpr double _flywheelP = 0.1;
   static constexpr double _flywheelI = 0;
   static constexpr double _flywheelD = 0;
-  static constexpr double _flywheelV = 0.112;
+  static constexpr double _flywheelV = 0.115;
 
   //Simulation stuff
   frc::sim::DCMotorSim _leftSim{frc::DCMotor::Falcon500(), 1, 0.005_kg_sq_m};

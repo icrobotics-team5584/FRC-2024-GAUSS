@@ -34,7 +34,7 @@ frc2::CommandPtr CmdOuttake(){
 frc2::CommandPtr CmdShootSpeaker(frc2::CommandXboxController& controller){
     return Parallel(
         SubPivot::GetInstance().CmdPivotFromVision([]{    /*default value = 60 degrees(Subwoofer shot)*/
-            return SubVision::GetInstance().GetSpeakerPitch().value_or(60_deg);}),
+            return SubVision::GetInstance().GetLatestSpeakerPitch().value_or(60_deg);}),
         SubShooter::GetInstance().CmdSetShooterSpeaker(),
         CmdAimAtSpeakerWithVision(controller),
         CmdFeedOnceOnTarget()
