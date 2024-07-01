@@ -82,7 +82,7 @@ frc2::CommandPtr CmdAimAtSpeakerWithVision(frc2::CommandXboxController& controll
 
         units::degree_t currentGyroYaw = SubDrivebase::GetInstance().GetHeading().Degrees();
         units::degree_t gyroAngleTravelled = currentGyroYaw - startingGyroYaw;
-        units::degree_t errorAngle = camYaw - gyroAngleTravelled;
+        units::degree_t errorAngle = -camYaw - gyroAngleTravelled;
         frc::SmartDashboard::PutNumber("Vision/Result", result.value_or(0_deg).value());
         frc::SmartDashboard::PutNumber("Vision/currentGyroYaw ", currentGyroYaw.value());
         frc::SmartDashboard::PutNumber("Vision/startingGyroYaw ", startingGyroYaw.value());

@@ -59,6 +59,6 @@ void SubPivot::SimulationPeriodic(){
 }
 
 bool SubPivot::IsOnTarget() {
-    auto tolerance = 1_deg;
+    auto tolerance = 5_deg;
     return units::math::abs( _pivotMotor.GetPosError()) < tolerance;
 }
