@@ -32,14 +32,23 @@ frc2::CommandPtr CmdOuttake(){
 }
 
 frc2::CommandPtr CmdShootSpeaker(frc2::CommandXboxController& controller){
-    return Parallel(
-        SubPivot::GetInstance().CmdPivotFromVision([]{    /*default value = 60 degrees(Subwoofer shot)*/
-            return SubVision::GetInstance().GetSpeakerPitch().value_or(60_deg);}),
-        SubShooter::GetInstance().CmdSetShooterSpeaker(),
-        CmdAimAtSpeakerWithVision(controller),
-        CmdFeedOnceOnTarget()
-    )
-    .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
+    if (frc::RobotBase::IsSimulation() == false) {
+        return Parallel(
+            SubPivot::GetInstance().CmdPivotFromVision([]{    /*default value = 60 degrees(Subwoofer shot)*/
+                return SubVision::GetInstance().GetSpeakerPitch().value_or(60_deg);}),
+            SubShooter::GetInstance().CmdSetShooterSpeaker(),
+            CmdAimAtSpeakerWithVision(controller),
+            CmdFeedOnceOnTarget()
+        )
+        .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
+    }
+    else {
+        return Sequence(
+            SubShooter::GetInstance().CmdSetShooterSpeaker(),
+            Wait(0.5_s),
+            SubShooter::GetInstance().CmdSetShooterOff()
+        );
+    }
 }
 
 frc2::CommandPtr CmdShootAmp(){
