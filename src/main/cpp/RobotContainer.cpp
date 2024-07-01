@@ -38,6 +38,7 @@ RobotContainer::RobotContainer(){
 
   _autoChooser.AddOption("AA1", "AA1");
   _autoChooser.AddOption("Example Path", "Example Path");
+  _autoChooser.AddOption("WhateverItIs", "WhateverItIs");
 
   frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
 }
