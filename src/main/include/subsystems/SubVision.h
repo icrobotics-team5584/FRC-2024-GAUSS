@@ -34,14 +34,16 @@ class SubVision : public frc2::SubsystemBase {
   void Periodic() override;
   void SimulationPeriodic() override;
 
-  units::degree_t GetTagPitch();
+  std::optional<photon::PhotonTrackedTarget> GetSpeakerTarget();
+  std::optional<units::degree_t> GetSpeakerYaw();
   std::optional<units::degree_t> GetSpeakerPitch();
-
+  
+  bool IsFacingTarget();
 
 private:
   std::string CAM_NAME1 = "arducam";
 
-  frc::Transform3d _camToBot{{0_mm, -200_mm, -150_mm}, {}}; // arducam
+  frc::Transform3d _camToBot{{150_mm, 364.315_mm, 149.24_mm}, {0_deg, 18.125_deg, 0_deg}}; // arducam
 
   frc::AprilTagFieldLayout _tagLayout = frc::AprilTagFieldLayout::LoadField(frc::AprilTagField::k2024Crescendo);
 

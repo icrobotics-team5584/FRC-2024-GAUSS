@@ -10,6 +10,9 @@
         "header": {
           "open": true
         }
+      },
+      "window": {
+        "visible": false
       }
     }
   },
@@ -54,19 +57,21 @@
             "open": true
           }
         },
-        "Intake": {
-          "open": true
-        },
         "Pivot": {
           "Motor": {
             "open": true
           },
           "open": true
         },
-        "Target": {
+        "Shooter": {
           "open": true
         },
         "open": true
+      },
+      "photonvision": {
+        "arducam": {
+          "open": true
+        }
       }
     }
   },
@@ -165,7 +170,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 25,
+          "height": 0,
           "series": [
             {
               "color": [
@@ -208,6 +213,46 @@
           ],
           "yaxis2": true,
           "yaxis3": true
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    },
+    "Plot <4>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 0
+        }
+      ]
+    },
+    "Plot <5>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 332,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Shooter/SpeedLeft"
+            }
+          ]
         }
       ]
     }
