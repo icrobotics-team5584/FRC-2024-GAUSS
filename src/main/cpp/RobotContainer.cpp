@@ -21,6 +21,7 @@ RobotContainer::RobotContainer(){
   pathplanner::NamedCommands::registerCommand("Intake", SubIntake::GetInstance().Intake());
   pathplanner::NamedCommands::registerCommand("FeedToShooter", SubFeeder::GetInstance().FeedToShooter());
   pathplanner::NamedCommands::registerCommand("FullSequenceShoot", cmd::CmdShootSpeaker());
+  pathplanner::NamedCommands::registerCommand("Shoot", cmd::CmdShootNeutral());
   pathplanner::NamedCommands::registerCommand("SetSubwooferAngle", SubShooter::GetInstance().CmdSetShooterOff());
 
 
@@ -32,7 +33,8 @@ RobotContainer::RobotContainer(){
   ConfigureBindings();
   SubVision::GetInstance();
 
-  _autoChooser.AddOption("AA1", "4NoteAuto");
+  _autoChooser.AddOption("AA1", "AA1");
+  _autoChooser.AddOption("Example Path", "Example Path");
 
   frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
 }
