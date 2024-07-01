@@ -29,16 +29,19 @@ void RobotContainer::ConfigureBindings() {
 
   //Triggers
   _driverController.RightTrigger().WhileTrue(cmd::CmdIntake());
+  _driverController.LeftTrigger().WhileTrue(cmd::CmdAimAtSpeakerWithVision(_driverController));
   //Bumpers
   
   //Letters
-  
+  _driverController.Y().OnTrue(SubDrivebase::GetInstance().ResetGyroCmd());
   //POV
 
   //Operator
 
   //Triggers
-  _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker());
+  _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker(_driverController));
+  
+  
   //Bumpers
   _operatorController.RightBumper().WhileTrue(cmd::CmdShootPassing());
   _operatorController.LeftBumper().WhileTrue(cmd::CmdShootNeutral());
@@ -50,6 +53,7 @@ void RobotContainer::ConfigureBindings() {
   //POV
   POVHelper::Left(&_operatorController).OnTrue(SubShooter::GetInstance().CmdSetShooterOff());
   POVHelper::Right(&_operatorController).WhileTrue(cmd::CmdOuttake());
+  POVHelper::Down(&_operatorController).WhileTrue(SubClimber::GetInstance().ClimberAutoReset());
 
   //Robot triggers
   frc2::Trigger{[]{return SubFeeder::GetInstance().CheckHasNote();}}.OnTrue(Rumble(1, 0.3_s));  
