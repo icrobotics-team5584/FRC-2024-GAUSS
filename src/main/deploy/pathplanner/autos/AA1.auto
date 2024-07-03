@@ -5,7 +5,7 @@
       "x": 1.3595974445343018,
       "y": 5.610667705535889
     },
-    "rotation": 4.71479023555271e-28
+    "rotation": 1.4251550643403734e-25
   },
   "command": {
     "type": "sequential",
@@ -62,12 +62,6 @@
                       }
                     },
                     {
-                      "type": "path",
-                      "data": {
-                        "pathName": "AA1.3"
-                      }
-                    },
-                    {
                       "type": "named",
                       "data": {
                         "name": "FullSequenceShoot"
@@ -76,13 +70,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "AA1.4"
-                      }
-                    },
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "AA1.5"
+                        "pathName": "AA1.3"
                       }
                     },
                     {
