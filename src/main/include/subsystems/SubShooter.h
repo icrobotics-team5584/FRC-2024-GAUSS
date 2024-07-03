@@ -45,7 +45,7 @@ class SubShooter : public frc2::SubsystemBase {
   units::turns_per_second_t ShooterOff = 0_tps;
   units::turns_per_second_t SpeakerSpeed = 60_tps;
   units::turns_per_second_t PassingSpeed = 55_tps;
-  units::turns_per_second_t AmpSpeed = 15_tps;
+  units::turns_per_second_t AmpSpeed = 5_tps;
 
   static constexpr double _flywheelP = 0.1;
   static constexpr double _flywheelI = 0;
