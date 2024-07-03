@@ -32,8 +32,8 @@ RobotContainer::RobotContainer(){
   ConfigureBindings();
   SubVision::GetInstance();
 
-  _autoChooser.AddOption("AA1", "4NoteAuto");
-
+  _autoChooser.AddOption("AA1", "3CloseNoteAuto");
+  _autoChooser.AddOption("1Close2Far", "1Close2FarAuto");
   frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
 }
 
