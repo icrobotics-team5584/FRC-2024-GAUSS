@@ -11,6 +11,7 @@
 #include <frc/system/plant/DCMotor.h>
 #include <frc/controller/ArmFeedforward.h>
 #include <wpi/interpolating_map.h>
+#include <ctre/phoenix6/CANcoder.hpp>
 
 class SubPivot : public frc2::SubsystemBase {
 public:
@@ -36,21 +37,22 @@ private:
   // declared private and exposed only through public methods.
 
   ICSparkMax _pivotMotor{canid::ShooterPivotMotor, 20_A};
+  ctre::phoenix6::hardware::CANcoder _shooterPivotEncoder{canid::ShooterPivotEncoder};
 
-  static constexpr double _pivotP = 100;
+  static constexpr double _pivotP = 21;
   static constexpr double _pivotI = 0;
   static constexpr double _pivotD = 0;
 
-  static constexpr auto PIVOT_G = 0.47_V;
+  static constexpr auto PIVOT_G = 4_V;
   static constexpr auto PIVOT_S = 0_V;
   static constexpr auto PIVOT_V = 0_V/1_tps;
   static constexpr auto PIVOT_A = 0_V/1_tr_per_s_sq;
   
-  static constexpr double PIVOT_GEAR_RATIO = 196;
-  static constexpr units::meter_t SHOOTER_LENGTH = 0.523_m;
-  static constexpr units::kilogram_t SHOOTER_MASS = 6.9_kg;
+  static constexpr double PIVOT_GEAR_RATIO = 252;
+  static constexpr units::meter_t SHOOTER_LENGTH = 0.47200_m;
+  static constexpr units::kilogram_t SHOOTER_MASS = 8_kg;
   static constexpr units::degree_t SHOOTER_MIN_ANGLE = 0_deg;
-  static constexpr units::degree_t SHOOTER_MAX_ANGLE = 100_deg;
+  static constexpr units::degree_t SHOOTER_MAX_ANGLE = 100_deg; //Needs to be double checked with amp
 
   frc::ArmFeedforward _pivotFF{PIVOT_S, PIVOT_G, PIVOT_V, PIVOT_A};
 

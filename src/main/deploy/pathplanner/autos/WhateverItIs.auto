@@ -1,0 +1,81 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.839900034136614,
+      "y": 6.6856548835410505
+    },
+    "rotation": 61.17619336160836
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "SetSubwooferAngle"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "FullSequenceShoot"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "PreToA1"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "FullSequenceShoot"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "A1ToC"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "CToA1"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "FullSequenceShoot"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

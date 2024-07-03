@@ -5,6 +5,7 @@
 #include "RobotContainer.h"
 #include "subsystems/SubIntake.h"
 #include <frc2/command/Commands.h>
+#include "subsystems/SubClimber.h"
 #include "subsystems/SubShooter.h"
 #include "subsystems/SubPivot.h"
 #include "commands/ShooterCommands.h"
@@ -14,25 +15,31 @@
 #include "subsystems/SubVision.h"
 #include <pathplanner/lib/commands/PathPlannerAuto.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <pathplanner/lib/auto/NamedCommands.h>
 
 RobotContainer::RobotContainer(){
 
   pathplanner::NamedCommands::registerCommand("Intake", SubIntake::GetInstance().Intake());
-  pathplanner::NamedCommands::registerCommand("FeedToShooter", SubIntake::GetInstance().FeedToShooter());
-  pathplanner::NamedCommands::registerCommand("FullSequenceShoot", ShooterCommands::GetInstance.CmdShootSpeaker().());
-  pathplanner::NamedCommands::registerCommand("Shoot", ShooterCommands::GetInstance.CmdShootNeutral().());
-  pathplanner::NamedCommands::registerCommand("SetSubwooferAngle", SubShooter::GetInstance.CmdSetShooterSpeaker().());
+  pathplanner::NamedCommands::registerCommand("FeedToShooter", SubFeeder::GetInstance().FeedToShooter());
+  pathplanner::NamedCommands::registerCommand("FullSequenceShoot", cmd::CmdShootSpeakerAuto());
+  pathplanner::NamedCommands::registerCommand("Shoot", cmd::CmdShootNeutral());
+  pathplanner::NamedCommands::registerCommand("SetSubwooferAngle", SubShooter::GetInstance().CmdSetShooterOff());
 
 
   std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("AA1.1");
 
   SubDrivebase::GetInstance().SetDefaultCommand(
       SubDrivebase::GetInstance().JoystickDrive(_driverController, false));
+
+  SubClimber::GetInstance();
   
   ConfigureBindings();
   SubVision::GetInstance();
 
-  _autoChooser.AddOption("AA1", "4NoteAuto");
+  _autoChooser.AddOption("AA1", "AA1");
+  _autoChooser.AddOption("Example Path", "Example Path");
+  _autoChooser.AddOption("WhateverItIs", "WhateverItIs");
+  _autoChooser.AddOption("TestPath", "TestPath");
 
   frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
 }
@@ -42,25 +49,31 @@ void RobotContainer::ConfigureBindings() {
 
   //Triggers
   _driverController.RightTrigger().WhileTrue(cmd::CmdIntake());
+  _driverController.LeftTrigger().WhileTrue(cmd::CmdAimAtSpeakerWithVision(_driverController));
   //Bumpers
   
   //Letters
-  
+  _driverController.Y().OnTrue(SubDrivebase::GetInstance().ResetGyroCmd());
   //POV
 
   //Operator
 
   //Triggers
-  _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker());
+  _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker(_driverController));
+  
+  
   //Bumpers
   _operatorController.RightBumper().WhileTrue(cmd::CmdShootPassing());
   _operatorController.LeftBumper().WhileTrue(cmd::CmdShootNeutral());
   //Letters
   _operatorController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(65_deg));
   _operatorController.B().WhileTrue(cmd::CmdShootAmp());
+  _operatorController.Y().OnTrue(SubClimber::GetInstance().ClimberPosition(0.4_m));
+  _operatorController.X().OnTrue(SubClimber::GetInstance().ClimberPosition(0.05_m));
   //POV
   POVHelper::Left(&_operatorController).OnTrue(SubShooter::GetInstance().CmdSetShooterOff());
   POVHelper::Right(&_operatorController).WhileTrue(cmd::CmdOuttake());
+  POVHelper::Down(&_operatorController).WhileTrue(SubClimber::GetInstance().ClimberAutoReset());
 
   //Robot triggers
   frc2::Trigger{[]{return SubFeeder::GetInstance().CheckHasNote();}}.OnTrue(Rumble(1, 0.3_s));  
