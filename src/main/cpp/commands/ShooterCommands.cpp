@@ -17,7 +17,10 @@ frc2::CommandPtr CmdIntake(){
     return SubIntake::GetInstance().Intake().AlongWith(SubFeeder::GetInstance().FeedToShooter())
     .Until([]{return SubFeeder::GetInstance().CheckHasNote();})
     .AndThen(SubFeeder::GetInstance().ReverseFeeder().WithTimeout(0.2_s));
+<<<<<<< HEAD
 
+=======
+>>>>>>> bac287bcb1a54a6dc35c669176ab6c9a201a70a3
 }
 
 frc2::CommandPtr CmdFeedOnceOnTarget() {
@@ -46,7 +49,7 @@ frc2::CommandPtr CmdShootSpeaker(frc2::CommandXboxController& controller){
 
 frc2::CommandPtr CmdShootAmp(){
     return Parallel(
-        SubPivot::GetInstance().CmdSetPivotAngle(90_deg),
+        SubPivot::GetInstance().CmdSetPivotAngle(50_deg),
         SubShooter::GetInstance().CmdSetShooterAmp(),
         CmdFeedOnceOnTarget()
     )
