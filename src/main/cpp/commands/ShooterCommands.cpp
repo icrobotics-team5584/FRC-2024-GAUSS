@@ -27,6 +27,13 @@ frc2::CommandPtr CmdFeedOnceOnTarget() {
             SubFeeder::GetInstance().FeedToShooter()
         );
 }
+frc2::CommandPtr CmdFeedOnceOnAmpTarget() {
+    return Sequence(
+            WaitUntil([]{return SubPivot::GetInstance().IsOnTarget();}),
+            WaitUntil([]{return SubShooter::GetInstance().IsOnTarget();}),
+            SubFeeder::GetInstance().FeedToShooter()
+        );
+}
 
 frc2::CommandPtr CmdOuttake(){
     return SubIntake::GetInstance().Outtake().AlongWith(SubFeeder::GetInstance().FeedToIntake());
@@ -47,7 +54,7 @@ frc2::CommandPtr CmdShootAmp(){
     return Parallel(
         SubPivot::GetInstance().CmdSetPivotAngle(50_deg),
         SubShooter::GetInstance().CmdSetShooterAmp(),
-        CmdFeedOnceOnTarget()
+        CmdFeedOnceOnAmpTarget()
     )
     .Until([] {return !SubFeeder::GetInstance().CheckHasNote();})
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});

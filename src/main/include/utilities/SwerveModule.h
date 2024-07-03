@@ -41,7 +41,7 @@ class SwerveModule {
 
  private:
   const double TURNING_GEAR_RATIO = 150.0/7.0;
-  const double DRIVE_GEAR_RATIO = 6.75; // L2 - Fast kit
+  const double DRIVE_GEAR_RATIO = 5.9; // L2 - Fast kit
   const units::meter_t WHEEL_RADIUS = 0.049_m;
   const units::meter_t WHEEL_CIRCUMFERENCE = 2 * std::numbers::pi * WHEEL_RADIUS;
 
