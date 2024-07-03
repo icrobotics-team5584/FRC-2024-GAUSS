@@ -21,7 +21,8 @@ class SubFeeder : public frc2::SubsystemBase {
 
   frc2::CommandPtr FeedToShooter();
   frc2::CommandPtr FeedToIntake();
-
+  frc2::CommandPtr ReverseFeeder();
+  
   bool CheckHasNote();
 
   

@@ -15,7 +15,10 @@ namespace cmd {
 using namespace frc2::cmd;
 frc2::CommandPtr CmdIntake(){
     return SubIntake::GetInstance().Intake().AlongWith(SubFeeder::GetInstance().FeedToShooter())
-    .Until([]{return SubFeeder::GetInstance().CheckHasNote();});
+    .Until([]{return SubFeeder::GetInstance().CheckHasNote();})
+    .AndThen(SubFeeder::GetInstance().ReverseFeeder().WithTimeout(0.2_s));[\]
+    
+
 }
 
 frc2::CommandPtr CmdFeedOnceOnTarget() {

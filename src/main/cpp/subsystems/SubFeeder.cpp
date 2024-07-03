@@ -21,6 +21,13 @@ frc2::CommandPtr SubFeeder::FeedToShooter() {
 return Run([this]{ _feederMotor.Set(-0.7);}).FinallyDo([this]{_feederMotor.Set(0);});
 }
 
+frc2::CommandPtr SubFeeder::ReverseFeeder() {
+  return Run([this] { _feederMotor.Set(0.2); }).FinallyDo([this] {
+    _feederMotor.Set(0);
+  });
+}
+
+
 // This method will be called once per scheduler run
 void SubFeeder::Periodic() {
 }

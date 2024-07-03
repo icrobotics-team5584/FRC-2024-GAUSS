@@ -42,8 +42,6 @@ void RobotContainer::ConfigureBindings() {
   _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker(_driverController));
   _operatorController.LeftTrigger().WhileTrue(SubShooter::GetInstance().CmdSetShooterAmp());
   
-  
-  
   //Bumpers
   _operatorController.RightBumper().WhileTrue(cmd::CmdShootPassing());
   _operatorController.LeftBumper().WhileTrue(cmd::CmdShootNeutral());
@@ -57,8 +55,9 @@ void RobotContainer::ConfigureBindings() {
   POVHelper::Right(&_operatorController).WhileTrue(cmd::CmdOuttake());
   POVHelper::Down(&_operatorController).WhileTrue(SubClimber::GetInstance().ClimberAutoReset());
 
-  //Robot triggers
+  //Triggers
   frc2::Trigger{[]{return SubFeeder::GetInstance().CheckHasNote();}}.OnTrue(Rumble(1, 0.3_s));  
+  
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
