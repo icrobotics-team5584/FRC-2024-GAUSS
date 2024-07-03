@@ -26,7 +26,7 @@ SubClimber::SubClimber() {
     // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0.001_m).value()); 
     
     //Enable top and bottom limit
-    // EnableSoftLimit(true);
+    EnableSoftLimit(false);
 
     //Put motor data to dashboard
     frc::SmartDashboard::PutData("Climber/Left motor", (wpi::Sendable*)&_lClimbMotor);
@@ -123,7 +123,7 @@ void SubClimber::EnableSoftLimit(bool enabled) {
 frc2::CommandPtr SubClimber::ClimberJoystickDrive(frc2::CommandXboxController& _controller) {
     return Run([this, &_controller] {
         _lClimbMotor.Set(-_controller.GetLeftY());
-        _rClimbMotor.Set(-_controller.GetRightY());
+        _rClimbMotor.Set(-_controller.GetLeftY());
     }).FinallyDo([this] {
         _lClimbMotor.SetPositionTarget(_lClimbMotor.GetPosition());
         _rClimbMotor.SetPositionTarget(_rClimbMotor.GetPosition());
@@ -169,6 +169,11 @@ frc2::CommandPtr SubClimber::ClimberResetZero() {
     return frc2::cmd::RunOnce([] {SubClimber::GetInstance().ZeroClimber();});
 }
 
+frc2::CommandPtr SubClimber::ClimberResetTop() {
+    return frc2::cmd::RunOnce([this] {_lClimbMotor.SetPosition(30_tr);
+    _rClimbMotor.SetPosition(30_tr);});
+}
+
 //Auto climber reset by bringing both hook to zero position then reset
 frc2::CommandPtr SubClimber::ClimberAutoReset() {
     return frc2::cmd::RunOnce([this] { Reseting = true; EnableSoftLimit(false);})
@@ -177,7 +182,7 @@ frc2::CommandPtr SubClimber::ClimberAutoReset() {
         .AndThen(ClimberResetCheck())
         .AndThen(ClimberResetZero())
         .AndThen(ClimberStop())
-        .FinallyDo([this] {Reseting = false; Reseted = true; EnableSoftLimit(true); Stop();});
+        .FinallyDo([this] {Reseting = false; Reseted = true; EnableSoftLimit(false); Stop();});
 }
 
 //Check if hook touch the bottom
