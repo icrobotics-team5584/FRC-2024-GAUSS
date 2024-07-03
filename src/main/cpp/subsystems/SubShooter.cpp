@@ -16,9 +16,13 @@ SubShooter::SubShooter(){
     flywheelConfig.Slot0.kV = _flywheelV;
     flywheelConfig.Voltage.PeakForwardVoltage = 12;
     flywheelConfig.Voltage.PeakReverseVoltage = 0;
+    flywheelConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    flywheelConfig.CurrentLimits.SupplyCurrentLimit = 40.0;
+    flywheelConfig.CurrentLimits.SupplyCurrentThreshold = 50.0;
+    flywheelConfig.CurrentLimits.SupplyTimeThreshold = 0.1;
 
     _ShooterFlywheelMotorRight.GetConfigurator().Apply(flywheelConfig);
-    flywheelConfig.MotorOutput.Inverted = ctre::phoenix6::signals::InvertedValue::CounterClockwise_Positive;
+    flywheelConfig.MotorOutput.Inverted = ctre::phoenix6::signals::InvertedValue::Clockwise_Positive;
     _ShooterFlywheelMotorLeft.GetConfigurator().Apply(flywheelConfig);
 }
 

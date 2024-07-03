@@ -50,7 +50,7 @@ private:
   
   static constexpr double PIVOT_GEAR_RATIO = 252;
   static constexpr units::meter_t SHOOTER_LENGTH = 0.47200_m;
-  static constexpr units::kilogram_t SHOOTER_MASS = 8_kg;
+  static constexpr units::kilogram_t SHOOTER_MASS = 13_kg;
   static constexpr units::degree_t SHOOTER_MIN_ANGLE = 0_deg;
   static constexpr units::degree_t SHOOTER_MAX_ANGLE = 100_deg; //Needs to be double checked with amp
 
