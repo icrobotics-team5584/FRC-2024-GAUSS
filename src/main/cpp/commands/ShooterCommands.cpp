@@ -17,10 +17,6 @@ frc2::CommandPtr CmdIntake(){
     return SubIntake::GetInstance().Intake().AlongWith(SubFeeder::GetInstance().FeedToShooter())
     .Until([]{return SubFeeder::GetInstance().CheckHasNote();})
     .AndThen(SubFeeder::GetInstance().ReverseFeeder().WithTimeout(0.2_s));
-<<<<<<< HEAD
-
-=======
->>>>>>> bac287bcb1a54a6dc35c669176ab6c9a201a70a3
 }
 
 frc2::CommandPtr CmdFeedOnceOnTarget() {
