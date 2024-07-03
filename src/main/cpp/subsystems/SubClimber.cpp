@@ -14,19 +14,19 @@ SubClimber::SubClimber() {
     _lClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
     _lClimbMotor.SetPIDFF(lP,lI,lD,lF);
     _lClimbMotor.SetInverted(false);
-    _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TopHeight).value());
-    _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0.001_m).value());
+    // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TopHeight).value());
+    // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0.001_m).value());
 
     //Set up right motor
     _rClimbMotor.SetConversionFactor(1.0 / gearRatio);
     _rClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
     _rClimbMotor.SetPIDFF(rP,rI,rD,rF);
     _rClimbMotor.SetInverted(true);
-    _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TopHeight).value());
-    _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0.001_m).value()); 
+    // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TopHeight).value());
+    // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0.001_m).value()); 
     
     //Enable top and bottom limit
-    EnableSoftLimit(true);
+    // EnableSoftLimit(true);
 
     //Put motor data to dashboard
     frc::SmartDashboard::PutData("Climber/Left motor", (wpi::Sendable*)&_lClimbMotor);

@@ -82,9 +82,9 @@ class SubClimber : public frc2::SubsystemBase {
 
   // Motor Setup
   static constexpr double gearRatio = 45;
-  static constexpr double lP = 1, lI = 0.0, lD = 0.0, lF = 0,
+  static constexpr double lP = 5, lI = 0.0, lD = 0.0, lF = 0,
   
-                          rP = 1, rI = 0.0, rD = 0.0, rF = 0;
+                          rP = 5, rI = 0.0, rD = 0.0, rF = 0;
 
   static constexpr double currentLimit = 15;
 
