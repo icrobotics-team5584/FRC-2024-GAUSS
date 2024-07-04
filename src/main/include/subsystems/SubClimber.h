@@ -69,6 +69,7 @@ class SubClimber : public frc2::SubsystemBase {
   frc2::CommandPtr ClimberManualDrive(float power);
   frc2::CommandPtr ClimberStop();
   frc2::CommandPtr ClimberResetZero();
+  frc2::CommandPtr ClimberResetTop();
   frc2::CommandPtr ClimberAutoReset();
   frc2::CommandPtr ClimberResetCheck();
   units::meter_t CheckLeftClimberPos();
@@ -81,7 +82,7 @@ class SubClimber : public frc2::SubsystemBase {
   ICSparkMax _rClimbMotor{canid::ClimberSecond, 60_A};
 
   // Motor Setup
-  static constexpr double gearRatio = 26.44444444;
+  static constexpr double gearRatio = 45;
   static constexpr double lP = 5, lI = 0.0, lD = 0.0, lF = 0,
   
                           rP = 5, rI = 0.0, rD = 0.0, rF = 0;
@@ -89,7 +90,7 @@ class SubClimber : public frc2::SubsystemBase {
   static constexpr double currentLimit = 15;
 
   // Unit translation
-  static constexpr units::meter_t WheelCir = 0.12538_m;
+  static constexpr units::meter_t WheelCir = 0.157_m;
 
   // Robot info
   static constexpr units::meter_t BaseHeight = 0.0_m;

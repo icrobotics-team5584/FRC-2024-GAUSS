@@ -114,6 +114,10 @@ units::volt_t SwerveModule::GetDriveVoltage() {
   return _canDriveMotor.GetMotorVoltage().GetValue();
 }
 
+units::radian_t SwerveModule::GetDrivenRotations() {
+  return _canDriveMotor.GetPosition().GetValue();
+}
+
 void SwerveModule::SetDesiredAngle(units::degree_t angle) {
   _canTurnMotor.SetPositionTarget(angle);
 }

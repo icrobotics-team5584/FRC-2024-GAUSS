@@ -52,8 +52,9 @@ class SubDrivebase : public frc2::SubsystemBase {
   units::meters_per_second_t GetVelocity();
   frc::SwerveDriveKinematics<4> GetKinematics();
   frc::ChassisSpeeds GetRobotRelativeSpeeds();
+  frc2::CommandPtr WheelCharecterisationCmd();
 
-  static constexpr units::meters_per_second_t MAX_VELOCITY = 4.7_mps;
+  static constexpr units::meters_per_second_t MAX_VELOCITY = 6.1_mps;
   static constexpr units::degrees_per_second_t MAX_ANGULAR_VELOCITY = 360_deg_per_s;
   static constexpr units::radians_per_second_squared_t MAX_ANG_ACCEL{std::numbers::pi};
 
@@ -135,11 +136,11 @@ class SubDrivebase : public frc2::SubsystemBase {
                              [this](frc::sysid::SysIdRoutineLog* log) {
                                log->Motor("drive-left")
                                    .voltage(_frontLeft.GetDriveVoltage())
-                                   .position(_frontLeft.GetPosition().distance)
+                                   .position(_frontLeft.GetDrivenRotations().convert<units::turns>())
                                    .velocity(_frontLeft.GetSpeed());
                                log->Motor("drive-right")
                                    .voltage(_frontRight.GetDriveVoltage())
-                                   .position(_frontRight.GetPosition().distance)
+                                   .position(_frontRight.GetDrivenRotations().convert<units::turns>())
                                    .velocity(_frontRight.GetSpeed());
                              },
                              this}};
