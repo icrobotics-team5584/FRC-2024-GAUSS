@@ -13,6 +13,7 @@
 #include "subsystems/SubFeeder.h"
 #include "subsystems/SubVision.h"
 #include <pathplanner/lib/commands/PathPlannerAuto.h>
+#include <pathplanner/lib/auto/NamedCommands.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 
 RobotContainer::RobotContainer(){
@@ -20,7 +21,7 @@ RobotContainer::RobotContainer(){
   pathplanner::NamedCommands::registerCommand("Intake", SubIntake::GetInstance().Intake());
   pathplanner::NamedCommands::registerCommand("FeedToShooter", SubFeeder::GetInstance().FeedToShooter().WithTimeout(0.2_s));
   pathplanner::NamedCommands::registerCommand("Shoot", cmd::CmdShootNeutral());
-  pathplanner::NamedCommands::registerCommand("FullSequenceShoot", cmd::CmdShootSpeakerAuto());
+  pathplanner::NamedCommands::registerCommand("FullSequenceShoot", cmd::CmdShootSpeaker(_driverController));
   pathplanner::NamedCommands::registerCommand("SetSubwooferAngle", SubShooter::GetInstance().CmdSetShooterOff());
 
   std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("AA1.1");
@@ -33,7 +34,8 @@ RobotContainer::RobotContainer(){
 
   _autoChooser.AddOption("AA1", "3CloseNoteAuto");
   _autoChooser.AddOption("1Close2Far", "1Close2FarAuto");
-    _autoChooser.AddOption("WhateverItIs", "WhateverItIs");
+  _autoChooser.AddOption("WhateverItIs", "WhateverItIs");
+  _autoChooser.AddOption("Example Path", "Example Path");
 
   frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
 }
