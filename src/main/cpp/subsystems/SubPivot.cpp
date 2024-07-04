@@ -23,11 +23,17 @@ SubPivot::SubPivot(){
     frc::SmartDashboard::PutData("Pivot/Motor", (wpi::Sendable*)&_pivotMotor);
 
     //Setup shooter pitch table
-    _pitchTable.insert(-12.2_deg, 12.5_deg);
-    _pitchTable.insert(-9_deg, 14.75_deg);
+    _pitchTable.insert(-12_deg, 9.25_deg);
+    _pitchTable.insert(-11_deg, 10_deg);
+    _pitchTable.insert(-10_deg, 11_deg);
+    _pitchTable.insert(-9_deg, 12.5_deg);
+    _pitchTable.insert(-4.5_deg, 17_deg);
     _pitchTable.insert(0_deg, 21.5_deg);
     _pitchTable.insert(9_deg, 28_deg);
     _pitchTable.insert(10_deg, 29_deg);
+
+    _pivotMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, LOW_STOP.value());
+    _pivotMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, HIGH_STOP.value()); 
 }
 
 
