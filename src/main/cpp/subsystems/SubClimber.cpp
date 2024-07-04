@@ -14,16 +14,16 @@ SubClimber::SubClimber() {
     _lClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
     _lClimbMotor.SetPIDFF(lP,lI,lD,lF);
     _lClimbMotor.SetInverted(false);
-    // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TopHeight).value());
-    // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0_m).value());
+    _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TopHeight).value());
+    _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0_m).value());
 
     //Set up right motor
     _rClimbMotor.SetConversionFactor(1.0 / gearRatio);
     _rClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
     _rClimbMotor.SetPIDFF(rP,rI,rD,rF);
     _rClimbMotor.SetInverted(true);
-    // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TopHeight).value());
-    // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0_m).value()); 
+    _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TopHeight).value());
+    _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0_m).value()); 
     
     //Enable top and bottom limit
     EnableSoftLimit(false);
@@ -182,7 +182,7 @@ frc2::CommandPtr SubClimber::ClimberAutoReset() {
         .AndThen(ClimberResetCheck())
         .AndThen(ClimberResetZero())
         .AndThen(ClimberStop())
-        .FinallyDo([this] {Reseting = false; Reseted = true; EnableSoftLimit(false); Stop();});
+        .FinallyDo([this] {Reseting = false; Reseted = true; EnableSoftLimit(true); Stop();});
 }
 
 //Check if hook touch the bottom
@@ -196,9 +196,6 @@ frc2::CommandPtr SubClimber::ClimberResetCheck() {
         }
         if (GetRightCurrent() > currentLimit && !ResetRight) {
             _rClimbMotor.StopMotor(); ResetRight = true;
-        }
-        if (ResetLeft && ResetRight) {
-            Reseting = false;
         }
     }).Until([this] { return ResetLeft && ResetRight; }));
 }
