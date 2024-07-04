@@ -21,7 +21,7 @@ RobotContainer::RobotContainer(){
   pathplanner::NamedCommands::registerCommand("Intake", SubIntake::GetInstance().Intake());
   pathplanner::NamedCommands::registerCommand("FeedToShooter", SubFeeder::GetInstance().FeedToShooter().WithTimeout(0.2_s));
   pathplanner::NamedCommands::registerCommand("Shoot", cmd::CmdShootNeutral());
-  pathplanner::NamedCommands::registerCommand("FullSequenceShoot", cmd::CmdShootSpeakerAuto());
+  pathplanner::NamedCommands::registerCommand("FullSequenceShoot", cmd::CmdShootSpeaker(_driverController));
   pathplanner::NamedCommands::registerCommand("SetSubwooferAngle", SubShooter::GetInstance().CmdSetShooterOff());
 
   std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("AA1.1");
