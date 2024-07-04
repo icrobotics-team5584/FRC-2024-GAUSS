@@ -143,4 +143,23 @@ frc2::CommandPtr CmdAimWithoutControl(){ // For auto
       .FinallyDo([]{SubDrivebase::GetInstance().StopDriving();});
 }
 
+frc2::CommandPtr CmdShootSpeakerAuto() {
+    if (frc::RobotBase::IsSimulation() == true) {
+        return Sequence(
+            SubShooter::GetInstance().CmdSetShooterSpeaker(),
+            Wait(0.5_s),
+            SubShooter::GetInstance().CmdSetShooterOff()
+        );
+    }
+    else {
+        return Parallel(
+            SubPivot::GetInstance().CmdPivotFromVision([]{    /*default value = 60 degrees(Subwoofer shot)*/
+                return SubVision::GetInstance().GetSpeakerPitch().value_or(60_deg);}),
+            SubShooter::GetInstance().CmdSetShooterSpeaker(),
+            CmdAimWithoutControl(),
+            CmdFeedOnceOnTarget()
+        )
+        .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
+    }
+}
 }
