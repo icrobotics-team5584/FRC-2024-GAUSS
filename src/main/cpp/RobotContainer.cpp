@@ -51,19 +51,23 @@ void RobotContainer::ConfigureBindings() {
   //Operator
 
   //Triggers
-  _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker());
+  _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker(_driverController));
+  _operatorController.LeftTrigger().WhileTrue(SubShooter::GetInstance().CmdSetShooterAmp());
+  
   //Bumpers
   _operatorController.RightBumper().WhileTrue(cmd::CmdShootPassing());
   _operatorController.LeftBumper().WhileTrue(cmd::CmdShootNeutral());
   //Letters
-  _operatorController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(65_deg));
+  _driverController.B().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(40_deg));
+  _driverController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(20_deg));
   _operatorController.B().WhileTrue(cmd::CmdShootAmp());
   //POV
   POVHelper::Left(&_operatorController).OnTrue(SubShooter::GetInstance().CmdSetShooterOff());
   POVHelper::Right(&_operatorController).WhileTrue(cmd::CmdOuttake());
 
-  //Robot triggers
+  //Triggers
   frc2::Trigger{[]{return SubFeeder::GetInstance().CheckHasNote();}}.OnTrue(Rumble(1, 0.3_s));  
+  
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {

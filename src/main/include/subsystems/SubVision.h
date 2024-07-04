@@ -37,6 +37,7 @@ class SubVision : public frc2::SubsystemBase {
   std::optional<photon::PhotonTrackedTarget> GetSpeakerTarget();
   std::optional<units::degree_t> GetSpeakerYaw();
   std::optional<units::degree_t> GetSpeakerPitch();
+  std::optional<units::degree_t> GetLatestSpeakerPitch();
   
   bool IsFacingTarget();
 

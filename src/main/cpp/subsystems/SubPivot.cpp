@@ -10,7 +10,8 @@
 
 SubPivot::SubPivot(){
     ctre::phoenix6::configs::CANcoderConfiguration pivotConfig{};
-    pivotConfig.MagnetSensor.MagnetOffset = 0.5164954444444444;
+    //pivotConfig.MagnetSensor.MagnetOffset = 0.5164954444444444; original offset
+    pivotConfig.MagnetSensor.MagnetOffset = 0.228271421875;
 
     _shooterPivotEncoder.GetConfigurator().Apply(pivotConfig);
 
@@ -22,12 +23,10 @@ SubPivot::SubPivot(){
     frc::SmartDashboard::PutData("Pivot/Motor", (wpi::Sendable*)&_pivotMotor);
 
     //Setup shooter pitch table
-    _pitchTable.insert(-20_deg, 65_deg);
-    _pitchTable.insert(-15_deg, 55_deg);
-    _pitchTable.insert(-9_deg, 40_deg);
-    _pitchTable.insert(0_deg, 28_deg);
-    _pitchTable.insert(9_deg, 20_deg);
-    _pitchTable.insert(17_deg, 15_deg);
+    _pitchTable.insert(-9_deg, 14_deg);
+    _pitchTable.insert(0_deg, 22_deg);
+    _pitchTable.insert(9_deg, 28_deg);
+    _pitchTable.insert(10_deg, 29_deg);
 }
 
 
@@ -59,6 +58,6 @@ void SubPivot::SimulationPeriodic(){
 }
 
 bool SubPivot::IsOnTarget() {
-    auto tolerance = 1_deg;
+    auto tolerance = 5_deg;
     return units::math::abs( _pivotMotor.GetPosError()) < tolerance;
 }

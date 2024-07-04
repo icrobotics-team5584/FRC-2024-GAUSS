@@ -67,6 +67,9 @@
         "Shooter": {
           "open": true
         },
+        "Target": {
+          "open": true
+        },
         "open": true
       },
       "photonvision": {
