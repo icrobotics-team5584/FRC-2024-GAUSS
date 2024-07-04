@@ -21,6 +21,10 @@ RobotContainer::RobotContainer(){
 
   pathplanner::NamedCommands::registerCommand("Intake", SubIntake::GetInstance().Intake());
   pathplanner::NamedCommands::registerCommand("IntakeSequence", cmd::CmdIntake());
+  pathplanner::NamedCommands::registerCommand(
+      "SetShooterToSpeakerSpeed",
+      SubShooter::GetInstance().CmdSetShooterSpeaker().AndThen(
+          frc2::cmd::Wait(1_s)));
   pathplanner::NamedCommands::registerCommand("FeedToShooter", SubFeeder::GetInstance().FeedToShooter().WithTimeout(0.2_s));
   pathplanner::NamedCommands::registerCommand("Shoot", cmd::CmdShootNeutral());
   pathplanner::NamedCommands::registerCommand("Feed", SubFeeder::GetInstance().FeedToShooter().WithTimeout(1_s));
