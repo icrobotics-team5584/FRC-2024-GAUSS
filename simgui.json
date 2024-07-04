@@ -19,13 +19,14 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Chosen Path": "String Chooser",
       "/SmartDashboard/Climber/Mech Display": "Mechanism2d",
       "/SmartDashboard/Drivebase/Vision/Rotation Controller: ": "ProfiledPIDController",
       "/SmartDashboard/arducam Sim Field": "Field2d",
       "/SmartDashboard/field": "Field2d"
     },
     "windows": {
-      "/SmartDashboard/Climber/Mech Display": {
+      "/SmartDashboard/Chosen Path": {
         "window": {
           "visible": true
         }
@@ -46,6 +47,12 @@
   "NetworkTables": {
     "transitory": {
       "SmartDashboard": {
+        "Chosen Path": {
+          "open": true,
+          "string[]##v_/SmartDashboard/Chosen Path/options": {
+            "open": true
+          }
+        },
         "Feeder": {
           "Motor": {
             "open": true
@@ -58,6 +65,9 @@
           "open": true
         },
         "Shooter": {
+          "open": true
+        },
+        "Target": {
           "open": true
         },
         "open": true
@@ -235,7 +245,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 332,
+          "height": 0,
           "series": [
             {
               "color": [

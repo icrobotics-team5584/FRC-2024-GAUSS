@@ -16,9 +16,13 @@ SubShooter::SubShooter(){
     flywheelConfig.Slot0.kV = _flywheelV;
     flywheelConfig.Voltage.PeakForwardVoltage = 12;
     flywheelConfig.Voltage.PeakReverseVoltage = 0;
+    flywheelConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    flywheelConfig.CurrentLimits.SupplyCurrentLimit = 40.0;
+    flywheelConfig.CurrentLimits.SupplyCurrentThreshold = 50.0;
+    flywheelConfig.CurrentLimits.SupplyTimeThreshold = 0.1;
 
     _ShooterFlywheelMotorRight.GetConfigurator().Apply(flywheelConfig);
-    flywheelConfig.MotorOutput.Inverted = ctre::phoenix6::signals::InvertedValue::CounterClockwise_Positive;
+    flywheelConfig.MotorOutput.Inverted = ctre::phoenix6::signals::InvertedValue::Clockwise_Positive;
     _ShooterFlywheelMotorLeft.GetConfigurator().Apply(flywheelConfig);
 }
 
@@ -33,8 +37,8 @@ frc::SmartDashboard::PutNumber("Shooter/RightCurrent", _ShooterFlywheelMotorRigh
 
 frc2::CommandPtr SubShooter::CmdSetShooterSpeaker(){
     return RunOnce([this]{
-        _ShooterFlywheelMotorLeft.SetControl(_flywheelTargetVelocity.WithVelocity(SpeakerSpeed));
-        _ShooterFlywheelMotorRight.SetControl(_flywheelTargetVelocity.WithVelocity(SpeakerSpeed));
+        _ShooterFlywheelMotorLeft.SetControl(_flywheelTargetVelocity.WithVelocity(SpeakerSpeedLeft));
+        _ShooterFlywheelMotorRight.SetControl(_flywheelTargetVelocity.WithVelocity(SpeakerSpeedRight));
         });
 }
 frc2::CommandPtr SubShooter::CmdSetShooterAmp(){
@@ -62,8 +66,8 @@ bool SubShooter::IsOnTarget() {
     auto leftVelocity = _ShooterFlywheelMotorLeft.GetVelocity().GetValue();
     auto rightVelocity = _ShooterFlywheelMotorRight.GetVelocity().GetValue();
     if (
-        units::math::abs(target - leftVelocity) < tolerance
-        && units::math::abs(target - rightVelocity) < tolerance
+        // units::math::abs(target - leftVelocity) < tolerance
+        units::math::abs(target - rightVelocity) < tolerance
         )
     {
         return true;
