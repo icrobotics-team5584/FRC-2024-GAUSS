@@ -157,7 +157,7 @@ frc2::CommandPtr CmdShootSpeakerAuto() {
                 return SubVision::GetInstance().GetSpeakerPitch().value_or(60_deg);}),
             SubShooter::GetInstance().CmdSetShooterSpeaker(),
             CmdAimWithoutControl(),
-            CmdFeedOnceOnTarget()
+            CmdFeedOnceOnTarget().WithTimeout(1_s).AndThen(SubFeeder::GetInstance().FeedToShooter())
         )
         .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
     }
