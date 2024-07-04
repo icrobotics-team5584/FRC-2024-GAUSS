@@ -178,11 +178,11 @@ frc2::CommandPtr SubClimber::ClimberResetTop() {
 frc2::CommandPtr SubClimber::ClimberAutoReset() {
     return frc2::cmd::RunOnce([this] { Reseting = true; EnableSoftLimit(false);})
         .AndThen(ClimberManualDrive(-0.2))
-        .AndThen(frc2::cmd::Wait(0.5_s))
+        .AndThen(frc2::cmd::Wait(0.2_s))
         .AndThen(ClimberResetCheck())
         .AndThen(ClimberResetZero())
         .AndThen(ClimberStop())
-        .FinallyDo([this] {Reseting = false; Reseted = true; EnableSoftLimit(true); Stop();});
+        .FinallyDo([this] {Reseting = false; Reseted = true; EnableSoftLimit(true);});
 }
 
 //Check if hook touch the bottom
@@ -190,11 +190,10 @@ frc2::CommandPtr SubClimber::ClimberResetCheck() {
     return frc2::cmd::RunOnce ([this] {ResetLeft = false; ResetRight = false;})
     .AndThen(
     frc2::cmd::Run([this] {
-        
-        if (GetLeftCurrent() > currentLimit && !ResetLeft) {
+        if (GetLeftCurrent() > currentLimit) {
             _lClimbMotor.StopMotor(); ResetLeft = true;
         }
-        if (GetRightCurrent() > currentLimit && !ResetRight) {
+        if (GetRightCurrent() > currentLimit) {
             _rClimbMotor.StopMotor(); ResetRight = true;
         }
     }).Until([this] { return ResetLeft && ResetRight; }));
