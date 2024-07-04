@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.839900034136614,
-      "y": 6.6856548835410505
+      "x": 1.3374413054104268,
+      "y": 5.632912378520905
     },
-    "rotation": 61.17619336160836
+    "rotation": 180.0
   },
   "command": {
     "type": "sequential",
@@ -15,6 +15,18 @@
           "type": "parallel",
           "data": {
             "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "FeedToShooter"
+                }
+              },
               {
                 "type": "sequential",
                 "data": {
@@ -28,13 +40,13 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "FullSequenceShoot"
+                        "name": "Shoot"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "PreToA1"
+                        "pathName": "Subwoofer to As"
                       }
                     },
                     {
@@ -46,13 +58,19 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "A1ToC"
+                        "pathName": "As to Ac"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "FullSequenceShoot"
                       }
                     },
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "CToA1"
+                        "pathName": "Ac to Aa"
                       }
                     },
                     {
@@ -62,12 +80,6 @@
                       }
                     }
                   ]
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
                 }
               }
             ]

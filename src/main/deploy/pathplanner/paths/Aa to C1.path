@@ -1,0 +1,114 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.1,
+        "y": 7.05
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.919288754016103,
+        "y": 6.586372828184253
+      },
+      "isLocked": false,
+      "linkedName": "M4 Aa Shoot"
+    },
+    {
+      "anchor": {
+        "x": 8.143300848005206,
+        "y": 7.441769269503451
+      },
+      "prevControl": {
+        "x": 8.078924477258608,
+        "y": 7.918154412981801
+      },
+      "nextControl": {
+        "x": 8.201855030739436,
+        "y": 7.008468317312405
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.1,
+        "y": 7.05
+      },
+      "prevControl": {
+        "x": 4.739517116416684,
+        "y": 7.096843346185898
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "M4 Aa Shoot"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.4,
+      "rotationDegrees": 180.0,
+      "rotateFast": false
+    },
+    {
+      "waypointRelativePos": 1.65,
+      "rotationDegrees": -150.0,
+      "rotateFast": false
+    }
+  ],
+  "constraintZones": [],
+  "eventMarkers": [
+    {
+      "name": "New Event Marker",
+      "waypointRelativePos": 0,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "StoreNote"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "New Event Marker",
+      "waypointRelativePos": 0.5,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "StopFeeder"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 5.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -150.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "M4",
+  "previewStartingState": {
+    "rotation": 180.0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}

@@ -1,0 +1,76 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.502840795155275,
+        "y": 4.267876956806545
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 0.9694307406428595,
+        "y": 4.959352504373026
+      },
+      "isLocked": false,
+      "linkedName": "Subwoofer to As link endpoint to As to Ac"
+    },
+    {
+      "anchor": {
+        "x": 2.9418259121824937,
+        "y": 5.527514849608872
+      },
+      "prevControl": {
+        "x": 2.3794101719663985,
+        "y": 5.616317334906151
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "M4 Middle Shot"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.3,
+      "rotationDegrees": 180.0,
+      "rotateFast": false
+    }
+  ],
+  "constraintZones": [],
+  "eventMarkers": [
+    {
+      "name": "New Event Marker",
+      "waypointRelativePos": 0,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "StoreNote"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 5.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "M4",
+  "previewStartingState": {
+    "rotation": 180.0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}
