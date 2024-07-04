@@ -44,9 +44,16 @@
                       }
                     },
                     {
-                      "type": "named",
+                      "type": "race",
                       "data": {
-                        "name": "FullSequenceShoot"
+                        "commands": [
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "FullSequenceShoot"
+                            }
+                          }
+                        ]
                       }
                     },
                     {
@@ -56,9 +63,16 @@
                       }
                     },
                     {
-                      "type": "named",
+                      "type": "race",
                       "data": {
-                        "name": "FullSequenceShoot"
+                        "commands": [
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "FullSequenceShoot"
+                            }
+                          }
+                        ]
                       }
                     },
                     {
@@ -68,9 +82,16 @@
                       }
                     },
                     {
-                      "type": "named",
+                      "type": "race",
                       "data": {
-                        "name": "FullSequenceShoot"
+                        "commands": [
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "FullSequenceShoot"
+                            }
+                          }
+                        ]
                       }
                     }
                   ]
