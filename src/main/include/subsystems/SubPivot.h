@@ -56,6 +56,7 @@ private:
 
   frc::ArmFeedforward _pivotFF{PIVOT_S, PIVOT_G, PIVOT_V, PIVOT_A};
 
+
   //Shooter table
   wpi::interpolating_map<units::degree_t, units::degree_t> _pitchTable;
 

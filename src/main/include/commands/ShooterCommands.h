@@ -24,5 +24,6 @@ namespace cmd {
   frc2::CommandPtr CmdShootPassing();
   frc2::CommandPtr CmdShootNeutral();
   frc2::CommandPtr CmdFeedOnceOnTarget();
+  frc2::CommandPtr CmdShootSubwoofer();
   frc2::CommandPtr CmdAimAtSpeakerWithVision(frc2::CommandXboxController& controller);
 }

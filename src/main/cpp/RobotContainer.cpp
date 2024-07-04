@@ -34,20 +34,21 @@ void RobotContainer::ConfigureBindings() {
   
   //Letters
   _driverController.Y().OnTrue(SubDrivebase::GetInstance().ResetGyroCmd());
+  _driverController.B().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(40_deg)); //Remove later
+  _driverController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(20_deg)); //Remove later
   //POV
 
   //Operator
 
   //Triggers
   _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker(_driverController));
-  _operatorController.LeftTrigger().WhileTrue(SubShooter::GetInstance().CmdSetShooterAmp());
   
   //Bumpers
   _operatorController.RightBumper().WhileTrue(cmd::CmdShootPassing());
   _operatorController.LeftBumper().WhileTrue(cmd::CmdShootNeutral());
+
   //Letters
-  _driverController.B().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(40_deg));
-  _driverController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(20_deg));
+  _operatorController.A().WhileTrue(cmd::CmdShootSubwoofer());
   _operatorController.B().WhileTrue(cmd::CmdShootAmp());
   _operatorController.Y().OnTrue(SubClimber::GetInstance().ClimberPosition(0.4_m));
   _operatorController.X().OnTrue(SubClimber::GetInstance().ClimberPosition(0.05_m));

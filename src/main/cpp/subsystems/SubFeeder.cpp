@@ -27,6 +27,10 @@ frc2::CommandPtr SubFeeder::ReverseFeeder() {
   });
 }
 
+frc2::CommandPtr SubFeeder::StopFeeder() {
+  return Run([this] { _feederMotor.Set(0); });
+}
+
 
 // This method will be called once per scheduler run
 void SubFeeder::Periodic() {

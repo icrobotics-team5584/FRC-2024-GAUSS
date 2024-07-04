@@ -37,8 +37,8 @@ frc::SmartDashboard::PutNumber("Shooter/RightCurrent", _ShooterFlywheelMotorRigh
 
 frc2::CommandPtr SubShooter::CmdSetShooterSpeaker(){
     return RunOnce([this]{
-        _ShooterFlywheelMotorLeft.SetControl(_flywheelTargetVelocity.WithVelocity(SpeakerSpeed));
-        _ShooterFlywheelMotorRight.SetControl(_flywheelTargetVelocity.WithVelocity(SpeakerSpeed));
+        _ShooterFlywheelMotorLeft.SetControl(_flywheelTargetVelocity.WithVelocity(SpeakerSpeedLeft));
+        _ShooterFlywheelMotorRight.SetControl(_flywheelTargetVelocity.WithVelocity(SpeakerSpeedRight));
         });
 }
 frc2::CommandPtr SubShooter::CmdSetShooterAmp(){
@@ -66,8 +66,8 @@ bool SubShooter::IsOnTarget() {
     auto leftVelocity = _ShooterFlywheelMotorLeft.GetVelocity().GetValue();
     auto rightVelocity = _ShooterFlywheelMotorRight.GetVelocity().GetValue();
     if (
-        units::math::abs(target - leftVelocity) < tolerance
-        && units::math::abs(target - rightVelocity) < tolerance
+        // units::math::abs(target - leftVelocity) < tolerance
+        units::math::abs(target - rightVelocity) < tolerance
         )
     {
         return true;
