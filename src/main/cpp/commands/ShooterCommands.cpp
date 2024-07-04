@@ -114,4 +114,33 @@ frc2::CommandPtr CmdAimAtSpeakerWithVision(frc2::CommandXboxController& controll
       .FinallyDo([]{SubDrivebase::GetInstance().StopDriving();});
 }
 
+frc2::CommandPtr CmdAimWithoutControl(){ // For auto
+  static units::degree_t camYaw = 0_deg;
+  static units::degree_t startingGyroYaw = 0_deg;
+
+  return RunOnce([] {camYaw = 0_deg;
+    startingGyroYaw = SubDrivebase::GetInstance().GetHeading().Degrees(); })
+      .AndThen(Run([] {
+        auto result = SubVision::GetInstance().GetSpeakerYaw();
+
+        if (result.has_value()) {
+          camYaw = SubVision::GetInstance().GetSpeakerYaw().value_or(0_deg);
+          startingGyroYaw = SubDrivebase::GetInstance().GetHeading().Degrees();
+        }
+
+        units::degree_t currentGyroYaw = SubDrivebase::GetInstance().GetHeading().Degrees();
+        units::degree_t gyroAngleTravelled = currentGyroYaw - startingGyroYaw;
+        units::degree_t errorAngle = camYaw - gyroAngleTravelled;
+        frc::SmartDashboard::PutNumber("Vision/Result", result.value_or(0_deg).value());
+        frc::SmartDashboard::PutNumber("Vision/currentGyroYaw ", currentGyroYaw.value());
+        frc::SmartDashboard::PutNumber("Vision/startingGyroYaw ", startingGyroYaw.value());
+        frc::SmartDashboard::PutNumber("Vision/GyroAngleTravelled ", gyroAngleTravelled.value());
+        frc::SmartDashboard::PutNumber("Vision/ErrorAngle ", errorAngle.value());
+        
+        SubDrivebase::GetInstance().RotateToZero(-errorAngle);
+        
+      }))
+      .FinallyDo([]{SubDrivebase::GetInstance().StopDriving();});
+}
+
 }
