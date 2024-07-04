@@ -12,7 +12,7 @@ SubPivot::SubPivot(){
     ctre::phoenix6::configs::CANcoderConfiguration pivotConfig{};
     //pivotConfig.MagnetSensor.MagnetOffset = 0.5164954444444444; original offset
     pivotConfig.MagnetSensor.MagnetOffset = 0.228271421875;
-
+    _pivotMotor.SetInverted(true);
     _shooterPivotEncoder.GetConfigurator().Apply(pivotConfig);
 
     _pivotMotor.SetPIDFF(_pivotP, _pivotI, _pivotD);
@@ -23,8 +23,9 @@ SubPivot::SubPivot(){
     frc::SmartDashboard::PutData("Pivot/Motor", (wpi::Sendable*)&_pivotMotor);
 
     //Setup shooter pitch table
-    _pitchTable.insert(-9_deg, 14_deg);
-    _pitchTable.insert(0_deg, 22_deg);
+    _pitchTable.insert(-12.2_deg, 12.5_deg);
+    _pitchTable.insert(-9_deg, 14.75_deg);
+    _pitchTable.insert(0_deg, 21.5_deg);
     _pitchTable.insert(9_deg, 28_deg);
     _pitchTable.insert(10_deg, 29_deg);
 }

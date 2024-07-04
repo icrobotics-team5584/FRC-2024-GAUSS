@@ -16,7 +16,7 @@ using namespace frc2::cmd;
 frc2::CommandPtr CmdIntake(){
     return SubIntake::GetInstance().Intake().AlongWith(SubFeeder::GetInstance().FeedToShooter())
     .Until([]{return SubFeeder::GetInstance().CheckHasNote();})
-    .AndThen(SubFeeder::GetInstance().ReverseFeeder().WithTimeout(0.2_s));
+    .AndThen(SubFeeder::GetInstance().StopFeeder());
 }
 
 frc2::CommandPtr CmdFeedOnceOnTarget() {
@@ -24,6 +24,13 @@ frc2::CommandPtr CmdFeedOnceOnTarget() {
             WaitUntil([]{return SubPivot::GetInstance().IsOnTarget();}),
             WaitUntil([]{return SubShooter::GetInstance().IsOnTarget();}),
             WaitUntil([]{return SubVision::GetInstance().IsFacingTarget();}),
+            SubFeeder::GetInstance().FeedToShooter()
+        );
+}
+frc2::CommandPtr CmdFeedOnceOnAmpTarget() {
+    return Sequence(
+            WaitUntil([]{return SubPivot::GetInstance().IsOnTarget();}),
+            WaitUntil([]{return SubShooter::GetInstance().IsOnTarget();}),
             SubFeeder::GetInstance().FeedToShooter()
         );
 }
@@ -45,9 +52,9 @@ frc2::CommandPtr CmdShootSpeaker(frc2::CommandXboxController& controller){
 
 frc2::CommandPtr CmdShootAmp(){
     return Parallel(
-        SubPivot::GetInstance().CmdSetPivotAngle(50_deg),
+        SubPivot::GetInstance().CmdSetPivotAngle(40_deg),
         SubShooter::GetInstance().CmdSetShooterAmp(),
-        CmdFeedOnceOnTarget()
+        CmdFeedOnceOnAmpTarget()
     )
     .Until([] {return !SubFeeder::GetInstance().CheckHasNote();})
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
@@ -55,7 +62,7 @@ frc2::CommandPtr CmdShootAmp(){
 
 frc2::CommandPtr CmdShootPassing(){
     return Parallel(
-        SubPivot::GetInstance().CmdSetPivotAngle(30_deg),
+        SubPivot::GetInstance().CmdSetPivotAngle(35_deg),
         SubShooter::GetInstance().CmdSetShooterPassing(),
         CmdFeedOnceOnTarget()
     )
@@ -65,6 +72,16 @@ frc2::CommandPtr CmdShootPassing(){
 
 frc2::CommandPtr CmdShootNeutral() {
     return SubShooter::GetInstance().CmdSetShooterSpeaker();
+}
+
+frc2::CommandPtr CmdShootSubwoofer() {
+    return Parallel(
+        SubPivot::GetInstance().CmdSetPivotAngle(55_deg),
+        SubShooter::GetInstance().CmdSetShooterSpeaker(),
+        CmdFeedOnceOnTarget()
+        )
+        .Until([] {return !SubFeeder::GetInstance().CheckHasNote();})
+        .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
 }
 
 frc2::CommandPtr CmdAimAtSpeakerWithVision(frc2::CommandXboxController& controller){
