@@ -11,6 +11,7 @@
 #include "stdio.h"
 #include "iostream"
 
+
 namespace cmd {
 using namespace frc2::cmd;
 frc2::CommandPtr CmdIntake(){
@@ -154,10 +155,10 @@ frc2::CommandPtr CmdShootSpeakerAuto() {
     else {
         return Parallel(
             SubPivot::GetInstance().CmdPivotFromVision([]{    /*default value = 60 degrees(Subwoofer shot)*/
-                return SubVision::GetInstance().GetSpeakerPitch().value_or(60_deg);}),
+                return SubVision::GetInstance().GetSpeakerPitch().value_or(60_deg);}).WithTimeout(1_s),
             SubShooter::GetInstance().CmdSetShooterSpeaker(),
-            CmdAimWithoutControl(),
-            CmdFeedOnceOnTarget().WithTimeout(1_s).AndThen(SubFeeder::GetInstance().FeedToShooter())
+            CmdAimWithoutControl().WithTimeout(1_s),
+            CmdFeedOnceOnTarget().WithTimeout(1_s).AndThen(SubFeeder::GetInstance().FeedToShooter().WithTimeout(1_s))
         )
         .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
     }

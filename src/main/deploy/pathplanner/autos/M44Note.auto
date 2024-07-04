@@ -16,12 +16,6 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              },
-              {
                 "type": "sequential",
                 "data": {
                   "commands": [
@@ -38,9 +32,28 @@
                       }
                     },
                     {
-                      "type": "path",
+                      "type": "race",
                       "data": {
-                        "pathName": "Subwoofer to As"
+                        "commands": [
+                          {
+                            "type": "path",
+                            "data": {
+                              "pathName": "Subwoofer to As"
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "IntakeSequence"
+                            }
+                          },
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 4.0
+                            }
+                          }
+                        ]
                       }
                     },
                     {
@@ -57,9 +70,28 @@
                       }
                     },
                     {
-                      "type": "path",
+                      "type": "race",
                       "data": {
-                        "pathName": "As to Ac"
+                        "commands": [
+                          {
+                            "type": "path",
+                            "data": {
+                              "pathName": "As to Ac"
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "IntakeSequence"
+                            }
+                          },
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 4.0
+                            }
+                          }
+                        ]
                       }
                     },
                     {
@@ -76,9 +108,28 @@
                       }
                     },
                     {
-                      "type": "path",
+                      "type": "race",
                       "data": {
-                        "pathName": "Ac to Aa"
+                        "commands": [
+                          {
+                            "type": "path",
+                            "data": {
+                              "pathName": "Ac to Aa"
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "IntakeSequence"
+                            }
+                          },
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 4.0
+                            }
+                          }
+                        ]
                       }
                     },
                     {

@@ -10,7 +10,6 @@
 
 void Robot::RobotInit() {
   frc::DataLogManager::Start();
-  frc::CameraServer::StartAutomaticCapture();
   frc::DriverStation::StartDataLog(frc::DataLogManager::GetLog(),true);
 }
 

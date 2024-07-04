@@ -20,10 +20,16 @@
 RobotContainer::RobotContainer(){
 
   pathplanner::NamedCommands::registerCommand("Intake", SubIntake::GetInstance().Intake());
+  pathplanner::NamedCommands::registerCommand("IntakeSequence", cmd::CmdIntake());
   pathplanner::NamedCommands::registerCommand("FeedToShooter", SubFeeder::GetInstance().FeedToShooter().WithTimeout(0.2_s));
   pathplanner::NamedCommands::registerCommand("Shoot", cmd::CmdShootNeutral());
+  pathplanner::NamedCommands::registerCommand("Feed", SubFeeder::GetInstance().FeedToShooter().WithTimeout(1_s));
   pathplanner::NamedCommands::registerCommand("FullSequenceShoot", cmd::CmdShootSpeakerAuto());
-  pathplanner::NamedCommands::registerCommand("SetSubwooferAngle", SubShooter::GetInstance().CmdSetShooterOff());
+  pathplanner::NamedCommands::registerCommand(
+      "SetSubwooferAngle",
+      SubPivot::GetInstance().CmdSetPivotAngle(50_deg).AndThen(
+          frc2::cmd::WaitUntil(
+              [] { return SubPivot::GetInstance().IsOnTarget(); })));
 
   std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("AA1.1");
 
@@ -33,10 +39,7 @@ RobotContainer::RobotContainer(){
   ConfigureBindings();
   SubVision::GetInstance();
 
-  _autoChooser.AddOption("AA1", "3CloseNote");
-  _autoChooser.AddOption("1Close2Far", "1Close2Far");
   _autoChooser.AddOption("M44Note", "M44Note");
-  _autoChooser.AddOption("Example Path", "Example Path");
 
   frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
 }
@@ -104,7 +107,7 @@ void RobotContainer::ConfigureBindings() {
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
   auto _autoSelected = _autoChooser.GetSelected();
   //units::second_t delay = _delayChooser.GetSelected() * 0.01_s;
-  units::second_t delay = 0.01_s;
+  units::second_t delay = 0.00_s;
   return frc2::cmd::Wait(delay)
       .AndThen(pathplanner::PathPlannerAuto(_autoSelected).ToPtr())
       .AlongWith(SubClimber::GetInstance().ClimberAutoReset().AndThen(
