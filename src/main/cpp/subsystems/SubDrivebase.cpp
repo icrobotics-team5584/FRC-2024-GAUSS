@@ -376,3 +376,40 @@ void SubDrivebase::SetNeutralMode(ctre::phoenix6::signals::NeutralModeValue mode
 units::degree_t SubDrivebase::GetPitch() {
   return _gyro.GetPitch() * 1_deg;
 }
+
+frc2::CommandPtr SubDrivebase::WheelCharecterisationCmd(){
+  static units::radian_t initialGyroHeading = 0_rad;
+  static units::radian_t initialWheelDistance = 0_rad;
+
+  return StartEnd(
+      [this]{
+        initialGyroHeading = GetHeading().Radians();
+        // initialWheelDistance =
+        //     (_frontRight.GetPosition().distance + _frontLeft.GetPosition().distance +
+        //      _backRight.GetPosition().distance + _backLeft.GetPosition().distance) /
+        //     4;
+        initialWheelDistance = _frontRight.GetDrivenRotations();
+        _forwardSpeedRequest = 0_mps;
+        _sidewaysSpeedRequest = 0_mps;
+        _rotationSpeedRequest = 15_deg_per_s;
+      },
+      [this] {
+        units::meter_t drivebaseRadius = _frontLeftLocation.Norm();
+        units::radian_t finalGyroHeading = GetHeading().Radians();
+        // auto finalWheelDistance =
+        //     (_frontRight.GetPosition().distance + _frontLeft.GetPosition().distance +
+        //      _backRight.GetPosition().distance + _backLeft.GetPosition().distance) /
+        //     4;
+        units::radian_t finalWheelDistance = _frontRight.GetDrivenRotations();
+        _rotationSpeedRequest = 0_deg_per_s;
+
+        units::radian_t gyroDelta = finalGyroHeading - initialGyroHeading;
+        units::radian_t wheelDistanceDelta = finalWheelDistance - initialWheelDistance;
+
+        frc::SmartDashboard::PutNumber("Drivebase/WheelCharacterisation/CalcedWheelRadius",
+                                       ((gyroDelta * drivebaseRadius) / wheelDistanceDelta).value());
+        frc::SmartDashboard::PutNumber("Drivebase/WheelCharacterisation/Gyro", gyroDelta.value());
+        frc::SmartDashboard::PutNumber("Drivebase/WheelCharacterisation/DrivebaseRadius", drivebaseRadius.value());
+        frc::SmartDashboard::PutNumber("Drivebase/WheelCharacterisation/WheelDistance", wheelDistanceDelta.value());
+      });
+}
