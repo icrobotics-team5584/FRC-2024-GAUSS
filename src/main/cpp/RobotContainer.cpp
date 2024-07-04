@@ -32,8 +32,8 @@ RobotContainer::RobotContainer(){
   ConfigureBindings();
   SubVision::GetInstance();
 
-  _autoChooser.AddOption("AA1", "3CloseNoteAuto");
-  _autoChooser.AddOption("1Close2Far", "1Close2FarAuto");
+  _autoChooser.AddOption("AA1", "3CloseNote");
+  _autoChooser.AddOption("1Close2Far", "1Close2Far");
   _autoChooser.AddOption("M44Note", "M44Note");
   _autoChooser.AddOption("Example Path", "Example Path");
 
