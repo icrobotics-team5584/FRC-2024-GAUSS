@@ -15,7 +15,7 @@ SubClimber::SubClimber() {
     _lClimbMotor.SetPIDFF(lP,lI,lD,lF);
     _lClimbMotor.SetInverted(false);
     // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TopHeight).value());
-    // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0.001_m).value());
+    // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0_m).value());
 
     //Set up right motor
     _rClimbMotor.SetConversionFactor(1.0 / gearRatio);
@@ -23,7 +23,7 @@ SubClimber::SubClimber() {
     _rClimbMotor.SetPIDFF(rP,rI,rD,rF);
     _rClimbMotor.SetInverted(true);
     // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TopHeight).value());
-    // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0.001_m).value()); 
+    // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0_m).value()); 
     
     //Enable top and bottom limit
     EnableSoftLimit(false);

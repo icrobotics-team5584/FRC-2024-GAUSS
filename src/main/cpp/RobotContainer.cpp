@@ -50,12 +50,10 @@ void RobotContainer::ConfigureBindings() {
   //Letters
   // _operatorController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(65_deg));
   // _operatorController.B().WhileTrue(cmd::CmdShootAmp());
-  _operatorController.A().WhileTrue(SubClimber::GetInstance().ClimberManualDrive(0.5));
-  _operatorController.A().OnFalse(SubClimber::GetInstance().ClimberStop());
-  _operatorController.B().OnFalse(SubClimber::GetInstance().ClimberStop());
-  _operatorController.B().WhileTrue(SubClimber::GetInstance().ClimberManualDrive(-0.5));
-  _operatorController.Y().OnTrue(SubClimber::GetInstance().ClimberPosition(0_m));
-  _operatorController.X().OnTrue(SubClimber::GetInstance().ClimberPosition(0.52_m));
+  _operatorController.Y().WhileTrue(SubClimber::GetInstance().ClimberManualDrive(0.5));
+  _operatorController.Y().OnFalse(SubClimber::GetInstance().ClimberStop());
+  _operatorController.X().OnFalse(SubClimber::GetInstance().ClimberStop());
+  _operatorController.X().WhileTrue(SubClimber::GetInstance().ClimberManualDrive(-0.5));
   //POV
   POVHelper::Left(&_operatorController).OnTrue(SubShooter::GetInstance().CmdSetShooterOff());
   POVHelper::Right(&_operatorController).WhileTrue(cmd::CmdOuttake());
