@@ -34,7 +34,7 @@ RobotContainer::RobotContainer(){
 
   _autoChooser.AddOption("AA1", "3CloseNoteAuto");
   _autoChooser.AddOption("1Close2Far", "1Close2FarAuto");
-  _autoChooser.AddOption("WhateverItIs", "WhateverItIs");
+  _autoChooser.AddOption("M44Note", "M44Note");
   _autoChooser.AddOption("Example Path", "Example Path");
 
   frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
