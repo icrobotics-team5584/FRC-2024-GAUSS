@@ -53,6 +53,8 @@ private:
   static constexpr units::kilogram_t SHOOTER_MASS = 13_kg;
   static constexpr units::degree_t SHOOTER_MIN_ANGLE = 0_deg;
   static constexpr units::degree_t SHOOTER_MAX_ANGLE = 100_deg; //Needs to be double checked with amp
+  static constexpr units::turn_t LOW_STOP = 14_deg;
+  static constexpr units::turn_t HIGH_STOP = 90_deg;
 
   frc::ArmFeedforward _pivotFF{PIVOT_S, PIVOT_G, PIVOT_V, PIVOT_A};
 
