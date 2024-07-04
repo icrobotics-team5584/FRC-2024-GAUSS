@@ -15,7 +15,8 @@ namespace cmd {
 using namespace frc2::cmd;
 frc2::CommandPtr CmdIntake(){
     return SubIntake::GetInstance().Intake().AlongWith(SubFeeder::GetInstance().FeedToShooter())
-    .Until([]{return SubFeeder::GetInstance().CheckHasNote();});
+    .Until([]{return SubFeeder::GetInstance().CheckHasNote();})
+    .AndThen(SubFeeder::GetInstance().StopFeeder());
 }
 
 frc2::CommandPtr CmdFeedOnceOnTarget() {
@@ -23,6 +24,13 @@ frc2::CommandPtr CmdFeedOnceOnTarget() {
             WaitUntil([]{return SubPivot::GetInstance().IsOnTarget();}),
             WaitUntil([]{return SubShooter::GetInstance().IsOnTarget();}),
             WaitUntil([]{return SubVision::GetInstance().IsFacingTarget();}),
+            SubFeeder::GetInstance().FeedToShooter()
+        );
+}
+frc2::CommandPtr CmdFeedOnceOnAmpTarget() {
+    return Sequence(
+            WaitUntil([]{return SubPivot::GetInstance().IsOnTarget();}),
+            WaitUntil([]{return SubShooter::GetInstance().IsOnTarget();}),
             SubFeeder::GetInstance().FeedToShooter()
         );
 }
@@ -34,7 +42,7 @@ frc2::CommandPtr CmdOuttake(){
 frc2::CommandPtr CmdShootSpeaker(frc2::CommandXboxController& controller){
     return Parallel(
         SubPivot::GetInstance().CmdPivotFromVision([]{    /*default value = 60 degrees(Subwoofer shot)*/
-            return SubVision::GetInstance().GetSpeakerPitch().value_or(60_deg);}),
+            return SubVision::GetInstance().GetLatestSpeakerPitch().value_or(60_deg);}),
         SubShooter::GetInstance().CmdSetShooterSpeaker(),
         CmdAimAtSpeakerWithVision(controller),
         CmdFeedOnceOnTarget()
@@ -44,9 +52,9 @@ frc2::CommandPtr CmdShootSpeaker(frc2::CommandXboxController& controller){
 
 frc2::CommandPtr CmdShootAmp(){
     return Parallel(
-        SubPivot::GetInstance().CmdSetPivotAngle(90_deg),
+        SubPivot::GetInstance().CmdSetPivotAngle(40_deg),
         SubShooter::GetInstance().CmdSetShooterAmp(),
-        CmdFeedOnceOnTarget()
+        CmdFeedOnceOnAmpTarget()
     )
     .Until([] {return !SubFeeder::GetInstance().CheckHasNote();})
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
@@ -54,7 +62,7 @@ frc2::CommandPtr CmdShootAmp(){
 
 frc2::CommandPtr CmdShootPassing(){
     return Parallel(
-        SubPivot::GetInstance().CmdSetPivotAngle(30_deg),
+        SubPivot::GetInstance().CmdSetPivotAngle(35_deg),
         SubShooter::GetInstance().CmdSetShooterPassing(),
         CmdFeedOnceOnTarget()
     )
@@ -64,6 +72,16 @@ frc2::CommandPtr CmdShootPassing(){
 
 frc2::CommandPtr CmdShootNeutral() {
     return SubShooter::GetInstance().CmdSetShooterSpeaker();
+}
+
+frc2::CommandPtr CmdShootSubwoofer() {
+    return Parallel(
+        SubPivot::GetInstance().CmdSetPivotAngle(55_deg),
+        SubShooter::GetInstance().CmdSetShooterSpeaker(),
+        CmdFeedOnceOnTarget()
+        )
+        .Until([] {return !SubFeeder::GetInstance().CheckHasNote();})
+        .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
 }
 
 frc2::CommandPtr CmdAimAtSpeakerWithVision(frc2::CommandXboxController& controller){
@@ -82,7 +100,7 @@ frc2::CommandPtr CmdAimAtSpeakerWithVision(frc2::CommandXboxController& controll
 
         units::degree_t currentGyroYaw = SubDrivebase::GetInstance().GetHeading().Degrees();
         units::degree_t gyroAngleTravelled = currentGyroYaw - startingGyroYaw;
-        units::degree_t errorAngle = camYaw - gyroAngleTravelled;
+        units::degree_t errorAngle = -camYaw - gyroAngleTravelled;
         frc::SmartDashboard::PutNumber("Vision/Result", result.value_or(0_deg).value());
         frc::SmartDashboard::PutNumber("Vision/currentGyroYaw ", currentGyroYaw.value());
         frc::SmartDashboard::PutNumber("Vision/startingGyroYaw ", startingGyroYaw.value());

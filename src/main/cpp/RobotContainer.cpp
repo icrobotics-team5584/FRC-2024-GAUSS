@@ -34,6 +34,8 @@ void RobotContainer::ConfigureBindings() {
   
   //Letters
   _driverController.Y().OnTrue(SubDrivebase::GetInstance().ResetGyroCmd());
+  _driverController.B().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(40_deg)); //Remove later
+  _driverController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(20_deg)); //Remove later
   //POV
 
   //Operator
@@ -41,10 +43,10 @@ void RobotContainer::ConfigureBindings() {
   //Triggers
   _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker(_driverController));
   
-  
   //Bumpers
   _operatorController.RightBumper().WhileTrue(cmd::CmdShootPassing());
   _operatorController.LeftBumper().WhileTrue(cmd::CmdShootNeutral());
+
   //Letters
   // _operatorController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(65_deg));
   // _operatorController.B().WhileTrue(cmd::CmdShootAmp());
@@ -61,7 +63,7 @@ void RobotContainer::ConfigureBindings() {
   POVHelper::Up(&_operatorController).OnTrue(SubClimber::GetInstance().ClimberResetZero());
   // POVHelper::Down(&_operatorController).OnTrue(SubClimber::GetInstance().ClimberResetTop());
 
-  //Robot triggers
+  //Triggers
   frc2::Trigger{[]{return SubFeeder::GetInstance().CheckHasNote();}}.OnTrue(Rumble(1, 0.3_s));  
 
   frc2::Trigger(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop(), [=, this] {
