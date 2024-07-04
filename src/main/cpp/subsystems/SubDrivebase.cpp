@@ -58,7 +58,7 @@ SubDrivebase::SubDrivebase() {
       [this](frc::ChassisSpeeds speeds) {
         _sidewaysSpeedRequest = speeds.vy;  // TEST!
         _forwardSpeedRequest = speeds.vx;
-        _rotationSpeedRequest = -speeds.omega;
+        _rotationSpeedRequest = speeds.omega;
         _fieldOrientedRequest = false;
         // Drive(speeds.vx, speeds.vy, -speeds.omega, false);
       },  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
