@@ -8,6 +8,8 @@
 #include "subsystems/SubIntake.h"
 #include "subsystems/SubShooter.h"
 #include "subsystems/SubVision.h"
+#include "subsystems/SubClimber.h"
+#include <frc/DriverStation.h>
 #include "stdio.h"
 #include "iostream"
 
@@ -17,8 +19,9 @@ using namespace frc2::cmd;
 frc2::CommandPtr CmdIntake(){
     return SubIntake::GetInstance().Intake().AlongWith(SubFeeder::GetInstance().FeedToShooter())
     .Until([]{return SubFeeder::GetInstance().CheckHasNote();})
-    .AndThen(SubFeeder::GetInstance().StopFeeder());
+    .AndThen(SubFeeder::GetInstance().ReverseFeeder().WithTimeout(0.2_s));
 }
+
 
 frc2::CommandPtr CmdFeedOnceOnTarget() {
     return Sequence(
@@ -65,7 +68,7 @@ frc2::CommandPtr CmdShootPassing(){
     return Parallel(
         SubPivot::GetInstance().CmdSetPivotAngle(35_deg),
         SubShooter::GetInstance().CmdSetShooterPassing(),
-        CmdFeedOnceOnTarget()
+        CmdFeedOnceOnAmpTarget()
     )
     .Until([] {return !SubFeeder::GetInstance().CheckHasNote();})
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
@@ -77,11 +80,11 @@ frc2::CommandPtr CmdShootNeutral() {
 
 frc2::CommandPtr CmdShootSubwoofer() {
     return Parallel(
-        SubPivot::GetInstance().CmdSetPivotAngle(55_deg),
+        SubPivot::GetInstance().CmdSetPivotAngle(37_deg),
         SubShooter::GetInstance().CmdSetShooterSpeaker(),
-        CmdFeedOnceOnTarget()
+        CmdFeedOnceOnAmpTarget()
         )
-        .Until([] {return !SubFeeder::GetInstance().CheckHasNote();})
+        // .Until([] {return !SubFeeder::GetInstance().CheckHasNote();})
         .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
 }
 
@@ -155,12 +158,22 @@ frc2::CommandPtr CmdShootSpeakerAuto() {
     else {
         return Parallel(
             SubPivot::GetInstance().CmdPivotFromVision([]{    /*default value = 60 degrees(Subwoofer shot)*/
-                return SubVision::GetInstance().GetSpeakerPitch().value_or(60_deg);}).WithTimeout(1_s),
+                return SubVision::GetInstance().GetSpeakerPitch().value_or(35_deg);}).WithTimeout(1_s),
             SubShooter::GetInstance().CmdSetShooterSpeaker(),
-            CmdAimWithoutControl().WithTimeout(1_s),
-            CmdFeedOnceOnTarget().WithTimeout(1_s).AndThen(SubFeeder::GetInstance().FeedToShooter().WithTimeout(1_s))
+            // CmdAimWithoutControl().WithTimeout(1_s),
+            CmdFeedOnceOnTarget().WithTimeout(2_s).AndThen(SubFeeder::GetInstance().FeedToShooter().WithTimeout(2_s)),
+            RunOnce([]() {frc::SmartDashboard::PutBoolean("Alliance is blue", frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kBlue);})
         )
         .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
     }
+}
+
+frc2::CommandPtr CmdClimb() {
+    return Parallel(
+        SubPivot::GetInstance().CmdSetPivotAngle(2_deg).AndThen(
+          frc2::cmd::WaitUntil(
+              [] { return SubPivot::GetInstance().IsOnTarget(); })),
+        SubClimber::GetInstance().ClimberManualDrive(-0.5)
+    );
 }
 }

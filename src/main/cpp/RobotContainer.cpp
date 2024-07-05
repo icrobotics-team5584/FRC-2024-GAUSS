@@ -31,7 +31,7 @@ RobotContainer::RobotContainer(){
   pathplanner::NamedCommands::registerCommand("FullSequenceShoot", cmd::CmdShootSpeakerAuto());
   pathplanner::NamedCommands::registerCommand(
       "SetSubwooferAngle",
-      SubPivot::GetInstance().CmdSetPivotAngle(50_deg).AndThen(
+      SubPivot::GetInstance().CmdSetPivotAngle(35_deg).AndThen(
           frc2::cmd::WaitUntil(
               [] { return SubPivot::GetInstance().IsOnTarget(); })));
 
@@ -44,6 +44,7 @@ RobotContainer::RobotContainer(){
   SubVision::GetInstance();
 
   _autoChooser.AddOption("M44Note", "M44Note");
+  _autoChooser.AddOption("Dont Move", "Dont Move");
 
   frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
 }
@@ -53,40 +54,42 @@ void RobotContainer::ConfigureBindings() {
 
   //Triggers
   _driverController.RightTrigger().WhileTrue(cmd::CmdIntake());
+  _driverController.LeftTrigger().WhileTrue(cmd::CmdOuttake());
   //Bumpers
   
   //Letters
   _driverController.Y().OnTrue(SubDrivebase::GetInstance().ResetGyroCmd());
-  _driverController.B().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(40_deg)); //Remove later
-  _driverController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(20_deg)); //Remove later
+
   //POV
 
   //Operator
 
   //Triggers
+  _operatorController.LeftTrigger().WhileTrue(cmd::CmdShootNeutral());
   _operatorController.RightTrigger().WhileTrue(cmd::CmdShootSpeaker(_driverController));
   
   //Bumpers
-  _operatorController.RightBumper().WhileTrue(cmd::CmdShootPassing());
-  _operatorController.LeftBumper().WhileTrue(cmd::CmdShootNeutral());
+  _operatorController.LeftBumper().WhileTrue(cmd::CmdShootPassing());
+  _operatorController.RightBumper().WhileTrue(cmd::CmdShootSubwoofer());
 
   //Letters
-  _operatorController.A().WhileTrue(cmd::CmdShootSubwoofer());
-  _operatorController.B().WhileTrue(cmd::CmdShootAmp());
+  _operatorController.A().WhileTrue(cmd::CmdShootAmp());
+  _operatorController.B().WhileTrue(cmd::CmdOuttake());
+  _operatorController.Y().OnTrue(SubShooter::GetInstance().CmdSetShooterOff());
+
   //POV
-  POVHelper::Left(&_operatorController).OnTrue(SubShooter::GetInstance().CmdSetShooterOff());
-  POVHelper::Right(&_operatorController).WhileTrue(cmd::CmdOuttake());
   // _operatorController.A().WhileTrue(SubPivot::GetInstance().CmdSetPivotAngle(65_deg));
   // _operatorController.B().WhileTrue(cmd::CmdShootAmp());
-  _operatorController.Y().WhileTrue(SubClimber::GetInstance().ClimberManualDrive(0.5));
-  _operatorController.Y().OnFalse(SubClimber::GetInstance().ClimberStop());
-  _operatorController.X().OnFalse(SubClimber::GetInstance().ClimberStop());
-  _operatorController.X().WhileTrue(SubClimber::GetInstance().ClimberManualDrive(-0.5));
+  
+  
+
   //POV
-  POVHelper::Left(&_operatorController).OnTrue(SubShooter::GetInstance().CmdSetShooterOff());
-  POVHelper::Right(&_operatorController).WhileTrue(cmd::CmdOuttake());
-  POVHelper::Down(&_operatorController).WhileTrue(SubClimber::GetInstance().ClimberAutoReset());
-  POVHelper::Up(&_operatorController).OnTrue(SubClimber::GetInstance().ClimberResetZero());
+  POVHelper::Up(&_operatorController).OnFalse(SubClimber::GetInstance().ClimberStop());
+  // POVHelper::Up(&_operatorController).WhileTrue(SubClimber::GetInstance().ClimberManualDrive(-0.5));
+  POVHelper::Up(&_operatorController).WhileTrue(cmd::CmdClimb());
+  POVHelper::Down(&_operatorController).WhileTrue(SubClimber::GetInstance().ClimberManualDrive(0.5));
+  POVHelper::Down(&_operatorController).OnFalse(SubClimber::GetInstance().ClimberStop());
+  POVHelper::Right(&_operatorController).WhileTrue(SubClimber::GetInstance().ClimberAutoReset());
   // POVHelper::Down(&_operatorController).OnTrue(SubClimber::GetInstance().ClimberResetTop());
 
   //Triggers
@@ -96,6 +99,7 @@ void RobotContainer::ConfigureBindings() {
     return (_operatorController.GetLeftY() < -0.2 || _operatorController.GetLeftY() > 0.2) &&
     !(_operatorController.GetRightY() < -0.2 || _operatorController.GetRightY() > 0.2);
   }).WhileTrue(SubClimber::GetInstance().ClimberJoystickDriveLeft(_operatorController));
+
 
   frc2::Trigger(frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop(), [=, this] {
     return (_operatorController.GetRightY() < -0.2 || _operatorController.GetRightY() > 0.2) &&

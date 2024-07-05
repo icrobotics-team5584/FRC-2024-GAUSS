@@ -12,15 +12,28 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "SetSubwooferAngle"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "SetShooterToSpeakerSpeed"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "SetSubwooferAngle"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Shoot"
+            "name": "Feed"
           }
         }
       ]

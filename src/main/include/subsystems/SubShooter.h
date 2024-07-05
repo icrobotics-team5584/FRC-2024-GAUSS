@@ -43,8 +43,8 @@ class SubShooter : public frc2::SubsystemBase {
   ctre::phoenix6::controls::VelocityVoltage _flywheelTargetVelocity{0_tps, 0_tr_per_s_sq, true, 0_V, 0, false};
   
   units::turns_per_second_t ShooterOff = 0_tps;
-  units::turns_per_second_t SpeakerSpeedLeft = 70_tps;
-  units::turns_per_second_t SpeakerSpeedRight = 50_tps;
+  units::turns_per_second_t SpeakerSpeedLeft = 50_tps;
+  units::turns_per_second_t SpeakerSpeedRight = 70_tps;
   units::turns_per_second_t PassingSpeed = 55_tps;
   units::turns_per_second_t AmpSpeed = 15_tps;
 

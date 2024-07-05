@@ -87,7 +87,7 @@ class SubClimber : public frc2::SubsystemBase {
   
                           rP = 5, rI = 0.0, rD = 0.0, rF = 0;
 
-  static constexpr double currentLimit = 15;
+  static constexpr double currentLimit = 10;
 
   // Unit translation
   static constexpr units::meter_t WheelCir = 0.157_m;
