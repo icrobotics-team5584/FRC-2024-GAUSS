@@ -46,6 +46,7 @@ RobotContainer::RobotContainer(){
   _autoChooser.AddOption("M44Note", "M44Note");
   _autoChooser.AddOption("Dont Move", "Dont Move");
   _autoChooser.AddOption("S1 (C4 first)", "S1 (C4 first)");
+  _autoChooser.AddOption("S1 (C5 first)", "S1 (C5 first)");
 
   frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
 }
