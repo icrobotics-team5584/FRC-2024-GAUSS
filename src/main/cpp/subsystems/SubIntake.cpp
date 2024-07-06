@@ -12,6 +12,7 @@ using namespace frc2::cmd;
 
 SubIntake::SubIntake() {
   _intakeMotor.SetInverted(false);
+  _intakeMotor.BurnFlash();
 }
 
 frc2::CommandPtr SubIntake::Outtake() {

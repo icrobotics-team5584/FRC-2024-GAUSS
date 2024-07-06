@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.8012958736331153,
-        "y": 4.145636137206654
+        "x": 2.754452527449989,
+        "y": 4.19247948338978
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.2678858191206999,
-        "y": 4.837111684773134
+        "x": 1.2210424729375737,
+        "y": 4.883955030956261
       },
       "isLocked": false,
       "linkedName": "Subwoofer to As link endpoint to As to Ac"

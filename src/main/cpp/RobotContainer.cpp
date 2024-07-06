@@ -31,7 +31,7 @@ RobotContainer::RobotContainer(){
   pathplanner::NamedCommands::registerCommand("FullSequenceShoot", cmd::CmdShootSpeakerAuto());
   pathplanner::NamedCommands::registerCommand(
       "SetSubwooferAngle",
-      SubPivot::GetInstance().CmdSetPivotAngle(35_deg).AndThen(
+      SubPivot::GetInstance().CmdSetPivotAngle(39_deg).AndThen(
           frc2::cmd::WaitUntil(
               [] { return SubPivot::GetInstance().IsOnTarget(); })));
 
@@ -45,6 +45,7 @@ RobotContainer::RobotContainer(){
 
   _autoChooser.AddOption("M44Note", "M44Note");
   _autoChooser.AddOption("Dont Move", "Dont Move");
+  _autoChooser.AddOption("S1 (C4 first)", "S1 (C4 first)");
 
   frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
 }
