@@ -1,0 +1,112 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.7050561319382253,
+      "y": 4.356431195030721
+    },
+    "rotation": 120.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "parallel",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Intake"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "StartShooter"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "ShooterChangePosFar"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "Start to As"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "VisionAlign"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "AutoShootFullSequence"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "As to C5"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "VisionAlign"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "AutoShootFullSequence"
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "As to C4"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "VisionAlign"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "AutoShootFullSequence"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

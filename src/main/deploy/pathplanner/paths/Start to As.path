@@ -1,0 +1,52 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 0.7050561319382253,
+        "y": 4.356431195030721
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 0.9861162090369812,
+        "y": 4.251033666118686
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.05,
+        "y": 3.1
+      },
+      "prevControl": {
+        "x": 1.548236363234494,
+        "y": 3.1385041942694443
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Speaker-Side Shoot Pos"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 5.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0.0,
+    "rotation": 130.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "S1 (C5 first)",
+  "previewStartingState": {
+    "rotation": 120.0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}

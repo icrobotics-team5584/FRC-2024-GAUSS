@@ -80,7 +80,7 @@ frc2::CommandPtr CmdShootNeutral() {
 
 frc2::CommandPtr CmdShootSubwoofer() {
     return Parallel(
-        SubPivot::GetInstance().CmdSetPivotAngle(37_deg),
+        SubPivot::GetInstance().CmdSetPivotAngle(39_deg),
         SubShooter::GetInstance().CmdSetShooterSpeaker(),
         CmdFeedOnceOnAmpTarget()
         )
@@ -134,7 +134,7 @@ frc2::CommandPtr CmdAimWithoutControl(){ // For auto
 
         units::degree_t currentGyroYaw = SubDrivebase::GetInstance().GetHeading().Degrees();
         units::degree_t gyroAngleTravelled = currentGyroYaw - startingGyroYaw;
-        units::degree_t errorAngle = camYaw - gyroAngleTravelled;
+        units::degree_t errorAngle = -camYaw - gyroAngleTravelled;
         frc::SmartDashboard::PutNumber("Vision/Result", result.value_or(0_deg).value());
         frc::SmartDashboard::PutNumber("Vision/currentGyroYaw ", currentGyroYaw.value());
         frc::SmartDashboard::PutNumber("Vision/startingGyroYaw ", startingGyroYaw.value());

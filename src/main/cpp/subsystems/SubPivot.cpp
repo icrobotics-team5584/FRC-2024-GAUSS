@@ -31,14 +31,14 @@ SubPivot::SubPivot(){
     // _pitchTable.insert(0_deg, 21.5_deg);
     // _pitchTable.insert(9_deg, 28_deg);
     // _pitchTable.insert(10_deg, 29_deg);
-    _pitchTable.insert(-12_deg, 10.25_deg);
-    _pitchTable.insert(-11_deg, 11_deg);
-    _pitchTable.insert(-10_deg, 12_deg);
-    _pitchTable.insert(-9_deg, 13.5_deg);
-    _pitchTable.insert(-4.5_deg, 18.5_deg);
-    _pitchTable.insert(0_deg, 23_deg);
-    _pitchTable.insert(9_deg, 29.5_deg);
-    _pitchTable.insert(10_deg, 30.5_deg);
+    _pitchTable.insert(-12_deg, 12.75_deg);
+    _pitchTable.insert(-11_deg, 13.5_deg);
+    _pitchTable.insert(-10_deg, 14.5_deg);
+    _pitchTable.insert(-9_deg, 16_deg);
+    _pitchTable.insert(-4.5_deg, 21_deg);
+    _pitchTable.insert(0_deg, 25.5_deg);
+    _pitchTable.insert(9_deg, 31.5_deg);
+    _pitchTable.insert(10_deg, 33_deg);
 
 
     _pivotMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, LOW_STOP.value());

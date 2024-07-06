@@ -38,7 +38,7 @@ SwerveModule::SwerveModule(int canDriveMotorID, int canTurnMotorID, int canTurnE
   _configCanDriveMotor.Slot0.kI = DRIVE_I;
   _configCanDriveMotor.Slot0.kD = DRIVE_D;
   _configCanDriveMotor.CurrentLimits.SupplyCurrentLimitEnable = true;
-  _configCanDriveMotor.CurrentLimits.SupplyCurrentLimit = 50.0;
+  _configCanDriveMotor.CurrentLimits.SupplyCurrentLimit = 40.0;
   _configCanDriveMotor.CurrentLimits.SupplyCurrentThreshold = 60.0;
   _configCanDriveMotor.CurrentLimits.SupplyTimeThreshold = 0.1;
   _configCanDriveMotor.Slot0.kS = DRIVE_S;
