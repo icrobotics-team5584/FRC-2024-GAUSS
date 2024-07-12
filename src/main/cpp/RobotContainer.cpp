@@ -31,7 +31,7 @@ RobotContainer::RobotContainer(){
   pathplanner::NamedCommands::registerCommand("FullSequenceShoot", cmd::CmdShootSpeakerAuto());
   pathplanner::NamedCommands::registerCommand(
       "SetSubwooferAngle",
-      SubPivot::GetInstance().CmdSetPivotAngle(39_deg).AndThen(
+      SubPivot::GetInstance().CmdSetPivotAngle(41_deg).AndThen(
           frc2::cmd::WaitUntil(
               [] { return SubPivot::GetInstance().IsOnTarget(); })));
 
@@ -45,7 +45,6 @@ RobotContainer::RobotContainer(){
 
   _autoChooser.AddOption("M44Note", "M44Note");
   _autoChooser.AddOption("Dont Move", "Dont Move");
-  _autoChooser.AddOption("S1 (C4 first)", "S1 (C4 first)");
   _autoChooser.AddOption("S1 (C5 first)", "S1 (C5 first)");
 
   frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
@@ -58,7 +57,7 @@ void RobotContainer::ConfigureBindings() {
   _driverController.RightTrigger().WhileTrue(cmd::CmdIntake());
   _driverController.LeftTrigger().WhileTrue(cmd::CmdOuttake());
   //Bumpers
-  
+   _driverController.LeftBumper().WhileTrue(cmd::CmdSourcePickUp());
   //Letters
   _driverController.Y().OnTrue(SubDrivebase::GetInstance().ResetGyroCmd());
 

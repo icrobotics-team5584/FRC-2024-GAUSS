@@ -59,6 +59,13 @@ frc2::CommandPtr SubShooter::CmdSetShooterOff(){
         _ShooterFlywheelMotorRight.SetControl(_flywheelTargetVelocity.WithVelocity(ShooterOff));
         });
 }
+frc2::CommandPtr SubShooter::CmdSourcePickUpIntake(){
+    return RunOnce([this]{
+        _ShooterFlywheelMotorLeft.Set(-1);
+        _ShooterFlywheelMotorRight.Set(-1);
+
+    });
+}
 
 bool SubShooter::IsOnTarget() {
     auto tolerance = 1_tps;

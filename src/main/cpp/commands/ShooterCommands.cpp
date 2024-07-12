@@ -64,6 +64,15 @@ frc2::CommandPtr CmdShootAmp(){
     .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff();});
 }
 
+frc2::CommandPtr CmdSourcePickUp(){
+    return Parallel(
+        SubPivot::GetInstance().CmdSetPivotAngle(35_deg),
+        SubShooter::GetInstance().CmdSourcePickUpIntake(),
+        SubFeeder::GetInstance().CmdSourcePickUpFeeder()
+    )
+    .FinallyDo([] {SubShooter::GetInstance().CmdSetShooterOff(); SubFeeder::GetInstance().StopFeeder();});
+}
+
 frc2::CommandPtr CmdShootPassing(){
     return Parallel(
         SubPivot::GetInstance().CmdSetPivotAngle(35_deg),
@@ -80,7 +89,7 @@ frc2::CommandPtr CmdShootNeutral() {
 
 frc2::CommandPtr CmdShootSubwoofer() {
     return Parallel(
-        SubPivot::GetInstance().CmdSetPivotAngle(39_deg),
+        SubPivot::GetInstance().CmdSetPivotAngle(41_deg),
         SubShooter::GetInstance().CmdSetShooterSpeaker(),
         CmdFeedOnceOnAmpTarget()
         )

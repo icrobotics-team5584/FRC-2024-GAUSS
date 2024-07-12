@@ -31,6 +31,12 @@ frc2::CommandPtr SubFeeder::StopFeeder() {
   return Run([this] { _feederMotor.Set(0); });
 }
 
+frc2::CommandPtr SubFeeder::CmdSourcePickUpFeeder(){
+    return RunOnce([this]{
+        _feederMotor.Set(-1);
+    });
+}
+
 
 // This method will be called once per scheduler run
 void SubFeeder::Periodic() {

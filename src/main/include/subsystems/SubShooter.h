@@ -29,6 +29,7 @@ class SubShooter : public frc2::SubsystemBase {
   frc2::CommandPtr CmdSetShooterAmp();
   frc2::CommandPtr CmdSetShooterPassing();
   frc2::CommandPtr CmdSetShooterOff();
+  frc2::CommandPtr CmdSourcePickUpIntake();
   bool IsOnTarget();
   /**
    * Will be called periodically whenever the CommandScheduler runs.
