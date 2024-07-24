@@ -10,17 +10,32 @@
         "header": {
           "open": true
         }
+      },
+      "window": {
+        "visible": false
       }
     }
   },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Chosen Path": "String Chooser",
+      "/SmartDashboard/Climber/Mech Display": "Mechanism2d",
       "/SmartDashboard/Drivebase/Vision/Rotation Controller: ": "ProfiledPIDController",
       "/SmartDashboard/arducam Sim Field": "Field2d",
       "/SmartDashboard/field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/Chosen Path": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Climber/Mech Display": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/field": {
         "bottom": 1476,
         "height": 8.210550308227539,
@@ -37,13 +52,16 @@
   "NetworkTables": {
     "transitory": {
       "SmartDashboard": {
+        "Chosen Path": {
+          "open": true,
+          "string[]##v_/SmartDashboard/Chosen Path/options": {
+            "open": true
+          }
+        },
         "Feeder": {
           "Motor": {
             "open": true
           }
-        },
-        "Intake": {
-          "open": true
         },
         "Pivot": {
           "Motor": {
@@ -51,10 +69,18 @@
           },
           "open": true
         },
+        "Shooter": {
+          "open": true
+        },
         "Target": {
           "open": true
         },
         "open": true
+      },
+      "photonvision": {
+        "arducam": {
+          "open": true
+        }
       }
     }
   },
@@ -153,7 +179,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": -30,
+          "height": 0,
           "series": [
             {
               "color": [
@@ -196,6 +222,46 @@
           ],
           "yaxis2": true,
           "yaxis3": true
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    },
+    "Plot <4>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 0
+        }
+      ]
+    },
+    "Plot <5>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 332,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Shooter/SpeedLeft"
+            }
+          ]
         }
       ]
     }

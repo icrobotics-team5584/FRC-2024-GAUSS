@@ -21,21 +21,16 @@ SubVision::SubVision() {
 void SubVision::Periodic() {
   const auto& result = camera.GetLatestResult();
   double _pitchtotarget = {result.GetBestTarget().GetPitch()};
-  frc::SmartDashboard::PutNumber("April Pitch", _pitchtotarget);
-  frc::SmartDashboard::PutNumber("Speaker Pitch", GetSpeakerPitch().value_or(-1000_deg).value());
+  frc::SmartDashboard::PutNumber("Vision/April Pitch", _pitchtotarget);
+  frc::SmartDashboard::PutNumber("Vision/Speaker Pitch", GetSpeakerPitch().value_or(-1000_deg).value());
+  frc::SmartDashboard::PutNumber("Target/YawOnTarget", IsFacingTarget());
   }
 
 void SubVision::SimulationPeriodic() {
   _visionSim.ProcessFrame(SubDrivebase::GetInstance().GetPose());
 };
 
-units::degree_t SubVision::GetTagPitch() {
-  const auto& result = camera.GetLatestResult();
-  double pitchToTarget = {result.GetBestTarget().GetPitch()};
-  return pitchToTarget * 1_deg;
-}
-
-std::optional<units::degree_t> SubVision::GetSpeakerPitch() {
+std::optional<photon::PhotonTrackedTarget> SubVision::GetSpeakerTarget() {
   auto alliance = frc::DriverStation::GetAlliance();
   std::array <int, 2> desiredIDs{-1, -1};
   if(alliance){
@@ -58,10 +53,50 @@ std::optional<units::degree_t> SubVision::GetSpeakerPitch() {
   auto tagResult = std::ranges::find_if(latestTargets, checkRightApriltag);
 
   if (tagResult != latestTargets.end()) {
-    return tagResult->GetPitch() * (1_deg);
+    return *tagResult;
   }
   else {
     return {};
   }
 
+}
+
+std::optional<units::degree_t> SubVision::GetSpeakerYaw(){
+  auto tagResult = SubVision::GetInstance().GetSpeakerTarget();
+  if (tagResult){
+    return tagResult.value().GetYaw() * 1_deg;
+  } else {
+    return {};
+  }
+}
+
+std::optional<units::degree_t> SubVision::GetSpeakerPitch(){
+  auto tagResult = SubVision::GetInstance().GetSpeakerTarget();
+  if (tagResult){
+    return tagResult.value().GetPitch() * 1_deg;
+  } else {
+    return {};
+  }
+}
+
+std::optional<units::degree_t> SubVision::GetLatestSpeakerPitch(){
+  static frc::Timer timer;
+  static std::optional<units::degree_t> latestPitch = std::nullopt;
+  auto optionalSpeakerPitch = GetSpeakerPitch();
+  if (optionalSpeakerPitch.has_value()) {
+      latestPitch = optionalSpeakerPitch.value();
+      timer.Restart();
+  }
+  if (timer.Get() >= 10_s) {
+      latestPitch = std::nullopt;
+  }
+  return latestPitch;
+}
+
+bool SubVision::IsFacingTarget(){
+  if (-2_deg < GetSpeakerYaw() && GetSpeakerYaw() < 2_deg){
+    return true;
+  } else {
+    return false;
+  }
 }

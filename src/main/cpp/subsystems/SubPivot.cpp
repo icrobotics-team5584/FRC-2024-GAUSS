@@ -5,21 +5,44 @@
 #include "subsystems/SubPivot.h"
 #include <frc2/command/commands.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <units/angle.h>
 
 
 SubPivot::SubPivot(){
+    ctre::phoenix6::configs::CANcoderConfiguration pivotConfig{};
+    //pivotConfig.MagnetSensor.MagnetOffset = 0.5164954444444444; original offset
+    pivotConfig.MagnetSensor.MagnetOffset = 0.228271421875;
+    _pivotMotor.SetInverted(true);
+    _shooterPivotEncoder.GetConfigurator().Apply(pivotConfig);
+
     _pivotMotor.SetPIDFF(_pivotP, _pivotI, _pivotD);
     _pivotMotor.SetConversionFactor(1/PIVOT_GEAR_RATIO);
+    _pivotMotor.SetPosition(_shooterPivotEncoder.GetPosition().GetValue());
+    _pivotMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
 
     frc::SmartDashboard::PutData("Pivot/Motor", (wpi::Sendable*)&_pivotMotor);
 
     //Setup shooter pitch table
-    _pitchTable.insert(-20_deg, 90_deg);
-    _pitchTable.insert(-15_deg, 84_deg);
-    _pitchTable.insert(-9_deg, 70_deg);
-    _pitchTable.insert(0_deg, 58_deg);
-    _pitchTable.insert(9_deg, 49_deg);
-    _pitchTable.insert(17_deg, 45_deg);
+    // _pitchTable.insert(-12_deg, 9.25_deg);
+    // _pitchTable.insert(-11_deg, 10_deg);
+    // _pitchTable.insert(-10_deg, 11_deg);
+    // _pitchTable.insert(-9_deg, 12.5_deg);
+    // _pitchTable.insert(-4.5_deg, 17_deg);
+    // _pitchTable.insert(0_deg, 21.5_deg);
+    // _pitchTable.insert(9_deg, 28_deg);
+    // _pitchTable.insert(10_deg, 29_deg);
+    _pitchTable.insert(-12_deg, 13.75_deg);
+    _pitchTable.insert(-11_deg, 14.5_deg);
+    _pitchTable.insert(-10_deg, 15.5_deg);
+    _pitchTable.insert(-9_deg, 17_deg);
+    _pitchTable.insert(-4.5_deg, 22.5_deg);
+    _pitchTable.insert(0_deg, 27_deg);
+    _pitchTable.insert(9_deg, 33_deg);
+    _pitchTable.insert(10_deg, 34.5_deg);
+
+
+    _pivotMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, LOW_STOP.value());
+    _pivotMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, HIGH_STOP.value()); 
 }
 
 
@@ -51,6 +74,6 @@ void SubPivot::SimulationPeriodic(){
 }
 
 bool SubPivot::IsOnTarget() {
-    auto tolerance = 1_deg;
+    auto tolerance = 5_deg;
     return units::math::abs( _pivotMotor.GetPosError()) < tolerance;
 }

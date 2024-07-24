@@ -7,13 +7,19 @@
 #include <frc/RobotBase.h>
 #include <units/time.h>
 #include <frc/DriverStation.h>
-#include <pathplanner/lib/auto/AutoBuilder.h>
-#include <pathplanner/lib/util/HolonomicPathFollowerConfig.h>
-#include <pathplanner/lib/util/PIDConstants.h>
 #include <frc2/command/Commands.h>
 #include "subsystems/SubDrivebase.h"
 #include <frc/filter/SlewRateLimiter.h>
 #include <iostream>
+#include <pathplanner/lib/auto/AutoBuilder.h>
+#include <pathplanner/lib/util/HolonomicPathFollowerConfig.h>
+#include <pathplanner/lib/util/PIDConstants.h>
+#include <pathplanner/lib/util/ReplanningConfig.h>
+#include <frc/geometry/Pose2d.h>
+#include <frc/kinematics/ChassisSpeeds.h>
+#include <frc/DriverStation.h>
+
+
 
 SubDrivebase::SubDrivebase() {
   frc::SmartDashboard::PutNumber("Drivebase/Config/MaxVelocity", MAX_VELOCITY.value());
@@ -52,7 +58,7 @@ SubDrivebase::SubDrivebase() {
       [this](frc::ChassisSpeeds speeds) {
         _sidewaysSpeedRequest = speeds.vy;  // TEST!
         _forwardSpeedRequest = speeds.vx;
-        _rotationSpeedRequest = -speeds.omega;
+        _rotationSpeedRequest = speeds.omega;
         _fieldOrientedRequest = false;
         // Drive(speeds.vx, speeds.vy, -speeds.omega, false);
       },  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
@@ -375,4 +381,41 @@ void SubDrivebase::SetNeutralMode(ctre::phoenix6::signals::NeutralModeValue mode
 
 units::degree_t SubDrivebase::GetPitch() {
   return _gyro.GetPitch() * 1_deg;
+}
+
+frc2::CommandPtr SubDrivebase::WheelCharecterisationCmd(){
+  static units::radian_t initialGyroHeading = 0_rad;
+  static units::radian_t initialWheelDistance = 0_rad;
+
+  return StartEnd(
+      [this]{
+        initialGyroHeading = GetHeading().Radians();
+        // initialWheelDistance =
+        //     (_frontRight.GetPosition().distance + _frontLeft.GetPosition().distance +
+        //      _backRight.GetPosition().distance + _backLeft.GetPosition().distance) /
+        //     4;
+        initialWheelDistance = _frontRight.GetDrivenRotations();
+        _forwardSpeedRequest = 0_mps;
+        _sidewaysSpeedRequest = 0_mps;
+        _rotationSpeedRequest = 15_deg_per_s;
+      },
+      [this] {
+        units::meter_t drivebaseRadius = _frontLeftLocation.Norm();
+        units::radian_t finalGyroHeading = GetHeading().Radians();
+        // auto finalWheelDistance =
+        //     (_frontRight.GetPosition().distance + _frontLeft.GetPosition().distance +
+        //      _backRight.GetPosition().distance + _backLeft.GetPosition().distance) /
+        //     4;
+        units::radian_t finalWheelDistance = _frontRight.GetDrivenRotations();
+        _rotationSpeedRequest = 0_deg_per_s;
+
+        units::radian_t gyroDelta = finalGyroHeading - initialGyroHeading;
+        units::radian_t wheelDistanceDelta = finalWheelDistance - initialWheelDistance;
+
+        frc::SmartDashboard::PutNumber("Drivebase/WheelCharacterisation/CalcedWheelRadius",
+                                       ((gyroDelta * drivebaseRadius) / wheelDistanceDelta).value());
+        frc::SmartDashboard::PutNumber("Drivebase/WheelCharacterisation/Gyro", gyroDelta.value());
+        frc::SmartDashboard::PutNumber("Drivebase/WheelCharacterisation/DrivebaseRadius", drivebaseRadius.value());
+        frc::SmartDashboard::PutNumber("Drivebase/WheelCharacterisation/WheelDistance", wheelDistanceDelta.value());
+      });
 }

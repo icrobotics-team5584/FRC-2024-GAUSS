@@ -1,0 +1,70 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.3374413054104268,
+        "y": 5.632912378520905
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.3204900255954373,
+        "y": 5.278814403782653
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.754452527449989,
+        "y": 4.19247948338978
+      },
+      "prevControl": {
+        "x": 1.698689646693458,
+        "y": 4.241814197443824
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Subwoofer to As link endpoint to As to Ac"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [
+    {
+      "name": "Endefector",
+      "waypointRelativePos": 0,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "StoreNote"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 5.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -30.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": null,
+  "previewStartingState": {
+    "rotation": 0.9338141243167682,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}

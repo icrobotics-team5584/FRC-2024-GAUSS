@@ -29,6 +29,7 @@ class SubShooter : public frc2::SubsystemBase {
   frc2::CommandPtr CmdSetShooterAmp();
   frc2::CommandPtr CmdSetShooterPassing();
   frc2::CommandPtr CmdSetShooterOff();
+  frc2::CommandPtr CmdSourcePickUpIntake();
   bool IsOnTarget();
   /**
    * Will be called periodically whenever the CommandScheduler runs.
@@ -43,14 +44,15 @@ class SubShooter : public frc2::SubsystemBase {
   ctre::phoenix6::controls::VelocityVoltage _flywheelTargetVelocity{0_tps, 0_tr_per_s_sq, true, 0_V, 0, false};
   
   units::turns_per_second_t ShooterOff = 0_tps;
-  units::turns_per_second_t SpeakerSpeed = 60_tps;
+  units::turns_per_second_t SpeakerSpeedLeft = 50_tps;
+  units::turns_per_second_t SpeakerSpeedRight = 70_tps;
   units::turns_per_second_t PassingSpeed = 55_tps;
   units::turns_per_second_t AmpSpeed = 15_tps;
 
-  static constexpr double _flywheelP = 2;
+  static constexpr double _flywheelP = 0.1;
   static constexpr double _flywheelI = 0;
   static constexpr double _flywheelD = 0;
-  static constexpr double _flywheelV = 0.112;
+  static constexpr double _flywheelV = 0.115;
 
   //Simulation stuff
   frc::sim::DCMotorSim _leftSim{frc::DCMotor::Falcon500(), 1, 0.005_kg_sq_m};

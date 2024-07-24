@@ -5,6 +5,7 @@
 #include "subsystems/SubShooter.h"
 #include "frc/smartdashboard/SmartDashboard.h"
 
+
 using namespace frc2::cmd;
 
 SubShooter::SubShooter(){
@@ -15,9 +16,14 @@ SubShooter::SubShooter(){
     flywheelConfig.Slot0.kV = _flywheelV;
     flywheelConfig.Voltage.PeakForwardVoltage = 12;
     flywheelConfig.Voltage.PeakReverseVoltage = 0;
+    flywheelConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+    flywheelConfig.CurrentLimits.SupplyCurrentLimit = 40.0;
+    flywheelConfig.CurrentLimits.SupplyCurrentThreshold = 50.0;
+    flywheelConfig.CurrentLimits.SupplyTimeThreshold = 0.1;
 
-    _ShooterFlywheelMotorLeft.GetConfigurator().Apply(flywheelConfig);
     _ShooterFlywheelMotorRight.GetConfigurator().Apply(flywheelConfig);
+    flywheelConfig.MotorOutput.Inverted = ctre::phoenix6::signals::InvertedValue::Clockwise_Positive;
+    _ShooterFlywheelMotorLeft.GetConfigurator().Apply(flywheelConfig);
 }
 
 // This method will be called once per scheduler run
@@ -25,12 +31,14 @@ void SubShooter::Periodic() {
 frc::SmartDashboard::PutNumber("Shooter/SpeedLeft", _ShooterFlywheelMotorLeft.GetVelocity().GetValue().value());
 frc::SmartDashboard::PutNumber("Shooter/SpeedRight", _ShooterFlywheelMotorRight.GetVelocity().GetValue().value());
 frc::SmartDashboard::PutBoolean("Target/FlywheelOnTarget", IsOnTarget());
+frc::SmartDashboard::PutNumber("Shooter/LeftCurrent", _ShooterFlywheelMotorLeft.GetStatorCurrent().GetValue().value());
+frc::SmartDashboard::PutNumber("Shooter/RightCurrent", _ShooterFlywheelMotorRight.GetStatorCurrent().GetValue().value());
 }
 
 frc2::CommandPtr SubShooter::CmdSetShooterSpeaker(){
     return RunOnce([this]{
-        _ShooterFlywheelMotorLeft.SetControl(_flywheelTargetVelocity.WithVelocity(SpeakerSpeed));
-        _ShooterFlywheelMotorRight.SetControl(_flywheelTargetVelocity.WithVelocity(SpeakerSpeed));
+        _ShooterFlywheelMotorLeft.SetControl(_flywheelTargetVelocity.WithVelocity(SpeakerSpeedLeft));
+        _ShooterFlywheelMotorRight.SetControl(_flywheelTargetVelocity.WithVelocity(SpeakerSpeedRight));
         });
 }
 frc2::CommandPtr SubShooter::CmdSetShooterAmp(){
@@ -51,15 +59,22 @@ frc2::CommandPtr SubShooter::CmdSetShooterOff(){
         _ShooterFlywheelMotorRight.SetControl(_flywheelTargetVelocity.WithVelocity(ShooterOff));
         });
 }
+frc2::CommandPtr SubShooter::CmdSourcePickUpIntake(){
+    return RunOnce([this]{
+        _ShooterFlywheelMotorLeft.Set(-1);
+        _ShooterFlywheelMotorRight.Set(-1);
+
+    });
+}
 
 bool SubShooter::IsOnTarget() {
-    auto tolerance = 10_rpm;
+    auto tolerance = 1_tps;
     auto target = _flywheelTargetVelocity.Velocity;
     auto leftVelocity = _ShooterFlywheelMotorLeft.GetVelocity().GetValue();
     auto rightVelocity = _ShooterFlywheelMotorRight.GetVelocity().GetValue();
     if (
-        units::math::abs(target - leftVelocity) < tolerance
-        && units::math::abs(target - rightVelocity) < tolerance
+        // units::math::abs(target - leftVelocity) < tolerance
+        units::math::abs(target - rightVelocity) < tolerance
         )
     {
         return true;
