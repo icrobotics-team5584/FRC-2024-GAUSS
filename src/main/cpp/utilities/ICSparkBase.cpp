@@ -48,9 +48,11 @@ void ICSpark::SetPositionTarget(units::turn_t target, units::volt_t arbFeedForwa
   _velocityTarget = units::turns_per_second_t{0};
   _voltageTarget = 0_V;
   _arbFeedForward = arbFeedForward;
-  SetInternalControlType(Mode::kPosition);
+  SetInternalControlType(ControlType::kPosition);
 
-  _pidController.SetReference(target.value(), GetControlType(), 0, _arbFeedForward.value());
+  _pidController.SetReference(target.value(),
+                              rev::CANSparkLowLevel::ControlType::kPosition, 0,
+                              _arbFeedForward.value());
 }
 
 void ICSpark::SetSmartMotionTarget(units::turn_t target, units::volt_t arbFeedForward) {
@@ -58,9 +60,23 @@ void ICSpark::SetSmartMotionTarget(units::turn_t target, units::volt_t arbFeedFo
   _velocityTarget = units::turns_per_second_t{0};
   _voltageTarget = 0_V;
   _arbFeedForward = arbFeedForward;
-  SetInternalControlType(Mode::kSmartMotion);
+  SetInternalControlType(ControlType::kSmartMotion);
 
-  _pidController.SetReference(target.value(), GetControlType(), 0, _arbFeedForward.value());
+  _pidController.SetReference(target.value(),
+                              rev::CANSparkLowLevel::ControlType::kSmartMotion,
+                              0, _arbFeedForward.value());
+}
+
+void ICSpark::SetMotionProfileTarget(units::turn_t target, units::volt_t arbFeedForward) {
+  _positionTarget = target;
+  _velocityTarget = units::turns_per_second_t{0};
+  _voltageTarget = 0_V;
+  _arbFeedForward = arbFeedForward;
+  SetInternalControlType(ControlType::kMotionProfile);
+
+  _pidController.SetReference(CalcMotionTarget().position.value(),
+                              rev::CANSparkLowLevel::ControlType::kPosition, 0,
+                              _arbFeedForward.value());
 }
 
 void ICSpark::SetVelocityTarget(units::turns_per_second_t target, units::volt_t arbFeedForward) {
@@ -68,19 +84,18 @@ void ICSpark::SetVelocityTarget(units::turns_per_second_t target, units::volt_t 
   _positionTarget = units::turn_t{0};
   _voltageTarget = 0_V;
   _arbFeedForward = arbFeedForward;
-  SetInternalControlType(Mode::kVelocity);
+  SetInternalControlType(ControlType::kVelocity);
 
-  _pidController.SetReference(target.value(), GetControlType(), 0, _arbFeedForward.value());
+  _pidController.SetReference(target.value(),
+                              rev::CANSparkLowLevel::ControlType::kVelocity, 0,
+                              _arbFeedForward.value());
 }
 
 void ICSpark::SetDutyCycle(double speed) {
   _velocityTarget = units::turns_per_second_t{0};
   _positionTarget = units::turn_t{0};
   _voltageTarget = 0_V;
-  SetInternalControlType(Mode::kDutyCycle);
-  if (frc::RobotBase::IsSimulation()) {
-    _pidController.SetReference(speed, Mode::kDutyCycle);
-  }
+  SetInternalControlType(ControlType::kDutyCycle);
   _spark->Set(speed);
 }
 
@@ -89,24 +104,57 @@ void ICSpark::SetVoltage(units::volt_t output) {
   _positionTarget = units::turn_t{0};
   _voltageTarget = output;
   _arbFeedForward = 0_V;
-  SetInternalControlType(Mode::kVoltage);
+  SetInternalControlType(ControlType::kVoltage);
 
-  _pidController.SetReference(output.value(), GetControlType(), 0, _arbFeedForward.value());
+  _pidController.SetReference(output.value(),
+                              rev::CANSparkLowLevel::ControlType::kVoltage, 0,
+                              _arbFeedForward.value());
+}
+
+void ICSpark::UpdateControls(units::second_t loopTime) {
+  switch (GetControlType()) {
+    case ControlType::kMotionProfile:
+      _arbFeedForward = CalculateFeedForward();
+      _pidController.SetReference(CalcMotionTarget().position.value(),
+                                  rev::CANSparkLowLevel::ControlType::kPosition,
+                                  0, _arbFeedForward.value());
+      break;
+    case ControlType::kSmartMotion:
+      SetSmartMotionTarget(_positionTarget, CalculateFeedForward());
+      break;
+    case ControlType::kPosition:
+      SetPositionTarget(_positionTarget, CalculateFeedForward());
+      break;
+    case ControlType::kVelocity:
+      SetVelocityTarget(_velocityTarget, CalculateFeedForward());
+      break;
+    default:
+      break;
+  }
 }
 
 void ICSpark::Stop() {
   _velocityTarget = units::turns_per_second_t{0};
   _positionTarget = units::turn_t{0};
   _voltageTarget = 0_V;
-  SetInternalControlType(Mode::kDutyCycle);
+  SetInternalControlType(ControlType::kDutyCycle);
   _spark->StopMotor();
 }
 
-void ICSpark::SetInternalControlType(Mode controlType) {
+void ICSpark::SetInternalControlType(ControlType controlType) {
   _controlType = controlType;
 }
 
-void ICSpark::ConfigSmartMotion(units::turns_per_second_t maxVelocity,
+rev::CANSparkLowLevel::ControlType ICSpark::GetREVControlType() {
+  auto controlType = GetControlType();
+  if (controlType == ControlType::kMotionProfile) {
+    return rev::CANSparkLowLevel::ControlType::kPosition;
+  } else {
+    return (rev::CANSparkLowLevel::ControlType)controlType;
+  }
+}
+
+void ICSpark::ConfigMotion(units::turns_per_second_t maxVelocity,
                                    units::turns_per_second_squared_t maxAcceleration,
                                    units::turn_t tolerance) {
   _pidController.SetSmartMotionMaxAccel(maxAcceleration.value());
@@ -182,43 +230,49 @@ units::volt_t ICSpark::GetSimVoltage() {
   units::volt_t output = 0_V;
 
   switch (_controlType) {
-    case Mode::kDutyCycle:
+    case ControlType::kDutyCycle:
       output = units::volt_t{_spark->Get() * 12};
       break;
 
-    case Mode::kVelocity:
+    case ControlType::kVelocity:
       // Spark internal PID uses native units (motor shaft RPM)
       // so divide by conversion factor to use that
-      output =
-          units::volt_t{_simController.Calculate(GetVelocity().value(), _velocityTarget.value()) /
-                            _encoder.GetVelocityConversionFactor() +
-                        _simFF * _velocityTarget.value()};
+      output = units::volt_t{_simController.Calculate(GetVelocity().value(),
+                                                      _velocityTarget.value()) /
+                                 _encoder.GetVelocityConversionFactor() +
+                             _simFF * _velocityTarget.value()};
       break;
 
-    case Mode::kPosition:
+    case ControlType::kPosition:
       // Spark internal PID uses native units (motor shaft rotations)
       // so divide by conversion factor to use that
+      output = units::volt_t{_simController.Calculate(GetPosition().value(),
+                                                      _positionTarget.value()) /
+                                 _encoder.GetPositionConversionFactor() +
+                             _simFF * _positionTarget.value()};
+      break;
+
+    case ControlType::kVoltage:
+      output = _voltageTarget;
+      break;
+
+    case ControlType::kSmartMotion:
+      output = units::volt_t{
+          _simController.Calculate(GetVelocity().value(),
+                                   CalcMotionTarget().velocity.value()) /
+              _encoder.GetVelocityConversionFactor() +
+          _simFF * CalcMotionTarget().velocity.value()};
+      break;
+
+    case ControlType::kMotionProfile:
       output = units::volt_t{
           _simController.Calculate(GetPosition().value(),
-                                   _positionTarget.value()) /
+                                   CalcMotionTarget().position.value()) /
               _encoder.GetPositionConversionFactor() +
           _simFF * _positionTarget.value()};
       break;
 
-    case Mode::kVoltage:
-      output = _voltageTarget;
-      break;
-
-    case Mode::kSmartMotion:
-      output = units::volt_t{
-          _simController.Calculate(GetVelocity().value(), EstimateSMVelocity().value()) +
-          _simFF * EstimateSMVelocity().value()};
-      break;
-
-    case Mode::kCurrent:
-      break;
-
-    case Mode::kSmartVelocity:
+    case ControlType::kCurrent:
       break;
   }
   output += _arbFeedForward;
@@ -230,19 +284,19 @@ void ICSpark::UpdateSimEncoder(units::turn_t position, units::turns_per_second_t
   _simVelocity = velocity;
 }
 
-units::turns_per_second_t ICSpark::EstimateSMVelocity() {
-  if (_controlType != Mode::kSmartMotion) {
-    return units::turns_per_second_t{0};
-  }
+bool ICSpark::InMotionMode() {
+  return GetControlType() == ControlType::kMotionProfile ||
+         GetControlType() == ControlType::kSmartMotion;
+}
 
+ICSpark::MPState ICSpark::CalcMotionTarget(units::second_t lookahead) {
   units::turn_t error = units::math::abs(_positionTarget - GetPosition());
   units::turn_t tolerance = _pidController.GetSmartMotionAllowedClosedLoopError() * 1_tr;
   if (error < tolerance) {
-    return units::turns_per_second_t{0};
+    return MPState{GetPosition(), 0_tps};
   }
 
-  return _motionProfile
-      .Calculate(20_ms, {GetPosition(), GetVelocity()},
-                 {_positionTarget, units::turns_per_second_t{0}})
-      .velocity;
+  return _motionProfile.Calculate(
+      lookahead, {GetPosition(), GetVelocity()},
+      {_positionTarget, units::turns_per_second_t{0}});
 }

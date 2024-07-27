@@ -70,7 +70,7 @@ private:
     SHOOTER_LENGTH,
     SHOOTER_MIN_ANGLE,
     SHOOTER_MAX_ANGLE,
-    true,
+    false,
     SHOOTER_MIN_ANGLE
   };
 };

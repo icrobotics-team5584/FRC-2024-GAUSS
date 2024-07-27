@@ -60,6 +60,9 @@ void RobotContainer::ConfigureBindings() {
    _driverController.LeftBumper().WhileTrue(cmd::CmdSourcePickUp());
   //Letters
   _driverController.Y().OnTrue(SubDrivebase::GetInstance().ResetGyroCmd());
+  _driverController.A().OnTrue(SubPivot::GetInstance().CmdSetPivotAngle(70_deg));
+  _driverController.B().OnTrue(SubPivot::GetInstance().CmdSetPivotAngle(10_deg));
+
 
   //POV
 

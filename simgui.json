@@ -26,16 +26,6 @@
       "/SmartDashboard/field": "Field2d"
     },
     "windows": {
-      "/SmartDashboard/Chosen Path": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Climber/Mech Display": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/field": {
         "bottom": 1476,
         "height": 8.210550308227539,
@@ -53,7 +43,6 @@
     "transitory": {
       "SmartDashboard": {
         "Chosen Path": {
-          "open": true,
           "string[]##v_/SmartDashboard/Chosen Path/options": {
             "open": true
           }
@@ -100,7 +89,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 0,
+          "height": 252,
           "series": [
             {
               "color": [
@@ -115,6 +104,7 @@
         }
       ],
       "window": {
+        "name": "Shooter Speed",
         "visible": false
       }
     },
@@ -127,7 +117,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 0,
+          "height": 306,
           "series": [
             {
               "color": [
@@ -146,12 +136,33 @@
                 1.0
               ],
               "id": "NT:/SmartDashboard/Pivot/Motor/Position Target"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Pivot/Motor/Velocity",
+              "yAxis": 1
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Pivot/Motor/Velocity Target",
+              "yAxis": 1
             }
-          ]
+          ],
+          "yaxis2": true
         }
       ],
       "window": {
-        "visible": false
+        "name": "Pivot"
       }
     },
     "Plot <2>": {
@@ -163,11 +174,22 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 332
+          "height": 311,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Pivot/Motor/Voltage"
+            }
+          ]
         }
       ],
       "window": {
-        "visible": false
+        "name": "Pivot voltage"
       }
     },
     "Plot <3>": {
@@ -239,7 +261,10 @@
           ],
           "height": 0
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     },
     "Plot <5>": {
       "plots": [
@@ -250,7 +275,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 332,
+          "height": 0,
           "series": [
             {
               "color": [
@@ -263,7 +288,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     }
   }
 }

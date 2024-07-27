@@ -24,6 +24,16 @@
  */
 class ICSpark : public wpi::Sendable {
  public:
+  enum class ControlType {
+    kDutyCycle = (int)rev::CANSparkLowLevel::ControlType::kDutyCycle,
+    kVelocity = (int)rev::CANSparkLowLevel::ControlType::kVelocity,
+    kVoltage = (int)rev::CANSparkLowLevel::ControlType::kVoltage,
+    kPosition = (int)rev::CANSparkLowLevel::ControlType::kPosition,
+    kSmartMotion = (int)rev::CANSparkLowLevel::ControlType::kSmartMotion,
+    kCurrent = (int)rev::CANSparkLowLevel::ControlType::kCurrent,
+    kMotionProfile = 10
+  };
+
   /**
    * Create a new object to control a SPARK motor controller.
    *
@@ -54,23 +64,33 @@ class ICSpark : public wpi::Sendable {
   void SetPositionTarget(units::turn_t target, units::volt_t arbFeedForward = 0.0_V);
 
   /**
-   * Sets a closed loop position target (aka reference or goal) for the motor to drive to using
-   * the Spark Max's Smart Motion control mode.
-   * This generates a profiled movement that accelerates and decelerates in a controlled way. This
-   * can reduce ware on components and is often much easier to tune. In this mode, you are actually
-   * controlling the velocity of the motor to follow a trapezoid (speeding up, staying constant,
-   * then slowing down) and as such the PID values should be tuned to follow a velocity target.
-   * Controlling velocity also allows us to use the WPILib feedforward classes.
-   * Also consider feeding CalcMotionProfileTarget() into SetPositionTarget() to use a profile that
-   * performs feedback control based on position.
+   * Sets a closed loop position target (aka reference or goal) for the motor to
+   * drive to using the Spark Max's Smart Motion control mode. This generates a
+   * profiled movement that accelerates and decelerates in a controlled way.
+   * This can reduce ware on components, limit current draw and is can be easier
+   * to tune. In this mode, you are actually controlling the velocity of the
+   * motor to follow a trapezoid (speeding up, staying constant, then slowing
+   * down) and as such the PID values should be tuned to follow a velocity
+   * target. Also consider using SetMotionProfileTarget() to compute a profile
+   * on the RoboRio and perform feedback control based on position.
    *
    * @param target The target position drive to.
    *
-   * @param arbFeedforward A voltage from -32.0V to 32.0V which is applied to the motor after the
-   * result of the specified control mode. This value is added after the control mode, but before
-   * any current limits or ramp rates
+   * @param arbFeedforward A voltage from -32.0V to 32.0V which is applied to
+   * the motor after the result of the specified control mode. This value is
+   * added after the control mode, but before any current limits or ramp rates
    */
   void SetSmartMotionTarget(units::turn_t target, units::volt_t arbFeedForward = 0.0_V);
+
+  /**
+   * Sets a closed loop position target (aka reference or goal) for the motor to
+   * drive to using a motion profile computed onboard the RoboRio and followed
+   * using the Spark Max's onboard PID position control.
+   * This generates a profiled movement that accelerates and decelerates in a controlled way. This
+   * can reduce ware on components, limit current draw and can be easier to tune.
+   * 
+   */
+  void SetMotionProfileTarget(units::turn_t target, units::volt_t arbFeedForward = 0.0_V);
 
   /**
    * Sets the closed loop target (aka reference or goal) for the motor to drive to.
@@ -84,6 +104,25 @@ class ICSpark : public wpi::Sendable {
   void SetVelocityTarget(units::turns_per_second_t target, units::volt_t arbFeedForward = 0.0_V);
 
   /**
+   * Update motion profile targets and feedforward calculations. This is
+   * required to be called periodically when you use kG gains or a motion
+   * profile.
+   * This only has an effect when in one of the following modes: Motion Profile,
+   * Smart Motion, Position, Velocty.
+   *
+   * @param loopTime The frequency at which this is being called. 20ms is the
+   * default loop time for WPILib periodic functions. Generally, faster loop
+   * times result in smoother controls at the cost of processing time.
+   */
+  void UpdateControls(units::second_t loopTime = 20_ms);
+
+  /**
+   * Calculate how many volts to send to the motor from the feedforward model.
+   * (Before any feedback control is applied).
+  */
+  units::volt_t CalculateFeedForward() { return 0_V; }
+
+  /**
    * Gets the current closed loop position target if there is one. Zero otherwise.
    */
   units::turn_t GetPositionTarget() { return _positionTarget; };
@@ -92,7 +131,7 @@ class ICSpark : public wpi::Sendable {
    * Gets the current closed loop velocity target if there is one. Zero otherwise
    */
   units::turns_per_second_t GetVelocityTarget() {
-    return GetControlType() == Mode::kSmartMotion ? EstimateSMVelocity() : _velocityTarget;
+    return InMotionMode() ? CalcMotionTarget().velocity : _velocityTarget;
   };
 
   /**
@@ -127,7 +166,7 @@ class ICSpark : public wpi::Sendable {
   /**
    * Gets the current closed loop control type.
    */
-  rev::CANSparkBase::ControlType GetControlType() { return _controlType; };
+  ControlType GetControlType() { return _controlType; };
 
   /**
    * Get the velocity of the motor.
@@ -169,7 +208,7 @@ class ICSpark : public wpi::Sendable {
    * @param tolerance When the position of the motor is within tolerance, the control mode will stop
    * applying power (arbitary feedforward can still apply power).
    */
-  void ConfigSmartMotion(units::turns_per_second_t maxVelocity,
+  void ConfigMotion(units::turns_per_second_t maxVelocity,
                          units::turns_per_second_squared_t maxAcceleration,
                          units::turn_t tolerance);
 
@@ -260,7 +299,8 @@ class ICSpark : public wpi::Sendable {
 
  private:
   rev::CANSparkBase* _spark;
-  using Mode = rev::CANSparkBase::ControlType;
+  using MPState = frc::TrapezoidProfile<units::turns>::State;
+  rev::CANSparkLowLevel::ControlType GetREVControlType();
 
   // Related REVLib objects
   rev::SparkPIDController _pidController{_spark->GetPIDController()};
@@ -276,11 +316,12 @@ class ICSpark : public wpi::Sendable {
   double _simFF{0};
   frc::TrapezoidProfile<units::turns> _motionProfile{
       {units::turns_per_second_t{0},
-       units::turns_per_second_squared_t{0}}  // constraints updated by Smart motion config
+       units::turns_per_second_squared_t{0}}  // constraints updated by SetMotionConfig
   };
-  Mode _controlType = Mode::kDutyCycle;
-  void SetInternalControlType(Mode controlType);
-  units::turns_per_second_t EstimateSMVelocity();
+  ControlType _controlType = ControlType::kDutyCycle;
+  void SetInternalControlType(ControlType controlType);
+  MPState CalcMotionTarget(units::second_t lookahead = 20_ms);
+  bool InMotionMode();
   units::turns_per_second_t _simVelocity = units::turns_per_second_t{0};
 
   double _minPidOutput = -1;
