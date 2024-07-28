@@ -3,6 +3,7 @@
 #include <frc/RobotBase.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <units/voltage.h>
+#include <wpi/MathExtras.h>
 #include <cstdlib>
 #include <iostream>
 
@@ -24,23 +25,27 @@ void ICSpark::InitSendable(wpi::SendableBuilder& builder) {
   builder.AddDoubleProperty("Velocity", [&] { return GetVelocity().value(); }, nullptr);
   builder.AddDoubleProperty("Position Target", [&] { return GetPositionTarget().value(); }, [&](double targ) { SetPositionTarget(targ*1_tr); });
   builder.AddDoubleProperty("Velocity Target", [&] { return GetVelocityTarget().value(); }, [&](double targ) { SetVelocityTarget(targ*1_tps); });
+  builder.AddDoubleProperty("Motion Profile Target", [&] { return _positionTarget.value(); }, [&](double targ) { SetMotionProfileTarget(targ*1_tr); });
 
   builder.AddDoubleProperty("Voltage", [&] { 
         return (frc::RobotBase::IsSimulation()) 
           ? GetSimVoltage().value() 
-          : _spark->GetAppliedOutput() * 12;
+          : _spark->GetAppliedOutput() * _spark->GetBusVoltage();
       }, nullptr);
 
-  builder.AddDoubleProperty("P Gain", [&] { return _simController.GetP(); }, [&](double P) { SetP(P); });
-  builder.AddDoubleProperty("I Gain", [&] { return _simController.GetI(); }, [&](double I) { SetI(I); });
-  builder.AddDoubleProperty("D Gain", [&] { return _simController.GetD(); }, [&](double D) { SetD(D); });
-  builder.AddDoubleProperty("FF Gain", [&] { return _simFF; }, [&](double FF) { SetFF(FF); });
+  builder.AddDoubleProperty("Gains/FB P Gain", [&] { return _simController.GetP(); }, [&](double P) { SetFeedbackProportional(P); });
+  builder.AddDoubleProperty("Gains/FB I Gain", [&] { return _simController.GetI(); }, [&](double I) { SetFeedbackIntegral(I); });
+  builder.AddDoubleProperty("Gains/FB D Gain", [&] { return _simController.GetD(); }, [&](double D) { SetFeedbackDerivative(D); });
+  builder.AddDoubleProperty("Gains/FF S Gain", [&] { return _feedforwardStaticFriction.value(); }, [&](double S) { SetFeedforwardStaticFriction(S*1_V); });
+  builder.AddDoubleProperty("Gains/FF V Gain", [&] { return _feedforwardVelocity.value(); },       [&](double V) { SetFeedforwardVelocity(VoltsPerTps{V}); });
+  builder.AddDoubleProperty("Gains/FF A Gain", [&] { return _feedforwardAcceleration.value(); },   [&](double A) { SetFeedforwardAcceleration(VoltsPerTpsSq{A}); });
+  builder.AddDoubleProperty("Gains/FF Linear G Gain",    [&] { return _feedforwardLinearGravity.value(); },    [&](double lG) { SetFeedforwardLinearGravity(lG*1_V); });
+  builder.AddDoubleProperty("Gains/FF Rotational G Gain",[&] { return _feedforwardRotationalGravity.value(); },[&](double rG) { SetFeedforwardRotationalGravity(rG*1_V); });
   // clang-format on
 }
 
 void ICSpark::SetPosition(units::turn_t position) {
   _encoder.SetPosition(position.value());
-  // auto err = GetLastError();
 }
 
 void ICSpark::SetPositionTarget(units::turn_t target, units::volt_t arbFeedForward) {
@@ -114,23 +119,36 @@ void ICSpark::SetVoltage(units::volt_t output) {
 void ICSpark::UpdateControls(units::second_t loopTime) {
   switch (GetControlType()) {
     case ControlType::kMotionProfile:
-      _arbFeedForward = CalculateFeedForward();
+      _arbFeedForward = CalculateFeedforward(CalcMotionAccelTarget(loopTime));
       _pidController.SetReference(CalcMotionTarget().position.value(),
                                   rev::CANSparkLowLevel::ControlType::kPosition,
                                   0, _arbFeedForward.value());
       break;
     case ControlType::kSmartMotion:
-      SetSmartMotionTarget(_positionTarget, CalculateFeedForward());
+      SetSmartMotionTarget(
+          _positionTarget,
+          CalculateFeedforward(CalcMotionAccelTarget(loopTime)));
       break;
     case ControlType::kPosition:
-      SetPositionTarget(_positionTarget, CalculateFeedForward());
+      SetPositionTarget(_positionTarget, CalculateFeedforward());
       break;
     case ControlType::kVelocity:
-      SetVelocityTarget(_velocityTarget, CalculateFeedForward());
+      SetVelocityTarget(_velocityTarget, CalculateFeedforward());
       break;
     default:
       break;
   }
+}
+
+units::volt_t ICSpark::CalculateFeedforward(
+    units::turns_per_second_squared_t accelerationTarget) {
+  auto velTarget = GetVelocityTarget();
+  auto posTarget = GetPositionTarget();
+  return _feedforwardStaticFriction * wpi::sgn(velTarget) +
+         _feedforwardLinearGravity +
+         _feedforwardRotationalGravity * units::math::cos(posTarget) +
+         _feedforwardVelocity * velTarget +
+         _feedforwardAcceleration * accelerationTarget;
 }
 
 void ICSpark::Stop() {
@@ -185,31 +203,58 @@ void ICSpark::EnableClosedLoopWrapping(units::turn_t min, units::turn_t max) {
   _simController.EnableContinuousInput(min.value(), max.value());
 }
 
-void ICSpark::SetPIDFF(double P, double I, double D, double FF) {
-  SetP(P);
-  SetI(I);
-  SetD(D);
-  SetFF(FF);
+void ICSpark::SetFeedbackGains(double P, double I, double D) {
+  SetFeedbackProportional(P);
+  SetFeedbackIntegral(I);
+  SetFeedbackDerivative(D);
 }
 
-void ICSpark::SetP(double P) {
+void ICSpark::SetFeedbackProportional(double P) {
   _pidController.SetP(P);
   _simController.SetP(P);
 }
 
-void ICSpark::SetI(double I) {
+void ICSpark::SetFeedbackIntegral(double I) {
   _pidController.SetI(I);
   _simController.SetI(I);
 }
 
-void ICSpark::SetD(double D) {
+void ICSpark::SetFeedbackDerivative(double D) {
   _pidController.SetD(D);
   _simController.SetD(D);
 }
 
-void ICSpark::SetFF(double FF) {
-  _pidController.SetFF(FF);
-  _simFF = FF;
+void ICSpark::SetFeedforwardGains(units::volt_t S, units::volt_t G,
+                                  bool gravityIsRotational, VoltsPerTps V,
+                                  VoltsPerTpsSq A) {
+  SetFeedforwardStaticFriction(S);
+  SetFeedforwardVelocity(V);
+  SetFeedforwardAcceleration(A);
+  if (gravityIsRotational) {
+    SetFeedforwardRotationalGravity(G);
+  } else {
+    SetFeedforwardLinearGravity(G);
+  }
+}
+
+void ICSpark::SetFeedforwardStaticFriction(units::volt_t S) {
+  _feedforwardStaticFriction = S;
+}
+
+void ICSpark::SetFeedforwardLinearGravity(units::volt_t linearG) {
+  _feedforwardLinearGravity = linearG;
+}
+
+void ICSpark::SetFeedforwardRotationalGravity(units::volt_t rotationalG) {
+  _feedforwardRotationalGravity = rotationalG;
+}
+
+void ICSpark::SetFeedforwardVelocity(VoltsPerTps V) {
+  _feedforwardVelocity = V;
+}
+
+void ICSpark::SetFeedforwardAcceleration(VoltsPerTpsSq A) {
+  _feedforwardAcceleration = A;
 }
 
 void ICSpark::SetClosedLoopOutputRange(double minOutputPercent, double maxOutputPercent) {
@@ -239,8 +284,7 @@ units::volt_t ICSpark::GetSimVoltage() {
       // so divide by conversion factor to use that
       output = units::volt_t{_simController.Calculate(GetVelocity().value(),
                                                       _velocityTarget.value()) /
-                                 _encoder.GetVelocityConversionFactor() +
-                             _simFF * _velocityTarget.value()};
+                                 _encoder.GetVelocityConversionFactor()};
       break;
 
     case ControlType::kPosition:
@@ -248,8 +292,7 @@ units::volt_t ICSpark::GetSimVoltage() {
       // so divide by conversion factor to use that
       output = units::volt_t{_simController.Calculate(GetPosition().value(),
                                                       _positionTarget.value()) /
-                                 _encoder.GetPositionConversionFactor() +
-                             _simFF * _positionTarget.value()};
+                                 _encoder.GetPositionConversionFactor()};
       break;
 
     case ControlType::kVoltage:
@@ -260,16 +303,14 @@ units::volt_t ICSpark::GetSimVoltage() {
       output = units::volt_t{
           _simController.Calculate(GetVelocity().value(),
                                    CalcMotionTarget().velocity.value()) /
-              _encoder.GetVelocityConversionFactor() +
-          _simFF * CalcMotionTarget().velocity.value()};
+              _encoder.GetVelocityConversionFactor()};
       break;
 
     case ControlType::kMotionProfile:
       output = units::volt_t{
           _simController.Calculate(GetPosition().value(),
                                    CalcMotionTarget().position.value()) /
-              _encoder.GetPositionConversionFactor() +
-          _simFF * _positionTarget.value()};
+              _encoder.GetPositionConversionFactor()};
       break;
 
     case ControlType::kCurrent:
@@ -299,4 +340,10 @@ ICSpark::MPState ICSpark::CalcMotionTarget(units::second_t lookahead) {
   return _motionProfile.Calculate(
       lookahead, {GetPosition(), GetVelocity()},
       {_positionTarget, units::turns_per_second_t{0}});
+}
+
+units::turns_per_second_squared_t ICSpark::CalcMotionAccelTarget(units::second_t lookahead) {
+  auto prevVelTarget = CalcMotionTarget(0_ms).velocity;
+  auto nextVelTarget = CalcMotionTarget(lookahead).velocity;
+  return (nextVelTarget-prevVelTarget)/lookahead;
 }

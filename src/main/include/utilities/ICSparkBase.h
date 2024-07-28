@@ -34,6 +34,11 @@ class ICSpark : public wpi::Sendable {
     kMotionProfile = 10
   };
 
+  using VoltsPerTps = units::unit_t<units::compound_unit<
+      units::volts, units::inverse<units::turns_per_second>>>;
+  using VoltsPerTpsSq = units::unit_t<units::compound_unit<
+      units::volts, units::inverse<units::turns_per_second_squared>>>;
+
   /**
    * Create a new object to control a SPARK motor controller.
    *
@@ -120,12 +125,14 @@ class ICSpark : public wpi::Sendable {
    * Calculate how many volts to send to the motor from the feedforward model.
    * (Before any feedback control is applied).
   */
-  units::volt_t CalculateFeedForward() { return 0_V; }
+  units::volt_t CalculateFeedforward(units::turns_per_second_squared_t accelerationTarget = 0_tr_per_s_sq);
 
   /**
    * Gets the current closed loop position target if there is one. Zero otherwise.
    */
-  units::turn_t GetPositionTarget() { return _positionTarget; };
+  units::turn_t GetPositionTarget() {
+    return InMotionMode() ? CalcMotionTarget().position : _positionTarget;
+  };
 
   /**
    * Gets the current closed loop velocity target if there is one. Zero otherwise
@@ -228,14 +235,24 @@ class ICSpark : public wpi::Sendable {
    * @param P The proportional gain value, must be positive
    * @param I The Integral gain value, must be positive
    * @param D The Derivative gain value, must be positive
-   * @param FF The Feed Forward gain value, must be positive. This is multiplied
    * by the target before being added to the final output power.
    */
-  void SetPIDFF(double P, double I, double D, double FF = 0.0);
-  void SetP(double P);
-  void SetI(double I);
-  void SetD(double D);
-  void SetFF(double FF);
+  void SetFeedbackGains(double P, double I, double D);
+  void SetFeedbackProportional(double P);
+  void SetFeedbackIntegral(double I);
+  void SetFeedbackDerivative(double D);
+
+  void SetFeedforwardGains(
+      units::volt_t S = 0_V, 
+      units::volt_t G = 0_V,
+      bool gravityIsRotational = false,
+      VoltsPerTps V = 0_V / 1_tps,
+      VoltsPerTpsSq A = 0_V / 1_tr_per_s_sq);
+  void SetFeedforwardStaticFriction(units::volt_t S);
+  void SetFeedforwardLinearGravity(units::volt_t linearG);
+  void SetFeedforwardRotationalGravity(units::volt_t rotationalG);
+  void SetFeedforwardVelocity(VoltsPerTps V);
+  void SetFeedforwardAcceleration(VoltsPerTpsSq A);
 
   /**
    * Set the min amd max output for the closed loop mode.
@@ -306,6 +323,13 @@ class ICSpark : public wpi::Sendable {
   rev::SparkPIDController _pidController{_spark->GetPIDController()};
   ICSparkEncoder _encoder;
 
+  // Feedforward gains
+  units::volt_t _feedforwardStaticFriction = 0_V;
+  units::volt_t _feedforwardLinearGravity = 0_V;
+  units::volt_t _feedforwardRotationalGravity = 0_V;
+  VoltsPerTps _feedforwardVelocity = 0_V / 1_tps;
+  VoltsPerTpsSq _feedforwardAcceleration = 0_V / 1_tr_per_s_sq;
+
   // PID simulation configuration
   bool _updatingTargetFromSendable = false;
   units::turn_t _positionTarget{0};
@@ -313,7 +337,6 @@ class ICSpark : public wpi::Sendable {
   units::volt_t _voltageTarget{0};
   units::volt_t _arbFeedForward = 0.0_V;
   frc::PIDController _simController{0, 0, 0};
-  double _simFF{0};
   frc::TrapezoidProfile<units::turns> _motionProfile{
       {units::turns_per_second_t{0},
        units::turns_per_second_squared_t{0}}  // constraints updated by SetMotionConfig
@@ -321,6 +344,7 @@ class ICSpark : public wpi::Sendable {
   ControlType _controlType = ControlType::kDutyCycle;
   void SetInternalControlType(ControlType controlType);
   MPState CalcMotionTarget(units::second_t lookahead = 20_ms);
+  units::turns_per_second_squared_t CalcMotionAccelTarget(units::second_t lookahead = 20_ms);
   bool InMotionMode();
   units::turns_per_second_t _simVelocity = units::turns_per_second_t{0};
 

@@ -66,7 +66,7 @@ class SubClimber : public frc2::SubsystemBase {
   frc2::CommandPtr ClimberJoystickDriveRight(frc2::CommandXboxController& _controller);
 
   frc2::CommandPtr ClimberPosition(units::meter_t distance);
-  frc2::CommandPtr ClimberManualDrive(float power);
+  frc2::CommandPtr ClimberManualDrive(double power);
   frc2::CommandPtr ClimberStop();
   frc2::CommandPtr ClimberResetZero();
   frc2::CommandPtr ClimberResetTop();

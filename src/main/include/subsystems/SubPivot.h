@@ -39,14 +39,14 @@ private:
   ICSparkMax _pivotMotor{canid::ShooterPivotMotor, 20_A};
   ctre::phoenix6::hardware::CANcoder _shooterPivotEncoder{canid::ShooterPivotEncoder};
 
-  static constexpr double _pivotP = 25;
+  static constexpr double _pivotP = 0;
   static constexpr double _pivotI = 0;
   static constexpr double _pivotD = 0;
 
-  static constexpr auto PIVOT_G = 0.4_V;
+  static constexpr auto PIVOT_G = 0.44_V;
   static constexpr auto PIVOT_S = 0_V;
-  static constexpr auto PIVOT_V = 0_V/1_tps;
-  static constexpr auto PIVOT_A = 0_V/1_tr_per_s_sq;
+  static constexpr auto PIVOT_V = 30.86_V/1_tps;
+  static constexpr auto PIVOT_A = 0.07_V/1_tr_per_s_sq;
   
   static constexpr double PIVOT_GEAR_RATIO = 252;
   static constexpr units::meter_t SHOOTER_LENGTH = 0.47200_m;
@@ -70,7 +70,7 @@ private:
     SHOOTER_LENGTH,
     SHOOTER_MIN_ANGLE,
     SHOOTER_MAX_ANGLE,
-    false,
+    true,
     SHOOTER_MIN_ANGLE
   };
 };

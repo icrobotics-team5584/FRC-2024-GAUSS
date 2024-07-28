@@ -15,8 +15,9 @@ SubPivot::SubPivot(){
     _pivotMotor.SetInverted(true);
     _shooterPivotEncoder.GetConfigurator().Apply(pivotConfig);
 
-    _pivotMotor.SetPIDFF(_pivotP, _pivotI, _pivotD);
     _pivotMotor.SetConversionFactor(1/PIVOT_GEAR_RATIO);
+    _pivotMotor.SetFeedbackGains(_pivotP, _pivotI, _pivotD);
+    _pivotMotor.SetFeedforwardGains(PIVOT_S, PIVOT_G, true, PIVOT_V, PIVOT_A);
     _pivotMotor.SetPosition(_shooterPivotEncoder.GetPosition().GetValue());
     _pivotMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
     _pivotMotor.ConfigMotion(0.2_tps, 1_tr_per_s_sq, 0_tr);

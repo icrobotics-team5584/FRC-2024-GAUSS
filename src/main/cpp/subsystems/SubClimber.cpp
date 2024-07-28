@@ -12,7 +12,7 @@ SubClimber::SubClimber() {
     //Set up left motor
     _lClimbMotor.SetConversionFactor(1.0 / gearRatio);
     _lClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
-    _lClimbMotor.SetPIDFF(lP,lI,lD,lF);
+    _lClimbMotor.SetFeedbackGains(lP,lI,lD);
     _lClimbMotor.SetInverted(false);
     // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TopHeight).value());
     // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0_m).value());
@@ -20,7 +20,7 @@ SubClimber::SubClimber() {
     //Set up right motor
     _rClimbMotor.SetConversionFactor(1.0 / gearRatio);
     _rClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
-    _rClimbMotor.SetPIDFF(rP,rI,rD,rF);
+    _rClimbMotor.SetFeedbackGains(rP,rI,rD);
     _rClimbMotor.SetInverted(true);
     // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TopHeight).value());
     // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0_m).value()); 
@@ -154,8 +154,8 @@ frc2::CommandPtr SubClimber::ClimberPosition(units::meter_t distance) {
 }
 
 //Ptr cmd of Start()
-frc2::CommandPtr SubClimber::ClimberManualDrive(float power) {
-    power = std::clamp(power, -1.0f, 1.0f);
+frc2::CommandPtr SubClimber::ClimberManualDrive(double power) {
+    power = std::clamp(power, -1.0, 1.0);
     return frc2::cmd::RunOnce([power] {SubClimber::GetInstance().Start(power);});
 }
 

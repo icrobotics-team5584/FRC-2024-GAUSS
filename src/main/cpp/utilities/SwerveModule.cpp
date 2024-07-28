@@ -56,7 +56,7 @@ void SwerveModule::ConfigTurnMotor(){
   //_canTurnMotor.SetCANTimeout(500);
   _canTurnMotor.SetConversionFactor(1.0 / TURNING_GEAR_RATIO);
   _canTurnMotor.EnableClosedLoopWrapping(0_tr, 1_tr);
-  _canTurnMotor.SetPIDFF(TURN_P, TURN_I, TURN_D);
+  _canTurnMotor.SetFeedbackGains(TURN_P, TURN_I, TURN_D);
   _canTurnMotor.SetInverted(true);
   _canTurnMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
   //_canTurnMotor.BurnFlash();
