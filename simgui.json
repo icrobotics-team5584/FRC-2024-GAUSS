@@ -61,12 +61,6 @@
           },
           "open": true
         },
-        "Shooter": {
-          "open": true
-        },
-        "Target": {
-          "open": true
-        },
         "open": true
       },
       "photonvision": {
@@ -159,6 +153,15 @@
               ],
               "id": "NT:/SmartDashboard/Pivot/Motor/Velocity Target",
               "yAxis": 1
+            },
+            {
+              "color": [
+                0.5058823823928833,
+                0.44705885648727417,
+                0.7019608020782471,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Pivot/Motor/Motion Profile Position Target"
             }
           ],
           "yaxis2": true
@@ -192,7 +195,8 @@
         }
       ],
       "window": {
-        "name": "Pivot voltage"
+        "name": "Pivot voltage",
+        "visible": false
       }
     },
     "Plot <3>": {
@@ -204,8 +208,17 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 0,
+          "height": 336,
           "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/laterator/targ"
+            },
             {
               "color": [
                 0.8666667342185974,
@@ -213,7 +226,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/Pivot/Motor/Position"
+              "id": "NT:/SmartDashboard/laterator/pos"
             },
             {
               "color": [
@@ -222,35 +235,15 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/Pivot/Motor/Position Target"
-            },
-            {
-              "color": [
-                0.7686275243759155,
-                0.30588236451148987,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/Feeder/Motor/Voltage",
-              "yAxis": 2
-            },
-            {
-              "color": [
-                0.3333333432674408,
-                0.658823549747467,
-                0.4078431725502014,
-                1.0
-              ],
-              "id": "NT:/SmartDashboard/ShooterSpeed",
+              "id": "NT:/SmartDashboard/laterator/vel",
               "yAxis": 1
             }
           ],
-          "yaxis2": true,
-          "yaxis3": true
+          "yaxis2": true
         }
       ],
       "window": {
-        "visible": false
+        "name": "laterator"
       }
     },
     "Plot <4>": {

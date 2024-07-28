@@ -39,7 +39,7 @@ private:
   ICSparkMax _pivotMotor{canid::ShooterPivotMotor, 20_A};
   ctre::phoenix6::hardware::CANcoder _shooterPivotEncoder{canid::ShooterPivotEncoder};
 
-  static constexpr double _pivotP = 0;
+  static constexpr double _pivotP = 10;
   static constexpr double _pivotI = 0;
   static constexpr double _pivotD = 0;
 

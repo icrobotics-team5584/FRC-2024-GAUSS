@@ -130,16 +130,12 @@ class ICSpark : public wpi::Sendable {
   /**
    * Gets the current closed loop position target if there is one. Zero otherwise.
    */
-  units::turn_t GetPositionTarget() {
-    return InMotionMode() ? CalcMotionTarget().position : _positionTarget;
-  };
+  units::turn_t GetPositionTarget() { return _positionTarget; };
 
   /**
    * Gets the current closed loop velocity target if there is one. Zero otherwise
    */
-  units::turns_per_second_t GetVelocityTarget() {
-    return InMotionMode() ? CalcMotionTarget().velocity : _velocityTarget;
-  };
+  units::turns_per_second_t GetVelocityTarget() { return _velocityTarget; };
 
   /**
    * Get the closed loop position error (current position - target position) if there is one.
@@ -343,8 +339,8 @@ class ICSpark : public wpi::Sendable {
   };
   ControlType _controlType = ControlType::kDutyCycle;
   void SetInternalControlType(ControlType controlType);
-  MPState CalcMotionTarget(units::second_t lookahead = 20_ms);
-  units::turns_per_second_squared_t CalcMotionAccelTarget(units::second_t lookahead = 20_ms);
+  MPState CalcNextMotionTarget(units::second_t lookahead = 20_ms);
+  MPState _latestMotionTarget;
   bool InMotionMode();
   units::turns_per_second_t _simVelocity = units::turns_per_second_t{0};
 
