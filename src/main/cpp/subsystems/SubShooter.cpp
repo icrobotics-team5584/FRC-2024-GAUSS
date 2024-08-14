@@ -4,6 +4,7 @@
 
 #include "subsystems/SubShooter.h"
 #include "frc/smartdashboard/SmartDashboard.h"
+#include "utilities/RobotLogs.h"
 
 
 using namespace frc2::cmd;
@@ -33,6 +34,7 @@ frc::SmartDashboard::PutNumber("Shooter/SpeedRight", _ShooterFlywheelMotorRight.
 frc::SmartDashboard::PutBoolean("Target/FlywheelOnTarget", IsOnTarget());
 frc::SmartDashboard::PutNumber("Shooter/LeftCurrent", _ShooterFlywheelMotorLeft.GetStatorCurrent().GetValue().value());
 frc::SmartDashboard::PutNumber("Shooter/RightCurrent", _ShooterFlywheelMotorRight.GetStatorCurrent().GetValue().value());
+Logger::logFalcon(_ShooterFlywheelMotorLeft, "leftFlywheelMotor");
 }
 
 frc2::CommandPtr SubShooter::CmdSetShooterSpeaker(){

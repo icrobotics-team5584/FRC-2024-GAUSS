@@ -58,6 +58,12 @@
             "open": true
           }
         },
+        "FalconLogs": {
+          "leftFlywheelMotor": {
+            "open": true
+          },
+          "open": true
+        },
         "Feeder": {
           "Motor": {
             "open": true
@@ -263,7 +269,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     }
   }
 }
