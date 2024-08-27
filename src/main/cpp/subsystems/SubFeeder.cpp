@@ -15,7 +15,7 @@ SubFeeder::SubFeeder() {
 
 frc2::CommandPtr SubFeeder::FeedToIntake() {
   std::cout <<"building Feeder cmd\n";
-return Run([this]{ std::cout <<"running Feeder\n"; _feederMotor.SetVoltage(7_V);}).FinallyDo([this]{_feederMotor.SetVoltage(0_V);});
+return Run([this]{ std::cout <<"running Feeder\n"; _feederMotor.Set(0.7);}).FinallyDo([this]{_feederMotor.Set(0);});
 }
 
 frc2::CommandPtr SubFeeder::FeedToShooter() {
