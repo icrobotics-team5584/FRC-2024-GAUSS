@@ -5,7 +5,7 @@
 #include "subsystems/SubFeeder.h"
 #include <frc2/command/commands.h>
 #include <frc/smartdashboard/SmartDashboard.h>
-
+#include <iostream>
 
 
 SubFeeder::SubFeeder() {
@@ -14,7 +14,8 @@ SubFeeder::SubFeeder() {
 }
 
 frc2::CommandPtr SubFeeder::FeedToIntake() {
-return Run([this]{ _feederMotor.Set(0.7);}).FinallyDo([this]{_feederMotor.Set(0);});
+  std::cout <<"building Feeder cmd\n";
+return Run([this]{ std::cout <<"running Feeder\n"; _feederMotor.SetVoltage(7_V);}).FinallyDo([this]{_feederMotor.SetVoltage(0_V);});
 }
 
 frc2::CommandPtr SubFeeder::FeedToShooter() {
@@ -41,6 +42,7 @@ frc2::CommandPtr SubFeeder::CmdSourcePickUpFeeder(){
 // This method will be called once per scheduler run
 void SubFeeder::Periodic() {
   frc::SmartDashboard::PutBoolean("Feeder/HasNote", CheckHasNote());
+  std::cout <<"Feeder periodic\n";
 }
 
 bool SubFeeder::CheckHasNote(){
@@ -49,4 +51,8 @@ bool SubFeeder::CheckHasNote(){
   }
 
   return true;
+}
+
+double SubFeeder::GetDutyCycle() {
+  return _feederMotor.Get();
 }
