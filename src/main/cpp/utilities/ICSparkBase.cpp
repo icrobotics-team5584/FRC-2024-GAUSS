@@ -121,15 +121,17 @@ void ICSpark::SetVoltage(units::volt_t output) {
 
 void ICSpark::UpdateControls(units::second_t loopTime) {
   switch (GetControlType()) {
-    case ControlType::kMotionProfile:
+    case ControlType::kMotionProfile: {
       auto prevVelTarget = _latestMotionTarget.velocity;
       _latestMotionTarget = CalcNextMotionTarget(loopTime);
-      auto accelTarget = (_latestMotionTarget.velocity - prevVelTarget)/loopTime;
+      auto accelTarget =
+          (_latestMotionTarget.velocity - prevVelTarget) / loopTime;
       _arbFeedForward = CalculateFeedforward(accelTarget);
       _pidController.SetReference(_latestMotionTarget.position.value(),
                                   rev::CANSparkLowLevel::ControlType::kPosition,
                                   0, _arbFeedForward.value());
       break;
+    }
     case ControlType::kSmartMotion:
       SetSmartMotionTarget(_positionTarget, CalculateFeedforward());
       break;
