@@ -14,8 +14,7 @@ SubFeeder::SubFeeder() {
 }
 
 frc2::CommandPtr SubFeeder::FeedToIntake() {
-  std::cout <<"building Feeder cmd\n";
-return Run([this]{ std::cout <<"running Feeder\n"; _feederMotor.Set(0.7);}).FinallyDo([this]{_feederMotor.Set(0);});
+return Run([this]{ _feederMotor.Set(0.7);}).FinallyDo([this]{_feederMotor.Set(0);});
 }
 
 frc2::CommandPtr SubFeeder::FeedToShooter() {
@@ -42,7 +41,6 @@ frc2::CommandPtr SubFeeder::CmdSourcePickUpFeeder(){
 // This method will be called once per scheduler run
 void SubFeeder::Periodic() {
   frc::SmartDashboard::PutBoolean("Feeder/HasNote", CheckHasNote());
-  std::cout <<"Feeder periodic\n";
 }
 
 bool SubFeeder::CheckHasNote(){
