@@ -18,7 +18,7 @@ return Run([this]{ _feederMotor.Set(0.7);}).FinallyDo([this]{_feederMotor.Set(0)
 }
 
 frc2::CommandPtr SubFeeder::FeedToShooter() {
-return Run([this]{ _feederMotor.Set(-0.5);}).FinallyDo([this]{_feederMotor.Set(0);});
+return Run([this]{ _feederMotor.SetVoltage(-6_V);}).FinallyDo([this]{_feederMotor.Set(0);});
 }
 
 frc2::CommandPtr SubFeeder::ReverseFeeder() {

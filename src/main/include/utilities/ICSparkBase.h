@@ -187,6 +187,11 @@ class ICSpark : public wpi::Sendable {
    * Get the duty cycle (-1 to 1) of the motor.
   */
   double GetDutyCycle() const;
+
+  /**
+   * Get the voltage applied to the motor.
+  */
+  units::volt_t GetMotorVoltage();
   
   /**
    * Common interface to stop the motor until Set is called again or closed loop control is started.

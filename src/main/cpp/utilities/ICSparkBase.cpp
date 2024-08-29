@@ -281,6 +281,14 @@ double ICSpark::GetDutyCycle() const {
   }
 }
 
+units::volt_t ICSpark::GetMotorVoltage() {
+  if constexpr (frc::RobotBase::IsSimulation()) {
+    return CalcSimVoltage();
+  } else {
+    return _spark->GetAppliedOutput() * _spark->GetBusVoltage()*1_V;
+  }
+}
+
 units::volt_t ICSpark::CalcSimVoltage() {
   units::volt_t output = 0_V;
 
@@ -326,7 +334,20 @@ units::volt_t ICSpark::CalcSimVoltage() {
     case ControlType::kCurrent:
       break;
   }
+
   output += _arbFeedForward;
+
+  bool posLimitOn = _spark->IsSoftLimitEnabled(rev::CANSparkBase::SoftLimitDirection::kForward);
+  bool negLimitOn = _spark->IsSoftLimitEnabled(rev::CANSparkBase::SoftLimitDirection::kReverse);
+  double posLimit = _spark->GetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward);
+  double negLimit = _spark->GetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse);
+  if (posLimitOn && GetPosition().value() >= posLimit && output > 0_V) {
+    output = 0_V;
+  }
+  if (negLimitOn && GetPosition().value() <= negLimit && output < 0_V) {
+    output = 0_V;
+  }
+
   output = std::clamp(output, _minPidOutputCache * 12_V, _maxPidOutputCache * 12_V);
   _simDutyCycle = output/12_V;
   return output;

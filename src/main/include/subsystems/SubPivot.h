@@ -31,6 +31,8 @@ public:
 
   //functions
   bool IsOnTarget();
+  units::turn_t GetAngle();
+  units::volt_t GetVoltage();
 
 private:
   // Components (e.g. motor controllers and sensors) should generally be

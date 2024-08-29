@@ -42,9 +42,10 @@ SubPivot::SubPivot(){
     _pitchTable.insert(9_deg, 33_deg);
     _pitchTable.insert(10_deg, 34.5_deg);
 
-
-    _pivotMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, LOW_STOP.value());
-    _pivotMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, HIGH_STOP.value()); 
+    _pivotMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, HIGH_STOP.value());
+    _pivotMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, LOW_STOP.value()); 
+    _pivotMotor.EnableSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, true);
+    _pivotMotor.EnableSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, true);
 }
 
 
@@ -79,4 +80,12 @@ void SubPivot::SimulationPeriodic(){
 bool SubPivot::IsOnTarget() {
     auto tolerance = 5_deg;
     return units::math::abs( _pivotMotor.GetPosError()) < tolerance;
+}
+
+units::turn_t SubPivot::GetAngle() {
+    return _pivotMotor.GetPosition();
+}
+
+units::volt_t SubPivot::GetVoltage() {
+    return _pivotMotor.GetMotorVoltage();
 }

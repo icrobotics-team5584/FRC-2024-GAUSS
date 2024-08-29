@@ -52,22 +52,18 @@
         "FalconLogs": {
           "leftFlywheelMotor": {
             "open": true
-          },
-          "open": true
+          }
         },
         "Feeder": {
           "Motor": {
             "open": true
-          },
-          "open": true
+          }
         },
         "Pivot": {
           "Motor": {
-            "Gains": {
-              "open": true
-            },
             "open": true
-          }
+          },
+          "open": true
         },
         "open": true
       },
@@ -176,8 +172,7 @@
         }
       ],
       "window": {
-        "name": "Pivot",
-        "visible": false
+        "name": "Pivot"
       }
     },
     "Plot <2>": {
@@ -280,7 +275,8 @@
         }
       ],
       "window": {
-        "name": "Feeder"
+        "name": "Feeder",
+        "visible": false
       }
     },
     "Plot <5>": {
