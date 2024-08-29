@@ -5,7 +5,7 @@
 #include "subsystems/SubFeeder.h"
 #include <frc2/command/commands.h>
 #include <frc/smartdashboard/SmartDashboard.h>
-
+#include <iostream>
 
 
 SubFeeder::SubFeeder() {
@@ -49,4 +49,8 @@ bool SubFeeder::CheckHasNote(){
   }
 
   return true;
+}
+
+double SubFeeder::GetDutyCycle() {
+  return _feederMotor.Get();
 }
