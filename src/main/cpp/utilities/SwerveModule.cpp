@@ -171,7 +171,7 @@ void SwerveModule::UpdateSim(units::second_t deltaTime) {
   driveState.SetRawRotorPosition(_driveMotorSim.GetAngularPosition() * DRIVE_GEAR_RATIO);
   driveState.SetRotorVelocity(_driveMotorSim.GetAngularVelocity() * DRIVE_GEAR_RATIO);
   // Turn Motor
-  auto turnVolts = _canTurnMotor.GetSimVoltage();
+  auto turnVolts = _canTurnMotor.CalcSimVoltage();
   _turnMotorSim.SetInputVoltage(turnVolts);
   _turnMotorSim.Update(deltaTime);
   auto turnAngle = _turnMotorSim.GetAngularPosition();

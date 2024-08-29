@@ -5,12 +5,8 @@
 #include "utilities/ICSparkBase.h"
 
 /**
- * Wrapper around the Rev CANSparkMax class with some convenience features.
- * - Brushless motor type assumed
- * - Required Current Limit Setting
- * - Better simulation support (see ICSpark::GetSimVoltage() and ICSpark::UpdateSimEncoder())
- * - Uses C++ units
- * - Encoder and pid functions are built into this class
+ * Helper class to setup an ICSpark to control a Spark Max. See ICSpark for
+ * further details.
  */
 class ICSparkMax : public rev::CANSparkMax, public ICSpark {
  public:
@@ -35,6 +31,13 @@ class ICSparkMax : public rev::CANSparkMax, public ICSpark {
    * @param output The voltage to set.
    */
   void SetVoltage(units::volt_t output) override;
+
+  /**
+   * Common interface for getting the current set speed of a speed controller.
+   *
+   * @return The current set speed.  Value is between -1.0 and 1.0.
+   */
+  double Get() const override;
 
   /**
    * Use an alternate quadrature (relative) encoder connected to the Spark Max's

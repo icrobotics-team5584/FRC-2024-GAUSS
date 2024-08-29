@@ -15,7 +15,7 @@ ICSpark::ICSpark(rev::CANSparkBase* spark,
   _spark->SetSmartCurrentLimit(currentLimit.value());
   SetConversionFactor(1);  // Makes the internal encoder use revs per sec not revs per min
 
-  _pidController.SetSmartMotionMinOutputVelocity(0);
+  _sparkPidController.SetSmartMotionMinOutputVelocity(0);
   SetClosedLoopOutputRange(-1, 1);
 }
 
@@ -30,13 +30,13 @@ void ICSpark::InitSendable(wpi::SendableBuilder& builder) {
 
   builder.AddDoubleProperty("Voltage", [&] { 
         return (frc::RobotBase::IsSimulation()) 
-          ? GetSimVoltage().value() 
+          ? CalcSimVoltage().value() 
           : _spark->GetAppliedOutput() * _spark->GetBusVoltage();
       }, nullptr);
 
-  builder.AddDoubleProperty("Gains/FB P Gain", [&] { return _simController.GetP(); }, [&](double P) { SetFeedbackProportional(P); });
-  builder.AddDoubleProperty("Gains/FB I Gain", [&] { return _simController.GetI(); }, [&](double I) { SetFeedbackIntegral(I); });
-  builder.AddDoubleProperty("Gains/FB D Gain", [&] { return _simController.GetD(); }, [&](double D) { SetFeedbackDerivative(D); });
+  builder.AddDoubleProperty("Gains/FB P Gain", [&] { return _rioPidController.GetP(); }, [&](double P) { SetFeedbackProportional(P); });
+  builder.AddDoubleProperty("Gains/FB I Gain", [&] { return _rioPidController.GetI(); }, [&](double I) { SetFeedbackIntegral(I); });
+  builder.AddDoubleProperty("Gains/FB D Gain", [&] { return _rioPidController.GetD(); }, [&](double D) { SetFeedbackDerivative(D); });
   builder.AddDoubleProperty("Gains/FF S Gain", [&] { return _feedforwardStaticFriction.value(); }, [&](double S) { SetFeedforwardStaticFriction(S*1_V); });
   builder.AddDoubleProperty("Gains/FF V Gain", [&] { return _feedforwardVelocity.value(); },       [&](double V) { SetFeedforwardVelocity(VoltsPerTps{V}); });
   builder.AddDoubleProperty("Gains/FF A Gain", [&] { return _feedforwardAcceleration.value(); },   [&](double A) { SetFeedforwardAcceleration(VoltsPerTpsSq{A}); });
@@ -56,7 +56,7 @@ void ICSpark::SetPositionTarget(units::turn_t target, units::volt_t arbFeedForwa
   _arbFeedForward = arbFeedForward;
   SetInternalControlType(ControlType::kPosition);
 
-  _pidController.SetReference(target.value(),
+  _sparkPidController.SetReference(target.value(),
                               rev::CANSparkLowLevel::ControlType::kPosition, 0,
                               _arbFeedForward.value());
 }
@@ -69,7 +69,7 @@ void ICSpark::SetSmartMotionTarget(units::turn_t target, units::volt_t arbFeedFo
   _latestMotionTarget = {GetPosition(), GetVelocity()};
   SetInternalControlType(ControlType::kSmartMotion);
 
-  _pidController.SetReference(target.value(),
+  _sparkPidController.SetReference(target.value(),
                               rev::CANSparkLowLevel::ControlType::kSmartMotion,
                               0, _arbFeedForward.value());
 }
@@ -82,7 +82,7 @@ void ICSpark::SetMotionProfileTarget(units::turn_t target, units::volt_t arbFeed
   _latestMotionTarget = {GetPosition(), GetVelocity()};
   SetInternalControlType(ControlType::kMotionProfile);
 
-  _pidController.SetReference(_latestMotionTarget.position.value(),
+  _sparkPidController.SetReference(_latestMotionTarget.position.value(),
                               rev::CANSparkLowLevel::ControlType::kPosition, 0,
                               _arbFeedForward.value());
 }
@@ -94,7 +94,7 @@ void ICSpark::SetVelocityTarget(units::turns_per_second_t target, units::volt_t 
   _arbFeedForward = arbFeedForward;
   SetInternalControlType(ControlType::kVelocity);
 
-  _pidController.SetReference(target.value(),
+  _sparkPidController.SetReference(target.value(),
                               rev::CANSparkLowLevel::ControlType::kVelocity, 0,
                               _arbFeedForward.value());
 }
@@ -104,7 +104,11 @@ void ICSpark::SetDutyCycle(double speed) {
   _positionTarget = units::turn_t{0};
   _voltageTarget = 0_V;
   SetInternalControlType(ControlType::kDutyCycle);
-  _spark->Set(speed);
+
+  _simDutyCycle = std::clamp(speed, -1.0, 1.0);
+  _sparkPidController.SetReference(speed,
+                              rev::CANSparkLowLevel::ControlType::kDutyCycle, 0,
+                              _arbFeedForward.value());
 }
 
 void ICSpark::SetVoltage(units::volt_t output) {
@@ -114,7 +118,8 @@ void ICSpark::SetVoltage(units::volt_t output) {
   _arbFeedForward = 0_V;
   SetInternalControlType(ControlType::kVoltage);
 
-  _pidController.SetReference(output.value(),
+  _simDutyCycle = output/12_V;
+  _sparkPidController.SetReference(output.value(),
                               rev::CANSparkLowLevel::ControlType::kVoltage, 0,
                               _arbFeedForward.value());
 }
@@ -124,10 +129,9 @@ void ICSpark::UpdateControls(units::second_t loopTime) {
     case ControlType::kMotionProfile: {
       auto prevVelTarget = _latestMotionTarget.velocity;
       _latestMotionTarget = CalcNextMotionTarget(loopTime);
-      auto accelTarget =
-          (_latestMotionTarget.velocity - prevVelTarget) / loopTime;
+      auto accelTarget = (_latestMotionTarget.velocity - prevVelTarget) / loopTime;
       _arbFeedForward = CalculateFeedforward(accelTarget);
-      _pidController.SetReference(_latestMotionTarget.position.value(),
+      _sparkPidController.SetReference(_latestMotionTarget.position.value(),
                                   rev::CANSparkLowLevel::ControlType::kPosition,
                                   0, _arbFeedForward.value());
       break;
@@ -157,14 +161,6 @@ units::volt_t ICSpark::CalculateFeedforward(
          _feedforwardAcceleration * accelerationTarget;
 }
 
-void ICSpark::Stop() {
-  _velocityTarget = units::turns_per_second_t{0};
-  _positionTarget = units::turn_t{0};
-  _voltageTarget = 0_V;
-  SetInternalControlType(ControlType::kDutyCycle);
-  _spark->StopMotor();
-}
-
 void ICSpark::SetInternalControlType(ControlType controlType) {
   _controlType = controlType;
 }
@@ -181,9 +177,9 @@ rev::CANSparkLowLevel::ControlType ICSpark::GetREVControlType() {
 void ICSpark::ConfigMotion(units::turns_per_second_t maxVelocity,
                                    units::turns_per_second_squared_t maxAcceleration,
                                    units::turn_t tolerance) {
-  _pidController.SetSmartMotionMaxAccel(maxAcceleration.value());
-  _pidController.SetSmartMotionMaxVelocity(maxVelocity.value());
-  _pidController.SetSmartMotionAllowedClosedLoopError(tolerance.value());
+  _sparkPidController.SetSmartMotionMaxAccel(maxAcceleration.value());
+  _sparkPidController.SetSmartMotionMaxVelocity(maxVelocity.value());
+  _sparkPidController.SetSmartMotionAllowedClosedLoopError(tolerance.value());
 
   _motionProfile = frc::TrapezoidProfile<units::turns>{{maxVelocity, maxAcceleration}};
 }
@@ -199,14 +195,14 @@ void ICSpark::UseAbsoluteEncoder(units::turn_t zeroOffset) {
   _spark->SetPeriodicFramePeriod(rev::CANSparkLowLevel::PeriodicFrame::kStatus6, 10);
   absEncoder.SetZeroOffset(zeroOffset.value());
   _encoder.UseAbsolute(std::move(absEncoder));
-  _pidController.SetFeedbackDevice(_encoder.GetPIDFeedbackDevice());
+  _sparkPidController.SetFeedbackDevice(_encoder.GetPIDFeedbackDevice());
 }
 
 void ICSpark::EnableClosedLoopWrapping(units::turn_t min, units::turn_t max) {
-  _pidController.SetPositionPIDWrappingMinInput(min.value());
-  _pidController.SetPositionPIDWrappingMaxInput(max.value());
-  _pidController.SetPositionPIDWrappingEnabled(true);
-  _simController.EnableContinuousInput(min.value(), max.value());
+  _sparkPidController.SetPositionPIDWrappingMinInput(min.value());
+  _sparkPidController.SetPositionPIDWrappingMaxInput(max.value());
+  _sparkPidController.SetPositionPIDWrappingEnabled(true);
+  _rioPidController.EnableContinuousInput(min.value(), max.value());
 }
 
 void ICSpark::SetFeedbackGains(double P, double I, double D) {
@@ -216,18 +212,18 @@ void ICSpark::SetFeedbackGains(double P, double I, double D) {
 }
 
 void ICSpark::SetFeedbackProportional(double P) {
-  _pidController.SetP(P);
-  _simController.SetP(P);
+  _sparkPidController.SetP(P);
+  _rioPidController.SetP(P);
 }
 
 void ICSpark::SetFeedbackIntegral(double I) {
-  _pidController.SetI(I);
-  _simController.SetI(I);
+  _sparkPidController.SetI(I);
+  _rioPidController.SetI(I);
 }
 
 void ICSpark::SetFeedbackDerivative(double D) {
-  _pidController.SetD(D);
-  _simController.SetD(D);
+  _sparkPidController.SetD(D);
+  _rioPidController.SetD(D);
 }
 
 void ICSpark::SetFeedforwardGains(units::volt_t S, units::volt_t G,
@@ -264,31 +260,39 @@ void ICSpark::SetFeedforwardAcceleration(VoltsPerTpsSq A) {
 }
 
 void ICSpark::SetClosedLoopOutputRange(double minOutputPercent, double maxOutputPercent) {
-  _minPidOutput = minOutputPercent;
-  _maxPidOutput = maxOutputPercent;
-  _pidController.SetOutputRange(minOutputPercent, maxOutputPercent);
+  _minPidOutputCache = minOutputPercent;
+  _maxPidOutputCache = maxOutputPercent;
+  _sparkPidController.SetOutputRange(minOutputPercent, maxOutputPercent);
 }
 
 units::turns_per_second_t ICSpark::GetVelocity() {
-  if (frc::RobotBase::IsSimulation()) {
+  if constexpr (frc::RobotBase::IsSimulation()) {
     return _simVelocity;
   } else {
     return units::turns_per_second_t{_encoder.GetVelocity()};
   }
 }
 
-units::volt_t ICSpark::GetSimVoltage() {
+double ICSpark::GetDutyCycle() const {
+  if constexpr (frc::RobotBase::IsSimulation()) {
+    return _simDutyCycle;
+  } else {
+    return _spark->GetAppliedOutput();
+  }
+}
+
+units::volt_t ICSpark::CalcSimVoltage() {
   units::volt_t output = 0_V;
 
   switch (_controlType) {
     case ControlType::kDutyCycle:
-      output = units::volt_t{_spark->Get() * 12};
+      output = _spark->Get() * 12_V;
       break;
 
     case ControlType::kVelocity:
       // Spark internal PID uses native units (motor shaft RPM)
       // so divide by conversion factor to use that
-      output = units::volt_t{_simController.Calculate(GetVelocity().value(),
+      output = units::volt_t{_rioPidController.Calculate(GetVelocity().value(),
                                                       _velocityTarget.value()) /
                                  _encoder.GetVelocityConversionFactor()};
       break;
@@ -296,7 +300,7 @@ units::volt_t ICSpark::GetSimVoltage() {
     case ControlType::kPosition:
       // Spark internal PID uses native units (motor shaft rotations)
       // so divide by conversion factor to use that
-      output = units::volt_t{_simController.Calculate(GetPosition().value(),
+      output = units::volt_t{_rioPidController.Calculate(GetPosition().value(),
                                                       _positionTarget.value()) /
                                  _encoder.GetPositionConversionFactor()};
       break;
@@ -307,14 +311,14 @@ units::volt_t ICSpark::GetSimVoltage() {
 
     case ControlType::kSmartMotion:
       output = units::volt_t{
-          _simController.Calculate(GetVelocity().value(),
+          _rioPidController.Calculate(GetVelocity().value(),
                                    _latestMotionTarget.velocity.value()) /
           _encoder.GetVelocityConversionFactor()};
       break;
 
     case ControlType::kMotionProfile:
       output = units::volt_t{
-          _simController.Calculate(GetPosition().value(),
+          _rioPidController.Calculate(GetPosition().value(),
                                    _latestMotionTarget.position.value()) /
           _encoder.GetPositionConversionFactor()};
       break;
@@ -323,7 +327,9 @@ units::volt_t ICSpark::GetSimVoltage() {
       break;
   }
   output += _arbFeedForward;
-  return std::clamp(output, _minPidOutput * 12_V, _maxPidOutput * 12_V);
+  output = std::clamp(output, _minPidOutputCache * 12_V, _maxPidOutputCache * 12_V);
+  _simDutyCycle = output/12_V;
+  return output;
 }
 
 void ICSpark::UpdateSimEncoder(units::turn_t position, units::turns_per_second_t velocity) {
@@ -338,7 +344,7 @@ bool ICSpark::InMotionMode() {
 
 ICSpark::MPState ICSpark::CalcNextMotionTarget(units::second_t lookahead) {
   units::turn_t error = units::math::abs(_positionTarget - GetPosition());
-  units::turn_t tolerance = _pidController.GetSmartMotionAllowedClosedLoopError() * 1_tr;
+  units::turn_t tolerance = _sparkPidController.GetSmartMotionAllowedClosedLoopError() * 1_tr;
   if (error < tolerance) {
     return MPState{GetPosition(), 0_tps};
   }

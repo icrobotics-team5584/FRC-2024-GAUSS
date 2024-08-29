@@ -70,7 +70,7 @@ frc2::CommandPtr SubPivot::CmdPivotFromVision(std::function<units::degree_t()> t
 }
 
 void SubPivot::SimulationPeriodic(){
-    _pivotSim.SetInputVoltage(_pivotMotor.GetSimVoltage());
+    _pivotSim.SetInputVoltage(_pivotMotor.CalcSimVoltage());
     _pivotSim.Update(20_ms);
 
     _pivotMotor.UpdateSimEncoder(_pivotSim.GetAngle(), _pivotSim.GetVelocity());

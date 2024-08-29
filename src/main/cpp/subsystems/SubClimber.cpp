@@ -48,12 +48,12 @@ void SubClimber::SimulationPeriodic() {
     frc::SmartDashboard::PutNumber("Climber/Left sim distance", TurnToDistance(_lClimbMotor.GetPosition()).value());
     frc::SmartDashboard::PutNumber("Climber/Right sim distance", TurnToDistance(_rClimbMotor.GetPosition()).value());
 
-  lElvSim.SetInputVoltage(_lClimbMotor.GetSimVoltage());
+  lElvSim.SetInputVoltage(_lClimbMotor.CalcSimVoltage());
   lElvSim.Update(20_ms);
   _lClimbMotor.UpdateSimEncoder(DistanceToTurn(lElvSim.GetPosition()),
                                DistanceToTurn(lElvSim.GetVelocity()));
 
-    rElvSim.SetInputVoltage(_rClimbMotor.GetSimVoltage());
+    rElvSim.SetInputVoltage(_rClimbMotor.CalcSimVoltage());
     rElvSim.Update(20_ms);
     _rClimbMotor.UpdateSimEncoder(DistanceToTurn(rElvSim.GetPosition()), DistanceToTurn(rElvSim.GetVelocity()));
 

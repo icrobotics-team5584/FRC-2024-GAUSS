@@ -3,6 +3,8 @@
 #include <rev/CANSparkBase.h>
 #include <frc/controller/PIDController.h>
 #include <frc/trajectory/TrapezoidProfile.h>
+#include <frc/simulation/SimDeviceSim.h>
+#include <hal/SimDevice.h>
 #include <units/acceleration.h>
 #include <units/length.h>
 #include <units/angle.h>
@@ -18,7 +20,7 @@
 /**
  * Wrapper around the Rev CANSparkBase class with some convenience features.
  * - Required Current Limit Setting
- * - Better simulation support (see GetSimVoltage() and UpdateSimEncoder())
+ * - Better simulation support (see CalcSimVoltage() and UpdateSimEncoder())
  * - Uses C++ units
  * - Encoder and pid functions are built into this class
  */
@@ -155,7 +157,7 @@ class ICSpark : public wpi::Sendable {
    * physics simulation classes.
    * (https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/physics-sim.html)
    */
-  units::volt_t GetSimVoltage();
+  units::volt_t CalcSimVoltage();
 
   /**
    * It is the user's responsibility to update the encoder position and
@@ -182,9 +184,14 @@ class ICSpark : public wpi::Sendable {
   units::turn_t GetPosition() { return units::turn_t{_encoder.GetPosition()}; };
 
   /**
+   * Get the duty cycle (-1 to 1) of the motor.
+  */
+  double GetDutyCycle() const;
+  
+  /**
    * Common interface to stop the motor until Set is called again or closed loop control is started.
    */
-  void Stop();
+  void StopMotor() { SetDutyCycle(0); };
 
   /**
    * Sets the duty cycle of a speed controller.
@@ -307,16 +314,15 @@ class ICSpark : public wpi::Sendable {
   template <std::derived_from<rev::RelativeEncoder> RelEncoder>
   void UseRelativeEncoder(RelEncoder&& encoder) {
     _encoder.UseRelative(std::move(encoder));
-    _pidController.SetFeedbackDevice(_encoder.GetPIDFeedbackDevice());
+    _sparkPidController.SetFeedbackDevice(_encoder.GetPIDFeedbackDevice());
   }
 
  private:
   rev::CANSparkBase* _spark;
-  using MPState = frc::TrapezoidProfile<units::turns>::State;
-  rev::CANSparkLowLevel::ControlType GetREVControlType();
 
-  // Related REVLib objects
-  rev::SparkPIDController _pidController{_spark->GetPIDController()};
+  // Feedback control objects
+  rev::SparkPIDController _sparkPidController{_spark->GetPIDController()};
+  frc::PIDController _rioPidController{0, 0, 0};
   ICSparkEncoder _encoder;
 
   // Feedforward gains
@@ -325,25 +331,33 @@ class ICSpark : public wpi::Sendable {
   units::volt_t _feedforwardRotationalGravity = 0_V;
   VoltsPerTps _feedforwardVelocity = 0_V / 1_tps;
   VoltsPerTpsSq _feedforwardAcceleration = 0_V / 1_tr_per_s_sq;
+  units::volt_t _arbFeedForward = 0.0_V;
 
-  // PID simulation configuration
-  bool _updatingTargetFromSendable = false;
+  // Control References (Targets)
+  using MPState = frc::TrapezoidProfile<units::turns>::State;
   units::turn_t _positionTarget{0};
   units::turns_per_second_t _velocityTarget{0};
   units::volt_t _voltageTarget{0};
-  units::volt_t _arbFeedForward = 0.0_V;
-  frc::PIDController _simController{0, 0, 0};
   frc::TrapezoidProfile<units::turns> _motionProfile{
       {units::turns_per_second_t{0},
        units::turns_per_second_squared_t{0}}  // constraints updated by SetMotionConfig
   };
-  ControlType _controlType = ControlType::kDutyCycle;
-  void SetInternalControlType(ControlType controlType);
   MPState CalcNextMotionTarget(units::second_t lookahead = 20_ms);
   MPState _latestMotionTarget;
-  bool InMotionMode();
-  units::turns_per_second_t _simVelocity = units::turns_per_second_t{0};
 
-  double _minPidOutput = -1;
-  double _maxPidOutput = 1;
+  // Control Type (aka mode) management
+  ControlType _controlType = ControlType::kDutyCycle;
+  rev::CANSparkLowLevel::ControlType GetREVControlType();
+  void SetInternalControlType(ControlType controlType);
+  bool InMotionMode();
+
+  // Store a cache of the min and max PID outputs configured in the Spark since
+  // requesting them causes slow, blocking CAN calls.
+  double _minPidOutputCache = -1;
+  double _maxPidOutputCache = 1;
+
+  // Simulation info. We don't use the WPI managed SimDeviceSim data because the REV Spark classes
+  // control those values and often overwrite what we want to set.
+  units::turns_per_second_t _simVelocity = 0_tps;
+  double _simDutyCycle = 0;
 };
