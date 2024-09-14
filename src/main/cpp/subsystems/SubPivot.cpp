@@ -20,7 +20,7 @@ SubPivot::SubPivot(){
     _pivotMotor.SetFeedforwardGains(PIVOT_S, PIVOT_G, true, PIVOT_V, PIVOT_A);
     _pivotMotor.SetPosition(_shooterPivotEncoder.GetPosition().GetValue());
     _pivotMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
-    _pivotMotor.ConfigMotion(0.2_tps, 1_tr_per_s_sq, 0_tr);
+    _pivotMotor.SetMotionConstraints(0.2_tps, 1_tr_per_s_sq, 0_tr);
 
     frc::SmartDashboard::PutData("Pivot/Motor", (wpi::Sendable*)&_pivotMotor);
 
@@ -54,7 +54,7 @@ SubPivot::SubPivot(){
 void SubPivot::Periodic() {
     frc::SmartDashboard::PutString("Pivot/CurrentCommand", (GetCurrentCommand()->GetName()));
     frc::SmartDashboard::PutBoolean("Target/PivotOnTarget", IsOnTarget());
-    _pivotMotor.UpdateMotionProfileControls();
+    _pivotMotor.UpdateControls();
 }
 
 frc2::CommandPtr SubPivot::CmdSetPivotAngle(units::degree_t targetAngle){

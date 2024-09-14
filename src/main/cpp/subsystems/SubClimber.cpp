@@ -14,7 +14,7 @@ SubClimber::SubClimber() {
     _lClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
     _lClimbMotor.SetFeedbackGains(lP,lI,lD);
     _lClimbMotor.SetFeedforwardGains(0_V, 0_V, false, 5.5_V/1_tps);
-    _lClimbMotor.ConfigMotion(2_tps, 3_tr_per_s_sq, 0_deg);
+    _lClimbMotor.SetMotionConstraints(2_tps, 3_tr_per_s_sq, 0_deg);
     _lClimbMotor.SetInverted(false);
     // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TOP_HEIGHT).value());
     // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0_m).value());
@@ -24,7 +24,7 @@ SubClimber::SubClimber() {
     _rClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
     _rClimbMotor.SetFeedbackGains(rP,rI,rD);
     _rClimbMotor.SetFeedforwardGains(0_V, 0_V, false, 5.5_V/1_tps);
-    _rClimbMotor.ConfigMotion(2_tps, 3_tr_per_s_sq, 0_deg);
+    _rClimbMotor.SetMotionConstraints(2_tps, 3_tr_per_s_sq, 0_deg);
     _rClimbMotor.SetInverted(true);
     // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TOP_HEIGHT).value());
     // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0_m).value()); 
@@ -45,8 +45,8 @@ void SubClimber::Periodic() {
     frc::SmartDashboard::PutNumber("Climber/Right current", _rClimbMotor.GetOutputCurrent());
     frc::SmartDashboard::PutBoolean("Climber/Reseted", Reseted);
     frc::SmartDashboard::PutBoolean("Climber/Reseting", Reseting);
-    _lClimbMotor.UpdateMotionProfileControls();
-    _rClimbMotor.UpdateMotionProfileControls();
+    _lClimbMotor.UpdateControls();
+    _rClimbMotor.UpdateControls();
 }
 
 void SubClimber::SimulationPeriodic() {

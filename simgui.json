@@ -53,10 +53,8 @@
           "Left motor": {
             "Gains": {
               "open": true
-            },
-            "open": true
-          },
-          "open": true
+            }
+          }
         },
         "FalconLogs": {
           "leftFlywheelMotor": {
@@ -70,11 +68,9 @@
         },
         "Pivot": {
           "Motor": {
-            "Gains": {
-              "open": true
-            },
             "open": true
-          }
+          },
+          "open": true
         },
         "open": true
       },

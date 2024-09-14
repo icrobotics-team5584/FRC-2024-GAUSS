@@ -21,22 +21,24 @@ ICSpark::ICSpark(rev::CANSparkBase* spark,
 
 void ICSpark::InitSendable(wpi::SendableBuilder& builder) {
   // clang-format off
-  //----------------------- Label --------------------------- Getter ------------------------------------------------ Setter -------------------------------------------------
-  builder.AddDoubleProperty("Position",                       [&] { return GetPosition().value(); },                  nullptr);
-  builder.AddDoubleProperty("Velocity",                       [&] { return GetVelocity().value(); },                  nullptr);
-  builder.AddDoubleProperty("Voltage",                        [&] { return GetMotorVoltage().value(); },              nullptr);
-  builder.AddDoubleProperty("Position Target",                [&] { return _positionTarget.value(); },                [&](double targ) { SetPositionTarget(targ*1_tr); });
-  builder.AddDoubleProperty("Velocity Target",                [&] { return _velocityTarget.value(); },                [&](double targ) { SetVelocityTarget(targ*1_tps); });
-  builder.AddDoubleProperty("Motion Profile Position Target", [&] { return _latestMotionTarget.position.value(); },   [&](double targ) { SetMotionProfileTarget(targ*1_tr); });
-  builder.AddDoubleProperty("Motion Profile Velocity Target", [&] { return _latestMotionTarget.velocity.value(); },   nullptr);
-  builder.AddDoubleProperty("Gains/FB P Gain",                [&] { return _rioPidController.GetP(); },               [&](double P) { SetFeedbackProportional(P); });
-  builder.AddDoubleProperty("Gains/FB I Gain",                [&] { return _rioPidController.GetI(); },               [&](double I) { SetFeedbackIntegral(I); });
-  builder.AddDoubleProperty("Gains/FB D Gain",                [&] { return _rioPidController.GetD(); },               [&](double D) { SetFeedbackDerivative(D); });
-  builder.AddDoubleProperty("Gains/FF S Gain",                [&] { return _feedforwardStaticFriction.value(); },     [&](double S) { SetFeedforwardStaticFriction(S*1_V); });
-  builder.AddDoubleProperty("Gains/FF V Gain",                [&] { return _feedforwardVelocity.value(); },           [&](double V) { SetFeedforwardVelocity(VoltsPerTps{V}); });
-  builder.AddDoubleProperty("Gains/FF A Gain",                [&] { return _feedforwardAcceleration.value(); },       [&](double A) { SetFeedforwardAcceleration(VoltsPerTpsSq{A}); });
-  builder.AddDoubleProperty("Gains/FF Linear G Gain",         [&] { return _feedforwardLinearGravity.value(); },      [&](double lG) { SetFeedforwardLinearGravity(lG*1_V); });
-  builder.AddDoubleProperty("Gains/FF Rotational G Gain",     [&] { return _feedforwardRotationalGravity.value(); },  [&](double rG) { SetFeedforwardRotationalGravity(rG*1_V); });
+  //----------------------- Label ------------------------ Getter ------------------------------------------------ Setter -------------------------------------------------
+  builder.AddDoubleProperty("Position",                   [&] { return GetPosition().value(); },                  nullptr);
+  builder.AddDoubleProperty("Velocity",                   [&] { return GetVelocity().value(); },                  nullptr);
+  builder.AddDoubleProperty("Voltage",                    [&] { return GetMotorVoltage().value(); },              nullptr);
+  builder.AddDoubleProperty("Position Target",            [&] { return _positionTarget.value(); },                [&](double targ) { SetPositionTarget(targ*1_tr); });
+  builder.AddDoubleProperty("Velocity Target",            [&] { return _velocityTarget.value(); },                [&](double targ) { SetVelocityTarget(targ*1_tps); });
+  builder.AddDoubleProperty("Profile Position Target",    [&] { return _latestMotionTarget.position.value(); },   [&](double targ) { SetMotionProfileTarget(targ*1_tr); });
+  builder.AddDoubleProperty("Profile Velocity Target",    [&] { return _latestMotionTarget.velocity.value(); },   nullptr);
+  builder.AddDoubleProperty("Gains/FB P Gain",            [&] { return _rioPidController.GetP(); },               [&](double P) { SetFeedbackProportional(P); });
+  builder.AddDoubleProperty("Gains/FB I Gain",            [&] { return _rioPidController.GetI(); },               [&](double I) { SetFeedbackIntegral(I); });
+  builder.AddDoubleProperty("Gains/FB D Gain",            [&] { return _rioPidController.GetD(); },               [&](double D) { SetFeedbackDerivative(D); });
+  builder.AddDoubleProperty("Gains/FF S Gain",            [&] { return _feedforwardStaticFriction.value(); },     [&](double S) { SetFeedforwardStaticFriction(S*1_V); });
+  builder.AddDoubleProperty("Gains/FF V Gain",            [&] { return _feedforwardVelocity.value(); },           [&](double V) { SetFeedforwardVelocity(VoltsPerTps{V}); });
+  builder.AddDoubleProperty("Gains/FF A Gain",            [&] { return _feedforwardAcceleration.value(); },       [&](double A) { SetFeedforwardAcceleration(VoltsPerTpsSq{A}); });
+  builder.AddDoubleProperty("Gains/FF Linear G Gain",     [&] { return _feedforwardLinearGravity.value(); },      [&](double lG) { SetFeedforwardLinearGravity(lG*1_V); });
+  builder.AddDoubleProperty("Gains/FF Rotational G Gain", [&] { return _feedforwardRotationalGravity.value(); },  [&](double rG) { SetFeedforwardRotationalGravity(rG*1_V); });
+  builder.AddDoubleProperty("Motion Config/Max vel",      [&] { return _sparkPidController.GetSmartMotionMaxVelocity(); },  [&](double vel) { SetMotionMaxVel(vel*1_tps); });
+  builder.AddDoubleProperty("Motion Config/Max accel",    [&] { return _sparkPidController.GetSmartMotionMaxAccel(); },     [&](double accel) { SetMotionMaxAccel(accel*1_tr_per_s_sq); });
   // clang-format on
 }
 
@@ -64,7 +66,7 @@ void ICSpark::SetSmartMotionTarget(units::turn_t target, units::volt_t arbFeedFo
   _latestMotionTarget = {GetPosition(), GetVelocity()};
   SetInternalControlType(ControlType::kSmartMotion);
 
-  UpdateMotionProfileControls();
+  UpdateControls();
 }
 
 void ICSpark::SetMotionProfileTarget(units::turn_t target, units::volt_t arbFeedForward) {
@@ -75,7 +77,7 @@ void ICSpark::SetMotionProfileTarget(units::turn_t target, units::volt_t arbFeed
   _latestMotionTarget = {GetPosition(), GetVelocity()};
   SetInternalControlType(ControlType::kMotionProfile);
 
-  UpdateMotionProfileControls();
+  UpdateControls();
 }
 
 void ICSpark::SetVelocityTarget(units::turns_per_second_t target, units::volt_t arbFeedForward) {
@@ -113,23 +115,33 @@ void ICSpark::SetVoltage(units::volt_t output) {
   _sparkPidController.SetReference(output.value(), rev::CANSparkLowLevel::ControlType::kVoltage);
 }
 
-void ICSpark::UpdateMotionProfileControls(units::second_t loopTime) {
+void ICSpark::UpdateControls(units::second_t loopTime) {
   auto prevVelTarget = _latestMotionTarget.velocity;
   double sparkTarget = 0;
 
-  if (GetControlType() == ControlType::kMotionProfile) {
-    // In motion profile mode, we use the prev target state as the "current state"
-    // and the sparkPIDController uses the next target state as its goal.
-    _latestMotionTarget = CalcNextMotionTarget(_latestMotionTarget, _positionTarget, loopTime);
-    sparkTarget = _latestMotionTarget.position.value();
-  } else if (GetControlType() == ControlType::kSmartMotion) {
-    // In Smart Motion mode, we use the true, sensed current state state as the "current state"
-    // and the sparkPIDController uses the overall target as its goal.
-    MPState currentState = {GetPosition(), GetVelocity()};
-    _latestMotionTarget = CalcNextMotionTarget(currentState, _positionTarget, loopTime);
-    sparkTarget = _positionTarget.value();
-  } else {
-    return;
+  switch (GetControlType()) {
+    case ControlType::kMotionProfile:
+      // In motion profile mode, we use the prev target state as the "current state"
+      // and the sparkPIDController uses the next target state as its goal.
+      _latestMotionTarget = CalcNextMotionTarget(_latestMotionTarget, _positionTarget, loopTime);
+      sparkTarget = _latestMotionTarget.position.value();
+      break;
+    case ControlType::kSmartMotion: {
+      // In Smart Motion mode, we use the true, sensed current state state as the "current state"
+      // and the sparkPIDController uses the overall target as its goal.
+      MPState currentState = {GetPosition(), GetVelocity()};
+      _latestMotionTarget = CalcNextMotionTarget(currentState, _positionTarget, loopTime);
+      sparkTarget = _positionTarget.value();
+      break;
+    }
+    case ControlType::kPosition:
+      sparkTarget = _positionTarget.value();
+      break;
+    case ControlType::kVelocity:
+      sparkTarget = _velocityTarget.value();
+      break;
+    default:
+      return;
   }
 
   auto accelTarget = (_latestMotionTarget.velocity - prevVelTarget) / loopTime;
@@ -159,7 +171,7 @@ rev::CANSparkLowLevel::ControlType ICSpark::GetREVControlType() {
   }
 }
 
-void ICSpark::ConfigMotion(units::turns_per_second_t maxVelocity,
+void ICSpark::SetMotionConstraints(units::turns_per_second_t maxVelocity,
                                    units::turns_per_second_squared_t maxAcceleration,
                                    units::turn_t tolerance) {
   _sparkPidController.SetSmartMotionMaxAccel(maxAcceleration.value());
@@ -167,6 +179,16 @@ void ICSpark::ConfigMotion(units::turns_per_second_t maxVelocity,
   _sparkPidController.SetSmartMotionAllowedClosedLoopError(tolerance.value());
 
   _motionProfile = frc::TrapezoidProfile<units::turns>{{maxVelocity, maxAcceleration}};
+}
+
+void ICSpark::SetMotionMaxVel(units::turns_per_second_t maxVelocity) {
+  SetMotionConstraints(maxVelocity, _sparkPidController.GetSmartMotionMaxVelocity() * 1_tr_per_s_sq,
+                       _sparkPidController.GetSmartMotionAllowedClosedLoopError() * 1_tr);
+}
+
+void ICSpark::SetMotionMaxAccel(units::turns_per_second_squared_t maxAcceleration) {
+  SetMotionConstraints(_sparkPidController.GetSmartMotionMaxVelocity() * 1_tps, maxAcceleration,
+                       _sparkPidController.GetSmartMotionAllowedClosedLoopError() * 1_tr);
 }
 
 void ICSpark::SetConversionFactor(double rotationsToDesired) {
@@ -211,37 +233,42 @@ void ICSpark::SetFeedbackDerivative(double D) {
   _rioPidController.SetD(D);
 }
 
-void ICSpark::SetFeedforwardGains(units::volt_t S, units::volt_t G,
-                                  bool gravityIsRotational, VoltsPerTps V,
-                                  VoltsPerTpsSq A) {
-  SetFeedforwardStaticFriction(S);
-  SetFeedforwardVelocity(V);
-  SetFeedforwardAcceleration(A);
+void ICSpark::SetFeedforwardGains(units::volt_t S, units::volt_t G, bool gravityIsRotational,
+                                  VoltsPerTps V, VoltsPerTpsSq A, bool updateSparkNow) {
+  SetFeedforwardStaticFriction(S, false);
+  SetFeedforwardVelocity(V, false);
+  SetFeedforwardAcceleration(A, false);
   if (gravityIsRotational) {
-    SetFeedforwardRotationalGravity(G);
+    SetFeedforwardRotationalGravity(G, false);
   } else {
-    SetFeedforwardLinearGravity(G);
+    SetFeedforwardLinearGravity(G, false);
   }
+  if (updateSparkNow) UpdateControls();
 }
 
-void ICSpark::SetFeedforwardStaticFriction(units::volt_t S) {
+void ICSpark::SetFeedforwardStaticFriction(units::volt_t S, bool updateSparkNow) {
   _feedforwardStaticFriction = S;
+  if (updateSparkNow) UpdateControls();
 }
 
-void ICSpark::SetFeedforwardLinearGravity(units::volt_t linearG) {
+void ICSpark::SetFeedforwardLinearGravity(units::volt_t linearG, bool updateSparkNow) {
   _feedforwardLinearGravity = linearG;
+  if (updateSparkNow) UpdateControls();
 }
 
-void ICSpark::SetFeedforwardRotationalGravity(units::volt_t rotationalG) {
+void ICSpark::SetFeedforwardRotationalGravity(units::volt_t rotationalG, bool updateSparkNow) {
   _feedforwardRotationalGravity = rotationalG;
+  if (updateSparkNow) UpdateControls();
 }
 
-void ICSpark::SetFeedforwardVelocity(VoltsPerTps V) {
+void ICSpark::SetFeedforwardVelocity(VoltsPerTps V, bool updateSparkNow) {
   _feedforwardVelocity = V;
+  if (updateSparkNow) UpdateControls();
 }
 
-void ICSpark::SetFeedforwardAcceleration(VoltsPerTpsSq A) {
+void ICSpark::SetFeedforwardAcceleration(VoltsPerTpsSq A, bool updateSparkNow) {
   _feedforwardAcceleration = A;
+  if (updateSparkNow) UpdateControls();
 }
 
 void ICSpark::SetClosedLoopOutputRange(double minOutputPercent, double maxOutputPercent) {
@@ -279,7 +306,7 @@ units::volt_t ICSpark::CalcSimVoltage() {
 
   switch (_controlType) {
     case ControlType::kDutyCycle:
-      output = _spark->Get() * 12_V;
+      output = _spark->Get() * _spark->GetBusVoltage()*1_V;
       break;
 
     case ControlType::kVelocity:
@@ -336,8 +363,8 @@ units::volt_t ICSpark::CalcSimVoltage() {
 
   output = std::clamp(output, _minPidOutputCache * 12_V, _maxPidOutputCache * 12_V);
 
-  // store a latest copy because we can't call calculate() on the pid controller whenever we want,
-  // it expects to be called at a specific frequency.
+  // store a latest copy because we can't call calculate() on the rio pid controller whenever we
+  // want, it expects to be called at a specific frequency.
   _simVoltage = output;
 
   return output;
