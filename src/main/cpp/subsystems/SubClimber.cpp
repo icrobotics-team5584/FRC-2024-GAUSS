@@ -13,16 +13,20 @@ SubClimber::SubClimber() {
     _lClimbMotor.SetConversionFactor(1.0 / gearRatio);
     _lClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
     _lClimbMotor.SetFeedbackGains(lP,lI,lD);
+    _lClimbMotor.SetFeedforwardGains(0_V, 0_V, false, 5.5_V/1_tps);
+    _lClimbMotor.ConfigMotion(2_tps, 3_tr_per_s_sq, 0_deg);
     _lClimbMotor.SetInverted(false);
-    // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TopHeight).value());
+    // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TOP_HEIGHT).value());
     // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0_m).value());
 
     //Set up right motor
     _rClimbMotor.SetConversionFactor(1.0 / gearRatio);
     _rClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
     _rClimbMotor.SetFeedbackGains(rP,rI,rD);
+    _rClimbMotor.SetFeedforwardGains(0_V, 0_V, false, 5.5_V/1_tps);
+    _rClimbMotor.ConfigMotion(2_tps, 3_tr_per_s_sq, 0_deg);
     _rClimbMotor.SetInverted(true);
-    // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TopHeight).value());
+    // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TOP_HEIGHT).value());
     // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0_m).value()); 
     
     //Enable top and bottom limit
@@ -41,6 +45,8 @@ void SubClimber::Periodic() {
     frc::SmartDashboard::PutNumber("Climber/Right current", _rClimbMotor.GetOutputCurrent());
     frc::SmartDashboard::PutBoolean("Climber/Reseted", Reseted);
     frc::SmartDashboard::PutBoolean("Climber/Reseting", Reseting);
+    _lClimbMotor.UpdateMotionProfileControls();
+    _rClimbMotor.UpdateMotionProfileControls();
 }
 
 void SubClimber::SimulationPeriodic() {
@@ -79,8 +85,8 @@ units::meter_t SubClimber::TurnToDistance(units::turn_t turn) {
 //Drive motor to height
 void SubClimber::DriveToDistance(units::meter_t distance) {
     TargetDistance = distance;
-    _lClimbMotor.SetPositionTarget(DistanceToTurn(distance));
-    _rClimbMotor.SetPositionTarget(DistanceToTurn(distance));
+    _lClimbMotor.SetSmartMotionTarget(DistanceToTurn(distance));
+    _rClimbMotor.SetSmartMotionTarget(DistanceToTurn(distance));
 }
 
 //Run motor with power
@@ -109,6 +115,14 @@ double SubClimber::GetLeftCurrent() {
 //Get right motor current
 double SubClimber::GetRightCurrent() {
     return _rClimbMotor.GetOutputCurrent();
+}
+
+units::meter_t SubClimber::GetLeftHeight() {
+    return TurnToDistance(_lClimbMotor.GetPosition());
+}
+
+units::meter_t SubClimber::GetRightHeight() {
+    return TurnToDistance(_rClimbMotor.GetPosition());
 }
 
 //Enable or disable top and bottom limit

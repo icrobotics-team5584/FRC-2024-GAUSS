@@ -8,6 +8,7 @@
 
 #include "subsystems/SubFeeder.h"
 #include "subsystems/SubPivot.h"
+#include "subsystems/SubClimber.h"
 
 int main(int argc, char** argv) {
   HAL_Initialize(500, 0);
@@ -87,4 +88,15 @@ TEST(pivot, highSoftLimit) {
   // Hits upper limit of 90 deg and goes to zero volts. 
   // Mechanism is capable of going further so it might swing past, so just check volts not position.
   EXPECT_LE(SubPivot::GetInstance().GetVoltage().value(), 0);
+}
+
+// CLIMBER TESTS
+
+TEST(climber, goUp) {
+  units::meter_t target = 0.4_m;
+  auto cmd = SubClimber::GetInstance().ClimberPosition(target);
+  cmd.Schedule();
+  SimCmdScheduler(3_s);
+  EXPECT_NEAR(SubClimber::GetInstance().GetRightHeight().value(), target.value(), 0.01);
+  EXPECT_NEAR(SubClimber::GetInstance().GetLeftHeight().value(), target.value(), 0.01);
 }

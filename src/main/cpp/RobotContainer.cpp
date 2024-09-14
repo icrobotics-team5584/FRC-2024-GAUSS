@@ -60,9 +60,10 @@ void RobotContainer::ConfigureBindings() {
   //Bumpers
    _driverController.LeftBumper().WhileTrue(cmd::CmdSourcePickUp());
   //Letters
-  _driverController.Y().OnTrue(SubDrivebase::GetInstance().ResetGyroCmd());
   _driverController.A().OnTrue(SubPivot::GetInstance().CmdSetPivotAngle(70_deg));
   _driverController.B().OnTrue(SubPivot::GetInstance().CmdSetPivotAngle(10_deg));
+  _driverController.Y().OnTrue(SubClimber::GetInstance().ClimberPosition(SubClimber::TOP_HEIGHT));
+  _driverController.X().OnTrue(SubClimber::GetInstance().ClimberPosition(SubClimber::BASE_HEIGHT));
 
 
   //POV
@@ -124,7 +125,7 @@ frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
   return frc2::cmd::Wait(delay)
       .AndThen(pathplanner::PathPlannerAuto(_autoSelected).ToPtr())
       .AlongWith(SubClimber::GetInstance().ClimberAutoReset().AndThen(
-          SubClimber::GetInstance().ClimberPosition(SubClimber::_ClimberPosStow)));
+          SubClimber::GetInstance().ClimberPosition(SubClimber::STOW_HEIGHT)));
 }
 
 frc2::CommandPtr RobotContainer::Rumble(double force, units::second_t duration) {

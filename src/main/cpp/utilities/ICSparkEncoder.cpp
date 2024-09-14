@@ -21,7 +21,6 @@ double ICSparkEncoder::GetPosition() {
 double ICSparkEncoder::GetVelocity() {
   switch (_selected) {
     case ABSOLUTE:
-    frc::SmartDashboard::PutNumber("arm/Encoder velocity", _absolute->GetVelocity());
       return _absolute->GetVelocity();
     case RELATIVE:
       return _relative->GetVelocity();
@@ -44,7 +43,7 @@ void ICSparkEncoder::SetPosition(double pos) {
     _relative->SetPosition(pos);
   }
   _inbuilt.SetPosition(pos);
-  _absoluteSimPos = pos; // Doesn't do anything for a real life absolute 
+  _absoluteSimPos = pos; // Doesn't do anything for a real life absolute encoder
 }
 
 void ICSparkEncoder::SetConversionFactor(double rotationsToDesired) {

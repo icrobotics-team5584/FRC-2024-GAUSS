@@ -54,7 +54,7 @@ SubPivot::SubPivot(){
 void SubPivot::Periodic() {
     frc::SmartDashboard::PutString("Pivot/CurrentCommand", (GetCurrentCommand()->GetName()));
     frc::SmartDashboard::PutBoolean("Target/PivotOnTarget", IsOnTarget());
-    _pivotMotor.UpdateControls();
+    _pivotMotor.UpdateMotionProfileControls();
 }
 
 frc2::CommandPtr SubPivot::CmdSetPivotAngle(units::degree_t targetAngle){

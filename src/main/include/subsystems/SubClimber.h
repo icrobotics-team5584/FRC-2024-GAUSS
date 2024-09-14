@@ -40,7 +40,11 @@ class SubClimber : public frc2::SubsystemBase {
   // Periodic
   void Periodic() override;
   void SimulationPeriodic() override;
-  static constexpr units::length::meter_t  _ClimberPosStow = 0.25_m;
+
+   // Robot info
+  static constexpr units::meter_t BASE_HEIGHT = 0.0_m;
+  static constexpr units::meter_t TOP_HEIGHT = 0.5_m;
+  static constexpr units::length::meter_t  STOW_HEIGHT = 0.25_m;
 
   //Units translation
   units::turn_t DistanceToTurn(units::meter_t distance);
@@ -55,6 +59,8 @@ class SubClimber : public frc2::SubsystemBase {
 
   double GetLeftCurrent();
   double GetRightCurrent();
+  units::meter_t GetLeftHeight();
+  units::meter_t GetRightHeight();
 
   void DriveToDistance(units::meter_t distance);
 
@@ -83,18 +89,16 @@ class SubClimber : public frc2::SubsystemBase {
 
   // Motor Setup
   static constexpr double gearRatio = 45;
-  static constexpr double lP = 5, lI = 0.0, lD = 0.0, lF = 0,
+  static constexpr double lP = 0.001, lI = 0.0, lD = 0.0, lF = 0,
   
-                          rP = 5, rI = 0.0, rD = 0.0, rF = 0;
+                          rP = 0.001, rI = 0.0, rD = 0.0, rF = 0;
 
   static constexpr double currentLimit = 10;
 
   // Unit translation
   static constexpr units::meter_t WheelCir = 0.157_m;
 
-  // Robot info
-  static constexpr units::meter_t BaseHeight = 0.0_m;
-  static constexpr units::meter_t TopHeight = 0.5_m;
+  static constexpr double recalcV = 35.1;
 
   //reset
   bool Reseting = false;
@@ -104,8 +108,8 @@ class SubClimber : public frc2::SubsystemBase {
 
   // Sim
 
-  frc::sim::ElevatorSim lElvSim{frc::DCMotor::NEO(), gearRatio, 26_kg, (WheelCir/std::numbers::pi)/2, BaseHeight, 5_m, false, BaseHeight};
-  frc::sim::ElevatorSim rElvSim{frc::DCMotor::NEO(), gearRatio, 26_kg, (WheelCir/std::numbers::pi)/2, BaseHeight, 5_m, false, BaseHeight};
+  frc::sim::ElevatorSim lElvSim{frc::DCMotor::NEO(), gearRatio, 26_kg, (WheelCir/std::numbers::pi)/2, BASE_HEIGHT, 5_m, false, BASE_HEIGHT};
+  frc::sim::ElevatorSim rElvSim{frc::DCMotor::NEO(), gearRatio, 26_kg, (WheelCir/std::numbers::pi)/2, BASE_HEIGHT, 5_m, false, BASE_HEIGHT};
 
   frc::Mechanism2d mech{4, 4};
   frc::MechanismRoot2d* mechRootL = mech.GetRoot("ClimberL", 1, 1);

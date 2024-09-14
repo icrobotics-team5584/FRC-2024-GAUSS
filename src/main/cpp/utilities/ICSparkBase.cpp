@@ -21,27 +21,22 @@ ICSpark::ICSpark(rev::CANSparkBase* spark,
 
 void ICSpark::InitSendable(wpi::SendableBuilder& builder) {
   // clang-format off
-  builder.AddDoubleProperty("Position", [&] { return GetPosition().value(); }, nullptr);  // setter is null, cannot set position directly
-  builder.AddDoubleProperty("Velocity", [&] { return GetVelocity().value(); }, nullptr);
-  builder.AddDoubleProperty("Position Target", [&] { return _positionTarget.value(); }, [&](double targ) { SetPositionTarget(targ*1_tr); });
-  builder.AddDoubleProperty("Velocity Target", [&] { return _velocityTarget.value(); }, [&](double targ) { SetVelocityTarget(targ*1_tps); });
-  builder.AddDoubleProperty("Motion Profile Position Target", [&] { return _latestMotionTarget.position.value(); }, [&](double targ) { SetMotionProfileTarget(targ*1_tr); });
-  builder.AddDoubleProperty("Motion Profile Velocity Target", [&] { return _latestMotionTarget.velocity.value(); }, nullptr);
-
-  builder.AddDoubleProperty("Voltage", [&] { 
-        return (frc::RobotBase::IsSimulation()) 
-          ? CalcSimVoltage().value() 
-          : _spark->GetAppliedOutput() * _spark->GetBusVoltage();
-      }, nullptr);
-
-  builder.AddDoubleProperty("Gains/FB P Gain", [&] { return _rioPidController.GetP(); }, [&](double P) { SetFeedbackProportional(P); });
-  builder.AddDoubleProperty("Gains/FB I Gain", [&] { return _rioPidController.GetI(); }, [&](double I) { SetFeedbackIntegral(I); });
-  builder.AddDoubleProperty("Gains/FB D Gain", [&] { return _rioPidController.GetD(); }, [&](double D) { SetFeedbackDerivative(D); });
-  builder.AddDoubleProperty("Gains/FF S Gain", [&] { return _feedforwardStaticFriction.value(); }, [&](double S) { SetFeedforwardStaticFriction(S*1_V); });
-  builder.AddDoubleProperty("Gains/FF V Gain", [&] { return _feedforwardVelocity.value(); },       [&](double V) { SetFeedforwardVelocity(VoltsPerTps{V}); });
-  builder.AddDoubleProperty("Gains/FF A Gain", [&] { return _feedforwardAcceleration.value(); },   [&](double A) { SetFeedforwardAcceleration(VoltsPerTpsSq{A}); });
-  builder.AddDoubleProperty("Gains/FF Linear G Gain",    [&] { return _feedforwardLinearGravity.value(); },    [&](double lG) { SetFeedforwardLinearGravity(lG*1_V); });
-  builder.AddDoubleProperty("Gains/FF Rotational G Gain",[&] { return _feedforwardRotationalGravity.value(); },[&](double rG) { SetFeedforwardRotationalGravity(rG*1_V); });
+  //----------------------- Label --------------------------- Getter ------------------------------------------------ Setter -------------------------------------------------
+  builder.AddDoubleProperty("Position",                       [&] { return GetPosition().value(); },                  nullptr);
+  builder.AddDoubleProperty("Velocity",                       [&] { return GetVelocity().value(); },                  nullptr);
+  builder.AddDoubleProperty("Voltage",                        [&] { return GetMotorVoltage().value(); },              nullptr);
+  builder.AddDoubleProperty("Position Target",                [&] { return _positionTarget.value(); },                [&](double targ) { SetPositionTarget(targ*1_tr); });
+  builder.AddDoubleProperty("Velocity Target",                [&] { return _velocityTarget.value(); },                [&](double targ) { SetVelocityTarget(targ*1_tps); });
+  builder.AddDoubleProperty("Motion Profile Position Target", [&] { return _latestMotionTarget.position.value(); },   [&](double targ) { SetMotionProfileTarget(targ*1_tr); });
+  builder.AddDoubleProperty("Motion Profile Velocity Target", [&] { return _latestMotionTarget.velocity.value(); },   nullptr);
+  builder.AddDoubleProperty("Gains/FB P Gain",                [&] { return _rioPidController.GetP(); },               [&](double P) { SetFeedbackProportional(P); });
+  builder.AddDoubleProperty("Gains/FB I Gain",                [&] { return _rioPidController.GetI(); },               [&](double I) { SetFeedbackIntegral(I); });
+  builder.AddDoubleProperty("Gains/FB D Gain",                [&] { return _rioPidController.GetD(); },               [&](double D) { SetFeedbackDerivative(D); });
+  builder.AddDoubleProperty("Gains/FF S Gain",                [&] { return _feedforwardStaticFriction.value(); },     [&](double S) { SetFeedforwardStaticFriction(S*1_V); });
+  builder.AddDoubleProperty("Gains/FF V Gain",                [&] { return _feedforwardVelocity.value(); },           [&](double V) { SetFeedforwardVelocity(VoltsPerTps{V}); });
+  builder.AddDoubleProperty("Gains/FF A Gain",                [&] { return _feedforwardAcceleration.value(); },       [&](double A) { SetFeedforwardAcceleration(VoltsPerTpsSq{A}); });
+  builder.AddDoubleProperty("Gains/FF Linear G Gain",         [&] { return _feedforwardLinearGravity.value(); },      [&](double lG) { SetFeedforwardLinearGravity(lG*1_V); });
+  builder.AddDoubleProperty("Gains/FF Rotational G Gain",     [&] { return _feedforwardRotationalGravity.value(); },  [&](double rG) { SetFeedforwardRotationalGravity(rG*1_V); });
   // clang-format on
 }
 
@@ -54,11 +49,11 @@ void ICSpark::SetPositionTarget(units::turn_t target, units::volt_t arbFeedForwa
   _velocityTarget = units::turns_per_second_t{0};
   _voltageTarget = 0_V;
   _arbFeedForward = arbFeedForward;
+  _latestModelFeedForward = CalculateFeedforward(target, 0_tps);
   SetInternalControlType(ControlType::kPosition);
 
-  _sparkPidController.SetReference(target.value(),
-                              rev::CANSparkLowLevel::ControlType::kPosition, 0,
-                              _arbFeedForward.value());
+  _sparkPidController.SetReference(target.value(), rev::CANSparkLowLevel::ControlType::kPosition, 0,
+                                   _arbFeedForward.value() + _latestModelFeedForward.value());
 }
 
 void ICSpark::SetSmartMotionTarget(units::turn_t target, units::volt_t arbFeedForward) {
@@ -69,9 +64,7 @@ void ICSpark::SetSmartMotionTarget(units::turn_t target, units::volt_t arbFeedFo
   _latestMotionTarget = {GetPosition(), GetVelocity()};
   SetInternalControlType(ControlType::kSmartMotion);
 
-  _sparkPidController.SetReference(target.value(),
-                              rev::CANSparkLowLevel::ControlType::kSmartMotion,
-                              0, _arbFeedForward.value());
+  UpdateMotionProfileControls();
 }
 
 void ICSpark::SetMotionProfileTarget(units::turn_t target, units::volt_t arbFeedForward) {
@@ -82,9 +75,7 @@ void ICSpark::SetMotionProfileTarget(units::turn_t target, units::volt_t arbFeed
   _latestMotionTarget = {GetPosition(), GetVelocity()};
   SetInternalControlType(ControlType::kMotionProfile);
 
-  _sparkPidController.SetReference(_latestMotionTarget.position.value(),
-                              rev::CANSparkLowLevel::ControlType::kPosition, 0,
-                              _arbFeedForward.value());
+  UpdateMotionProfileControls();
 }
 
 void ICSpark::SetVelocityTarget(units::turns_per_second_t target, units::volt_t arbFeedForward) {
@@ -92,23 +83,23 @@ void ICSpark::SetVelocityTarget(units::turns_per_second_t target, units::volt_t 
   _positionTarget = units::turn_t{0};
   _voltageTarget = 0_V;
   _arbFeedForward = arbFeedForward;
+  _latestModelFeedForward = CalculateFeedforward(0_tr, _velocityTarget);
   SetInternalControlType(ControlType::kVelocity);
 
-  _sparkPidController.SetReference(target.value(),
-                              rev::CANSparkLowLevel::ControlType::kVelocity, 0,
-                              _arbFeedForward.value());
+  _sparkPidController.SetReference(target.value(), rev::CANSparkLowLevel::ControlType::kVelocity, 0,
+                                   _arbFeedForward.value() + _latestModelFeedForward.value());
 }
 
 void ICSpark::SetDutyCycle(double speed) {
   _velocityTarget = units::turns_per_second_t{0};
   _positionTarget = units::turn_t{0};
   _voltageTarget = 0_V;
+  _arbFeedForward = 0_V;
+  _latestModelFeedForward = 0_V;
   SetInternalControlType(ControlType::kDutyCycle);
 
-  _simDutyCycle = std::clamp(speed, -1.0, 1.0);
-  _sparkPidController.SetReference(speed,
-                              rev::CANSparkLowLevel::ControlType::kDutyCycle, 0,
-                              _arbFeedForward.value());
+  _simVoltage = std::clamp(speed, -1.0, 1.0) * _spark->GetBusVoltage() * 1_V;
+  _sparkPidController.SetReference(speed, rev::CANSparkLowLevel::ControlType::kDutyCycle);
 }
 
 void ICSpark::SetVoltage(units::volt_t output) {
@@ -118,47 +109,41 @@ void ICSpark::SetVoltage(units::volt_t output) {
   _arbFeedForward = 0_V;
   SetInternalControlType(ControlType::kVoltage);
 
-  _simDutyCycle = output/12_V;
-  _sparkPidController.SetReference(output.value(),
-                              rev::CANSparkLowLevel::ControlType::kVoltage, 0,
-                              _arbFeedForward.value());
+  _simVoltage = output;
+  _sparkPidController.SetReference(output.value(), rev::CANSparkLowLevel::ControlType::kVoltage);
 }
 
-void ICSpark::UpdateControls(units::second_t loopTime) {
-  switch (GetControlType()) {
-    case ControlType::kMotionProfile: {
-      auto prevVelTarget = _latestMotionTarget.velocity;
-      _latestMotionTarget = CalcNextMotionTarget(loopTime);
-      auto accelTarget = (_latestMotionTarget.velocity - prevVelTarget) / loopTime;
-      _arbFeedForward = CalculateFeedforward(accelTarget);
-      _sparkPidController.SetReference(_latestMotionTarget.position.value(),
-                                  rev::CANSparkLowLevel::ControlType::kPosition,
-                                  0, _arbFeedForward.value());
-      break;
-    }
-    case ControlType::kSmartMotion:
-      SetSmartMotionTarget(_positionTarget, CalculateFeedforward());
-      break;
-    case ControlType::kPosition:
-      SetPositionTarget(_positionTarget, CalculateFeedforward());
-      break;
-    case ControlType::kVelocity:
-      SetVelocityTarget(_velocityTarget, CalculateFeedforward());
-      break;
-    default:
-      break;
+void ICSpark::UpdateMotionProfileControls(units::second_t loopTime) {
+  auto prevVelTarget = _latestMotionTarget.velocity;
+  double sparkTarget = 0;
+
+  if (GetControlType() == ControlType::kMotionProfile) {
+    // In motion profile mode, we use the prev target state as the "current state"
+    // and the sparkPIDController uses the next target state as its goal.
+    _latestMotionTarget = CalcNextMotionTarget(_latestMotionTarget, _positionTarget, loopTime);
+    sparkTarget = _latestMotionTarget.position.value();
+  } else if (GetControlType() == ControlType::kSmartMotion) {
+    // In Smart Motion mode, we use the true, sensed current state state as the "current state"
+    // and the sparkPIDController uses the overall target as its goal.
+    MPState currentState = {GetPosition(), GetVelocity()};
+    _latestMotionTarget = CalcNextMotionTarget(currentState, _positionTarget, loopTime);
+    sparkTarget = _positionTarget.value();
+  } else {
+    return;
   }
+
+  auto accelTarget = (_latestMotionTarget.velocity - prevVelTarget) / loopTime;
+  _latestModelFeedForward =
+      CalculateFeedforward(_latestMotionTarget.position, _latestMotionTarget.velocity, accelTarget);
+  units::volt_t feedforward = _arbFeedForward + _latestModelFeedForward;
+  _sparkPidController.SetReference(sparkTarget, GetREVControlType(), 0, feedforward.value());
 }
 
-units::volt_t ICSpark::CalculateFeedforward(
-    units::turns_per_second_squared_t accelerationTarget) {
-  auto velTarget = _latestMotionTarget.velocity;
-  auto posTarget = _latestMotionTarget.position;
-  return _feedforwardStaticFriction * wpi::sgn(velTarget) +
-         _feedforwardLinearGravity +
-         _feedforwardRotationalGravity * units::math::cos(posTarget) +
-         _feedforwardVelocity * velTarget +
-         _feedforwardAcceleration * accelerationTarget;
+units::volt_t ICSpark::CalculateFeedforward(units::turn_t pos, units::turns_per_second_t vel,
+                                            units::turns_per_second_squared_t accel) {
+  return _feedforwardStaticFriction * wpi::sgn(vel) + _feedforwardLinearGravity +
+         _feedforwardRotationalGravity * units::math::cos(pos) + _feedforwardVelocity * vel +
+         _feedforwardAcceleration * accel;
 }
 
 void ICSpark::SetInternalControlType(ControlType controlType) {
@@ -275,7 +260,7 @@ units::turns_per_second_t ICSpark::GetVelocity() {
 
 double ICSpark::GetDutyCycle() const {
   if constexpr (frc::RobotBase::IsSimulation()) {
-    return _simDutyCycle;
+    return _simVoltage.value()/_spark->GetBusVoltage();
   } else {
     return _spark->GetAppliedOutput();
   }
@@ -283,7 +268,7 @@ double ICSpark::GetDutyCycle() const {
 
 units::volt_t ICSpark::GetMotorVoltage() {
   if constexpr (frc::RobotBase::IsSimulation()) {
-    return CalcSimVoltage();
+    return _simVoltage;
   } else {
     return _spark->GetAppliedOutput() * _spark->GetBusVoltage()*1_V;
   }
@@ -335,8 +320,9 @@ units::volt_t ICSpark::CalcSimVoltage() {
       break;
   }
 
-  output += _arbFeedForward;
+  output += _arbFeedForward + _latestModelFeedForward;
 
+  // Soft limits
   bool posLimitOn = _spark->IsSoftLimitEnabled(rev::CANSparkBase::SoftLimitDirection::kForward);
   bool negLimitOn = _spark->IsSoftLimitEnabled(rev::CANSparkBase::SoftLimitDirection::kReverse);
   double posLimit = _spark->GetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward);
@@ -349,7 +335,11 @@ units::volt_t ICSpark::CalcSimVoltage() {
   }
 
   output = std::clamp(output, _minPidOutputCache * 12_V, _maxPidOutputCache * 12_V);
-  _simDutyCycle = output/12_V;
+
+  // store a latest copy because we can't call calculate() on the pid controller whenever we want,
+  // it expects to be called at a specific frequency.
+  _simVoltage = output;
+
   return output;
 }
 
@@ -363,14 +353,15 @@ bool ICSpark::InMotionMode() {
          GetControlType() == ControlType::kSmartMotion;
 }
 
-ICSpark::MPState ICSpark::CalcNextMotionTarget(units::second_t lookahead) {
-  units::turn_t error = units::math::abs(_positionTarget - GetPosition());
+ICSpark::MPState ICSpark::CalcNextMotionTarget(MPState current, units::turn_t goalPosition,
+                                               units::second_t lookahead) {
+  units::turn_t error = units::math::abs(goalPosition - GetPosition());
   units::turn_t tolerance = _sparkPidController.GetSmartMotionAllowedClosedLoopError() * 1_tr;
   if (error < tolerance) {
     return MPState{GetPosition(), 0_tps};
   }
 
   return _motionProfile.Calculate(
-      lookahead, _latestMotionTarget,
-      {_positionTarget, units::turns_per_second_t{0}});
+      lookahead, current,
+      {goalPosition, units::turns_per_second_t{0}});
 }

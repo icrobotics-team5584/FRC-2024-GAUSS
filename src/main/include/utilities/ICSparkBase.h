@@ -111,23 +111,24 @@ class ICSpark : public wpi::Sendable {
   void SetVelocityTarget(units::turns_per_second_t target, units::volt_t arbFeedForward = 0.0_V);
 
   /**
-   * Update motion profile targets and feedforward calculations. This is
-   * required to be called periodically when you use kG gains or a motion
-   * profile.
-   * This only has an effect when in one of the following modes: Motion Profile,
-   * Smart Motion, Position, Velocty.
+   * Update motion profile targets and feedforward calculations. This is required to be called
+   * periodically when you use a motion profile using the Motion Profile or Smart Motion modes.
    *
-   * @param loopTime The frequency at which this is being called. 20ms is the
-   * default loop time for WPILib periodic functions. Generally, faster loop
-   * times result in smoother controls at the cost of processing time.
+   * @param loopTime The frequency at which this is being called. 20ms is the default loop time for
+   * WPILib periodic functions.
    */
-  void UpdateControls(units::second_t loopTime = 20_ms);
+  void UpdateMotionProfileControls(units::second_t loopTime = 20_ms);
 
   /**
-   * Calculate how many volts to send to the motor from the feedforward model.
-   * (Before any feedback control is applied).
-  */
-  units::volt_t CalculateFeedforward(units::turns_per_second_squared_t accelerationTarget = 0_tr_per_s_sq);
+   * Calculate how many volts to send to the motor from the feedforward model configured with
+   * SetFeedforwardGains().
+   *
+   * @param pos The position target
+   * @param vel The velocity target
+   * @param accel The acceleration target
+   */
+  units::volt_t CalculateFeedforward(units::turn_t pos, units::turns_per_second_t vel,
+                                     units::turns_per_second_squared_t accel = 0_tr_per_s_sq);
 
   /**
    * Gets the current closed loop position target if there is one. Zero otherwise.
@@ -337,6 +338,7 @@ class ICSpark : public wpi::Sendable {
   VoltsPerTps _feedforwardVelocity = 0_V / 1_tps;
   VoltsPerTpsSq _feedforwardAcceleration = 0_V / 1_tr_per_s_sq;
   units::volt_t _arbFeedForward = 0.0_V;
+  units::volt_t _latestModelFeedForward = 0.0_V;
 
   // Control References (Targets)
   using MPState = frc::TrapezoidProfile<units::turns>::State;
@@ -347,7 +349,8 @@ class ICSpark : public wpi::Sendable {
       {units::turns_per_second_t{0},
        units::turns_per_second_squared_t{0}}  // constraints updated by SetMotionConfig
   };
-  MPState CalcNextMotionTarget(units::second_t lookahead = 20_ms);
+  MPState CalcNextMotionTarget(MPState current, units::turn_t goalPosition,
+                               units::second_t lookahead = 20_ms);
   MPState _latestMotionTarget;
 
   // Control Type (aka mode) management
@@ -364,5 +367,7 @@ class ICSpark : public wpi::Sendable {
   // Simulation info. We don't use the WPI managed SimDeviceSim data because the REV Spark classes
   // control those values and often overwrite what we want to set.
   units::turns_per_second_t _simVelocity = 0_tps;
-  double _simDutyCycle = 0;
+  units::volt_t _simVoltage =
+      0_V;  // store a latest copy because we can't call calculate() on the pid controller whenever
+            // we want, it expects to be called at a specific frequency.
 };
