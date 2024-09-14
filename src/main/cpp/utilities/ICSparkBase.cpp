@@ -243,32 +243,32 @@ void ICSpark::SetFeedforwardGains(units::volt_t S, units::volt_t G, bool gravity
   } else {
     SetFeedforwardLinearGravity(G, false);
   }
-  if (updateSparkNow) UpdateControls();
+  if (updateSparkNow) UpdateControls(0_s);
 }
 
 void ICSpark::SetFeedforwardStaticFriction(units::volt_t S, bool updateSparkNow) {
   _feedforwardStaticFriction = S;
-  if (updateSparkNow) UpdateControls();
+  if (updateSparkNow) UpdateControls(0_s);
 }
 
 void ICSpark::SetFeedforwardLinearGravity(units::volt_t linearG, bool updateSparkNow) {
   _feedforwardLinearGravity = linearG;
-  if (updateSparkNow) UpdateControls();
+  if (updateSparkNow) UpdateControls(0_s);
 }
 
 void ICSpark::SetFeedforwardRotationalGravity(units::volt_t rotationalG, bool updateSparkNow) {
   _feedforwardRotationalGravity = rotationalG;
-  if (updateSparkNow) UpdateControls();
+  if (updateSparkNow) UpdateControls(0_s);
 }
 
 void ICSpark::SetFeedforwardVelocity(VoltsPerTps V, bool updateSparkNow) {
   _feedforwardVelocity = V;
-  if (updateSparkNow) UpdateControls();
+  if (updateSparkNow) UpdateControls(0_s);
 }
 
 void ICSpark::SetFeedforwardAcceleration(VoltsPerTpsSq A, bool updateSparkNow) {
   _feedforwardAcceleration = A;
-  if (updateSparkNow) UpdateControls();
+  if (updateSparkNow) UpdateControls(0_s);
 }
 
 void ICSpark::SetClosedLoopOutputRange(double minOutputPercent, double maxOutputPercent) {
