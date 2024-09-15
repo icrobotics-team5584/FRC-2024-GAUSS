@@ -10,29 +10,73 @@ SwerveSteerIO::SwerveSteerIO()
 
 SwerveSteerTalonFXIO::SwerveSteerTalonFXIO(int canID) : _talon(canID) {}
 
-void SwerveSteerTalonFXIO::Config() {}
+void SwerveSteerTalonFXIO::Config() {
+  _config.Feedback.SensorToMechanismRatio = SwerveModule::STEER_GEAR_RATIO;
+  _config.ClosedLoopGeneral.ContinuousWrap = true;
+  _config.Slot0.kP = STEER_P;
+  _config.Slot0.kI = STEER_I;
+  _config.Slot0.kD = STEER_D;
+  _config.MotorOutput.Inverted = true;
+  _config.MotorOutput.NeutralMode =
+      ctre::phoenix6::signals::NeutralModeValue::Brake;
+  _config.CurrentLimits.StatorCurrentLimitEnable = true;
+  _config.CurrentLimits.StatorCurrentLimit = 80;  // amps
+  _config.CurrentLimits.SupplyCurrentLimitEnable = true;
+  _config.CurrentLimits.SupplyCurrentLimit = 60;    // amps
+  _config.CurrentLimits.SupplyTimeThreshold = 0.2;  // seconds
+  _talon.GetConfigurator().Apply(_config);
+}
 
-void SwerveSteerTalonFXIO::SetAngle(units::turn_t target) {}
+void SwerveSteerTalonFXIO::SetAngle(units::turn_t angle) {
+  _talon.SetPosition(angle);
+}
 
-void SwerveSteerTalonFXIO::SetTarget(units::turn_t target) {}
+void SwerveSteerTalonFXIO::SetTarget(units::turn_t target) {
+  _target = ctre::phoenix6::controls::PositionVoltage{target};
+  _talon.SetControl(_target);
+}
 
-void SwerveSteerTalonFXIO::Stop() {}
+void SwerveSteerTalonFXIO::Stop() { _talon.StopMotor(); }
 
-void SwerveSteerTalonFXIO::SetBreakMode() {}
+void SwerveSteerTalonFXIO::SetBreakMode() {
+  _config.MotorOutput.NeutralMode =
+      ctre::phoenix6::signals::NeutralModeValue::Brake;
+  _talon.GetConfigurator().Apply(_config);
+}
 
-void SwerveSteerTalonFXIO::SetCoastMode() {}
+void SwerveSteerTalonFXIO::SetCoastMode() {
+  _config.MotorOutput.NeutralMode =
+      ctre::phoenix6::signals::NeutralModeValue::Coast;
+  _talon.GetConfigurator().Apply(_config);
+}
 
-std::string SwerveSteerTalonFXIO::GetDeviceID() { return 0; }
+std::string SwerveSteerTalonFXIO::GetDeviceID() {
+  return std::to_string(_talon.GetDeviceID());
+}
 
-units::turn_t SwerveSteerTalonFXIO::GetTarget() { return units::turn_t(0); }
+units::turn_t SwerveSteerTalonFXIO::GetTarget() { return _target.Position; }
 
-units::turn_t SwerveSteerTalonFXIO::GetError() { return units::turn_t(0); }
+units::turn_t SwerveSteerTalonFXIO::GetError() {
+  return GetAngle() - GetTarget();
+}
 
-units::turn_t SwerveSteerTalonFXIO::GetAngle() { return units::turn_t(0); }
+units::turn_t SwerveSteerTalonFXIO::GetAngle() {
+  return _talon.GetPosition().GetValue();
+}
 
-units::turns_per_second_t SwerveSteerTalonFXIO::GetVelocity() { return 0_tps; }
+units::turns_per_second_t SwerveSteerTalonFXIO::GetVelocity() {
+  return _talon.GetVelocity().GetValue();
+}
 
-void SwerveSteerTalonFXIO::Simulate(units::second_t deltaTime) {}
+void SwerveSteerTalonFXIO::Simulate(units::second_t deltaTime) {
+  auto& simState = _talon.GetSimState();
+  _motorSim.SetInputVoltage(simState.GetMotorVoltage());
+  _motorSim.Update(deltaTime);
+  simState.SetRawRotorPosition(_motorSim.GetAngularPosition() *
+                               SwerveModule::STEER_GEAR_RATIO);
+  simState.SetRotorVelocity(_motorSim.GetAngularVelocity() *
+                            SwerveModule::STEER_GEAR_RATIO);
+}
 
 SwerveSteerSparkMaxIO::SwerveSteerSparkMaxIO(int canID) : _spark(canID, 40_A) {
   frc::SmartDashboard::PutData("swerve/turn motor " + std::to_string(canID),
@@ -42,8 +86,7 @@ SwerveSteerSparkMaxIO::SwerveSteerSparkMaxIO(int canID) : _spark(canID, 40_A) {
 void SwerveSteerSparkMaxIO::Config() {
   _spark.SetConversionFactor(1.0 / SwerveModule::STEER_GEAR_RATIO);
   _spark.EnableClosedLoopWrapping(0_tr, 1_tr);
-  _spark.SetPIDFF(SwerveModule::STEER_P, SwerveModule::STEER_I,
-                  SwerveModule::STEER_D);
+  _spark.SetPIDFF(STEER_P, STEER_I, STEER_D);
   _spark.SetInverted(true);
   _spark.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
 }

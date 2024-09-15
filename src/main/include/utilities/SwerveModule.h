@@ -45,9 +45,7 @@ class SwerveModule {
   static constexpr units::meter_t WHEEL_RADIUS = 0.0481098886_m;
   static constexpr units::meter_t WHEEL_CIRCUMFERENCE = 2 * std::numbers::pi * WHEEL_RADIUS;
 
-  static constexpr double STEER_P = 3;
-  static constexpr double STEER_I = 0.0;
-  static constexpr double STEER_D = 0;
+
   static constexpr double DRIVE_P = 1.6998; 
   static constexpr double DRIVE_I = 0.0;
   static constexpr double DRIVE_D = 0.0;
