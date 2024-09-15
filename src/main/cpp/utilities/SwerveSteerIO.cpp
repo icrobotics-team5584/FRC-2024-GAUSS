@@ -86,7 +86,7 @@ SwerveSteerSparkMaxIO::SwerveSteerSparkMaxIO(int canID) : _spark(canID, 40_A) {
 void SwerveSteerSparkMaxIO::Config() {
   _spark.SetConversionFactor(1.0 / SwerveModule::STEER_GEAR_RATIO);
   _spark.EnableClosedLoopWrapping(0_tr, 1_tr);
-  _spark.SetPIDFF(STEER_P, STEER_I, STEER_D);
+  _spark.SetFeedbackGains(STEER_P, STEER_I, STEER_D);
   _spark.SetInverted(true);
   _spark.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
 }
@@ -140,7 +140,7 @@ units::turns_per_second_t SwerveSteerSparkMaxIO::GetVelocity() {
 }
 
 void SwerveSteerSparkMaxIO::Simulate(units::second_t deltaTime) {
-  auto turnVolts = _spark.GetSimVoltage();
+  auto turnVolts = _spark.CalcSimVoltage();
   _motorSim.SetInputVoltage(turnVolts);
   _motorSim.Update(deltaTime);
   auto turnAngle = _motorSim.GetAngularPosition();
