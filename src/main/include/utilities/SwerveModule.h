@@ -49,12 +49,12 @@ class SwerveModule {
   const double TURN_P = 3;
   const double TURN_I = 0.0;
   const double TURN_D = 0;
-  const double DRIVE_P = 1.6998; 
+  const double DRIVE_P = 1.0; 
   const double DRIVE_I = 0.0;
   const double DRIVE_D = 0.0;
   const double DRIVE_F = 0;
-  const double DRIVE_S = 0.3017;  // Units is V
-  const double DRIVE_V = 0.65;  // Units is V/1m/s      //MAKE SURE TO TUNE ABOVE 12.5 VOLTS
+  const double DRIVE_S = 0.2;  // Units is V
+  const double DRIVE_V = 0.45;  // Units is V/1m/s      //MAKE SURE TO TUNE ABOVE 12.5 VOLTS
   const double DRIVE_A = 0.34324; // Units is V/1m/s^2
 
   ctre::phoenix6::hardware::TalonFX _canDriveMotor;
