@@ -7,9 +7,8 @@
 #include <cstdlib>
 #include <iostream>
 
-ICSpark::ICSpark(rev::CANSparkBase* spark,
-                         rev::SparkRelativeEncoder&& inbuiltEncoder,
-                         units::ampere_t currentLimit)
+ICSpark::ICSpark(std::shared_ptr<rev::CANSparkBase> spark,
+                 rev::SparkRelativeEncoder&& inbuiltEncoder, units::ampere_t currentLimit)
     : _spark(spark), _encoder{std::move(inbuiltEncoder)} {
   _spark->RestoreFactoryDefaults();
   _spark->SetSmartCurrentLimit(currentLimit.value());

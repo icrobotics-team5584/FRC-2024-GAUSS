@@ -5,7 +5,10 @@
 #pragma once
 
 #include <frc2/command/SubsystemBase.h>
-#include <rev/CANSparkMax.h>
+#include "utilities/ICSparkBase.h"
+#include "utilities/ICSparkFlex.h"
+#include "utilities/ICSparkMax.h"
+#include "utilities/BotVars.h"
 #include "Constants.h"
 #include <frc/DigitalInput.h>
 
@@ -31,6 +34,6 @@ class SubIntake : public frc2::SubsystemBase {
  private:
   // Components (e.g. motor controllers and sensors) should generally be
   // declared private and exposed only through public methods.
-
-  rev::CANSparkMax _intakeMotor{canid::IntakeMotor, rev::CANSparkMax::MotorType::kBrushless};
+  static constexpr units::ampere_t CURRENT_LIMIT = 40_A;
+  std::unique_ptr<ICSpark> _intakeMotor;
 };

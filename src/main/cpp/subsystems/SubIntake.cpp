@@ -11,20 +11,26 @@
 using namespace frc2::cmd;
 
 SubIntake::SubIntake() {
-  _intakeMotor.SetInverted(false);
-  _intakeMotor.BurnFlash();
+  if (BotVars::activeRobot == BotVars::PRACTICE) {
+    _intakeMotor = std::make_unique<ICSparkMax>(canid::IntakeMotor, CURRENT_LIMIT);
+  } else {
+    _intakeMotor = std::make_unique<ICSparkFlex>(canid::IntakeMotor, CURRENT_LIMIT);
+  }
+
+  _intakeMotor->_spark->SetInverted(false);
+  _intakeMotor->_spark->BurnFlash();
 }
 
 frc2::CommandPtr SubIntake::Outtake() {
-  return Run([this]{ _intakeMotor.Set(-1);}).FinallyDo([this]{_intakeMotor.Set(0);});
+  return Run([this]{ _intakeMotor->_spark->Set(-1);}).FinallyDo([this]{_intakeMotor->_spark->Set(0);});
 }
 
 frc2::CommandPtr SubIntake::Intake() {
-return Run([this]{ _intakeMotor.Set(1);}).FinallyDo([this]{_intakeMotor.Set(0);});
+return Run([this]{ _intakeMotor->_spark->Set(1);}).FinallyDo([this]{_intakeMotor->_spark->Set(0);});
 }
 
 
 // This method will be called once per scheduler run
 void SubIntake::Periodic() {
-  frc::SmartDashboard::PutNumber("Intake/Speed", _intakeMotor.Get());
+  frc::SmartDashboard::PutNumber("Intake/Speed", _intakeMotor->_spark->Get());
 }

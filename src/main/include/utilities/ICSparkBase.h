@@ -44,13 +44,12 @@ class ICSpark : public wpi::Sendable {
   /**
    * Create a new object to control a SPARK motor controller.
    *
+   * @param spark rvalue reference to the spark to control
    * @param currentLimit Value used for spark smart current limiting
    * @param inbultEncoder rvalue reference to the encoder built into the NEO
-   * @param spark Reference to the spark to control
    */
-  ICSpark(rev::CANSparkBase* spark,
-              rev::SparkRelativeEncoder&& inbuiltEncoder,
-              units::ampere_t currentLimit);
+  ICSpark(std::shared_ptr<rev::CANSparkBase> spark, rev::SparkRelativeEncoder&& inbuiltEncoder,
+          units::ampere_t currentLimit);
 
   /**
    * Sets position of motor
@@ -322,7 +321,12 @@ class ICSpark : public wpi::Sendable {
 
   // Sendable setup, called automatically when this is passed into smartDashbaord::PutData()
   void InitSendable(wpi::SendableBuilder& builder) override;
-  
+
+  // The underlying spark is public, use to call low level CANSparkBase functions. It is preferred
+  // to use the ICSparkMax and ICSparkFlex helper classes, but sometimes you cant do that. For
+  // example, when you need to support both a Max and Flex for different robots.
+  std::shared_ptr<rev::CANSparkBase> _spark;
+
  protected:
   // Use a relative (alternarte for Max, external for Flex) encoder as the feedback device.
   template <std::derived_from<rev::RelativeEncoder> RelEncoder>
@@ -332,8 +336,6 @@ class ICSpark : public wpi::Sendable {
   }
 
  private:
-  rev::CANSparkBase* _spark;
-
   // Feedback control objects
   rev::SparkPIDController _sparkPidController{_spark->GetPIDController()};
   frc::PIDController _rioPidController{0, 0, 0};
