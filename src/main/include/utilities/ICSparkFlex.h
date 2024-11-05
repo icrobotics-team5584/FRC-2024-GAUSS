@@ -1,6 +1,6 @@
 #pragma once
 
-#include <rev/CANSparkFlex.h>
+#include <rev/SparkFlex.h>
 
 #include "utilities/ICSparkBase.h"
 
@@ -8,7 +8,7 @@
  * Helper class to setup an ICSpark to control a Spark Flex. See ICSpark for
  * further details.
  */
-class ICSparkFlex : public rev::CANSparkFlex,  public ICSpark {
+class ICSparkFlex : public rev::spark::SparkFlex, public ICSpark {
  public:
   ICSparkFlex(int deviceID, units::ampere_t currentLimit);
 

@@ -12,9 +12,7 @@
 #include <frc/filter/SlewRateLimiter.h>
 #include <iostream>
 #include <pathplanner/lib/auto/AutoBuilder.h>
-#include <pathplanner/lib/util/HolonomicPathFollowerConfig.h>
-#include <pathplanner/lib/util/PIDConstants.h>
-#include <pathplanner/lib/util/ReplanningConfig.h>
+#include <pathplanner/lib/config/RobotConfig.h>
 #include <frc/geometry/Pose2d.h>
 #include <frc/kinematics/ChassisSpeeds.h>
 #include <frc/DriverStation.h>
@@ -33,59 +31,53 @@ SubDrivebase::SubDrivebase() {
 
   frc::SmartDashboard::PutNumber("Drivebase/Config/MaxAngularAcceleration",
                                  MAX_ANGULAR_JOYSTICK_ACCEL);
-  _gyro.Calibrate();
   Rcontroller.EnableContinuousInput(0_deg, 360_deg);
   frc::SmartDashboard::PutData("field", &_fieldDisplay);
 
   using namespace pathplanner;
-  AutoBuilder::configureHolonomic(
-      [this]() { return GetPose(); },  // Robot pose supplier
-      [this](frc::Pose2d pose) {
-        auto alliance = frc::DriverStation::GetAlliance();
-        if (alliance) {
-          if (alliance.value() == frc::DriverStation::Alliance::kBlue) {
-            ResetGyroHeading(pose.Rotation().RotateBy(180_deg).Degrees());
-          } else {
-            ResetGyroHeading(pose.Rotation().Degrees());
-          }
-        }
+  AutoBuilder::configure(
+      // Robot pose supplier
+      [this]() { return GetPose(); },
 
-        SetPose(pose);
-      },  // Method to reset odometry (will be called if your auto has a starting pose)
-      [this]() {
-        return GetRobotRelativeSpeeds();
-      },  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-      [this](frc::ChassisSpeeds speeds) {
-        _sidewaysSpeedRequest = speeds.vy;  // TEST!
+      // Method to reset odometry (will be called if your auto has a starting pose)
+      [this](frc::Pose2d pose) { SetPose(pose); },
+
+      // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+      [this]() { return GetRobotRelativeSpeeds(); },
+
+      // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally
+      // outputs individual module feedforwards
+      [this](auto speeds, auto feedforwards) {
+        _sidewaysSpeedRequest = speeds.vy;
         _forwardSpeedRequest = speeds.vx;
         _rotationSpeedRequest = speeds.omega;
         _fieldOrientedRequest = false;
-        // Drive(speeds.vx, speeds.vy, -speeds.omega, false);
-      },  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
-      HolonomicPathFollowerConfig(
-          PIDConstants(2, 0.0, 0.0),    // Translation PID constants
-          PIDConstants(0.5, 0.0, 0.0),  // Rotation PID constants
-          MAX_VELOCITY,                 // Max module speed, in m/s
-          432_mm,  // Drive base radius in meters. Distance from robot center to furthest module.
-                   // NEEDS TO BE CHECKED AND MADE ACCURATE!!
-          ReplanningConfig(
-              false, false, 1_m,
-              0.25_m)  // Default path replanning config. See the API for the options here
-          ),
+      },
 
+      // PID Feedback controller for translation and rotation
+      _pathplannerController,
+
+      // robot mass, MOT, wheel locations, etc
+      RobotConfig::fromGUISettings(),  
+
+      // Boolean supplier that controls when the path will be mirrored for the red alliance
+      // This will flip the path being followed to the red side of the field.
+      // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
       []() {
-        // Boolean supplier that controls when the path will be mirrored for the red alliance
-        // This will flip the path being followed to the red side of the field.
-        // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
         auto alliance = frc::DriverStation::GetAlliance();
         if (alliance) {
+          frc::SmartDashboard::PutString(
+              "Drivebase/Alliance",
+              alliance.value() == frc::DriverStation::Alliance::kBlue ? "Blue" : "Red");
           return alliance.value() == frc::DriverStation::Alliance::kRed;
         }
-        std::cout << "Failed to detect alliance\n";
+        frc::SmartDashboard::PutString("Drivebase/Alliance",
+                                       "Failed to detect alliance, assuming blue");
         return false;
       },
-      this  // Reference to this subsystem to set requirements
-  );
+
+      // Reference to this subsystem to set requirements
+      this);
 }
 
 // This method will be called once per scheduler run
@@ -352,6 +344,7 @@ void SubDrivebase::SetPose(frc::Pose2d pose) {
   auto bl = _backLeft.GetPosition();
   auto br = _backRight.GetPosition();
   _poseEstimator.ResetPosition(GetHeading(), {fl, fr, bl, br}, pose);
+  ResetGyroHeading(pose.Rotation().Degrees());
 }
 
 void SubDrivebase::DisplayPose(std::string label, frc::Pose2d pose) {

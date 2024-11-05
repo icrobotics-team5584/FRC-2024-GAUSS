@@ -18,7 +18,6 @@
 
 #include <frc/DoubleSolenoid.h>
 #include <frc/DigitalInput.h>
-#include <grpl/LaserCan.h>
 
 #include <units/angle.h>
 

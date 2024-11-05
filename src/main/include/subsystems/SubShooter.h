@@ -8,13 +8,13 @@
 #include "Constants.h"
 #include "utilities/ICSparkMax.h"
 #include "utilities/ICSparkEncoder.h"
-#include <rev/CANSparkMax.h>
 #include <frc2/command/commands.h>
 #include "frc/Encoder.h"
 #include <frc/controller/SimpleMotorFeedforward.h>
 #include <units/velocity.h>
 #include "ctre/phoenix6/TalonFX.hpp"
 #include <frc/simulation/DCMotorSim.h>
+#include <frc/system/plant/LinearSystemId.h>
 
 class SubShooter : public frc2::SubsystemBase {
  public:
@@ -41,7 +41,7 @@ class SubShooter : public frc2::SubsystemBase {
  private:
   ctre::phoenix6::hardware::TalonFX _ShooterFlywheelMotorLeft {canid::ShooterFlywheelMotorLeft};
   ctre::phoenix6::hardware::TalonFX _ShooterFlywheelMotorRight {canid::ShooterFlywheelMotorRight};
-  ctre::phoenix6::controls::VelocityVoltage _flywheelTargetVelocity{0_tps, 0_tr_per_s_sq, true, 0_V, 0, false};
+  ctre::phoenix6::controls::VelocityVoltage _flywheelTargetVelocity;
   
   units::turns_per_second_t ShooterOff = 0_tps;
   units::turns_per_second_t SpeakerSpeedLeft = 50_tps;
@@ -55,6 +55,8 @@ class SubShooter : public frc2::SubsystemBase {
   static constexpr double _flywheelV = 0.115;
 
   //Simulation stuff
-  frc::sim::DCMotorSim _leftSim{frc::DCMotor::Falcon500(), 1, 0.005_kg_sq_m};
-  frc::sim::DCMotorSim _rightSim{frc::DCMotor::Falcon500(), 1, 0.005_kg_sq_m};
+  frc::sim::DCMotorSim _leftSim{
+      frc::LinearSystemId::DCMotorSystem(frc::DCMotor::Falcon500(), 0.005_kg_sq_m, 1),
+      frc::DCMotor::Falcon500()};
+  frc::sim::DCMotorSim _rightSim{_leftSim};
 };

@@ -5,14 +5,15 @@
 #include "subsystems/SubIntake.h"
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc2/command/Commands.h>
-#include <rev/CANSparkLowLevel.h>
 
  
 using namespace frc2::cmd;
 
 SubIntake::SubIntake() {
-  _intakeMotor.SetInverted(false);
-  _intakeMotor.BurnFlash();
+  rev::spark::SparkBaseConfig config;
+  config.Inverted(false);
+  _intakeMotor.Configure(config, rev::spark::SparkBase::ResetMode::kResetSafeParameters,
+                         rev::spark::SparkBase::PersistMode::kPersistParameters);
 }
 
 frc2::CommandPtr SubIntake::Outtake() {

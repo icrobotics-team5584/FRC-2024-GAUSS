@@ -5,13 +5,14 @@
 #pragma once
 
 #include <frc2/command/SubsystemBase.h>
-#include <AHRS.h>
+#include <studica/AHRS.h>
 #include <frc/geometry/Translation2d.h>
 #include <frc/kinematics/SwerveDriveKinematics.h>
 #include <frc/kinematics/SwerveDriveOdometry.h>
 #include <frc/estimator/SwerveDrivePoseEstimator.h>
 #include <frc/smartdashboard/Field2d.h>
 #include <frc/controller/HolonomicDriveController.h>
+#include <pathplanner/lib/controllers/PPHolonomicDriveController.h>
 #include <numbers>
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/Commands.h>
@@ -73,7 +74,7 @@ class SubDrivebase : public frc2::SubsystemBase {
   }
 
  private:
-  AHRS _gyro{frc::SerialPort::kMXP};
+  studica::AHRS _gyro{studica::AHRS::NavXComType::kMXP_SPI};
 
   // Swerve modules
   frc::Translation2d _frontLeftLocation{160.509_mm, 308.33_mm};
@@ -104,6 +105,11 @@ class SubDrivebase : public frc2::SubsystemBase {
   frc::ProfiledPIDController<units::radian> Rcontroller{
       6, 0, 0.3, {MAX_ANGULAR_VELOCITY, MAX_ANG_ACCEL}};
   frc::HolonomicDriveController _driveController{Xcontroller, Ycontroller, Rcontroller};
+  std::shared_ptr<pathplanner::PPHolonomicDriveController> _pathplannerController =
+      std::make_shared<pathplanner::PPHolonomicDriveController>(
+          pathplanner::PIDConstants{2.0, 0.0, 0.0},  // Translation PID constants
+          pathplanner::PIDConstants{0.5, 0.0, 0.0}   // Rotation PID constants
+      );
 
   // Pose estimation
   frc::SwerveDrivePoseEstimator<4> _poseEstimator{

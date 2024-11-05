@@ -1,11 +1,8 @@
 #include "utilities/ICSparkFlex.h"
 
 ICSparkFlex::ICSparkFlex(int deviceID, units::ampere_t currentLimit)
-    : rev::CANSparkFlex(deviceID, rev::CANSparkLowLevel::MotorType::kBrushless),
-      ICSpark(this,
-              GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor,
-                         VORTEX_ENCODER_RESOLUTION),
-              currentLimit) {}
+    : SparkFlex(deviceID, rev::spark::SparkLowLevel::MotorType::kBrushless),
+      ICSpark(this, GetEncoder(), configAccessor, currentLimit) {}
 
 void ICSparkFlex::Set(double speed) { ICSpark::SetDutyCycle(speed); }
 
@@ -18,5 +15,5 @@ double ICSparkFlex::Get() const { return ICSpark::GetDutyCycle(); }
 void ICSparkFlex::StopMotor() { ICSpark::StopMotor(); }
 
 void ICSparkFlex::UseExternalEncoder(int countsPerRev) {
-  ICSpark::UseRelativeEncoder(CANSparkFlex::GetExternalEncoder(countsPerRev));
+  ICSpark::UseRelativeEncoder(SparkFlex::GetExternalEncoder());
 }

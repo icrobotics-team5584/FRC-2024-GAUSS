@@ -11,6 +11,7 @@
 #include <frc/geometry/Rotation2d.h>
 #include <frc/kinematics/SwerveModulePosition.h>
 #include <frc/simulation/DCMotorSim.h>
+#include <frc/system/plant/LinearSystemId.h>
 #include <units/time.h>
 #include <units/velocity.h>
 #include <units/voltage.h>
@@ -65,6 +66,10 @@ class SwerveModule {
   ctre::phoenix6::configs::TalonFXConfiguration _configCanTurnMotor{};
   ctre::phoenix6::configs::CANcoderConfiguration _configTurnEncoder{};
 
-  frc::sim::DCMotorSim _driveMotorSim{frc::DCMotor::Falcon500(), DRIVE_GEAR_RATIO, 0.05_kg_sq_m};
-  frc::sim::DCMotorSim _turnMotorSim{frc::DCMotor::NEO(), TURNING_GEAR_RATIO, 0.000000001_kg_sq_m};
+  frc::sim::DCMotorSim _driveMotorSim{
+      frc::LinearSystemId::DCMotorSystem(frc::DCMotor::Falcon500(), 0.05_kg_sq_m, DRIVE_GEAR_RATIO),
+      frc::DCMotor::Falcon500()};
+  frc::sim::DCMotorSim _turnMotorSim{
+      frc::LinearSystemId::DCMotorSystem(frc::DCMotor::NEO(), 0.000000001_kg_sq_m, TURNING_GEAR_RATIO),
+      frc::DCMotor::NEO()};
 };

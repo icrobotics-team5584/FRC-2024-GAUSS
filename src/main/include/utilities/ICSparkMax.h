@@ -1,6 +1,6 @@
 #pragma once
 
-#include <rev/CANSparkMax.h>
+#include <rev/SparkMax.h>
 
 #include "utilities/ICSparkBase.h"
 
@@ -8,7 +8,7 @@
  * Helper class to setup an ICSpark to control a Spark Max. See ICSpark for
  * further details.
  */
-class ICSparkMax : public rev::CANSparkMax, public ICSpark {
+class ICSparkMax : public rev::spark::SparkMax, public ICSpark {
  public:
   ICSparkMax(int deviceID, units::ampere_t currentLimit);
   static constexpr int NEO_ENCODER_RESOLUTION = 42;

@@ -11,7 +11,7 @@
 SubPivot::SubPivot(){
     ctre::phoenix6::configs::CANcoderConfiguration pivotConfig{};
     //pivotConfig.MagnetSensor.MagnetOffset = 0.5164954444444444; original offset
-    pivotConfig.MagnetSensor.MagnetOffset = 0.228271421875;
+    pivotConfig.MagnetSensor.MagnetOffset = 0.228271421875_tr;
     _pivotMotor.SetInverted(true);
     _shooterPivotEncoder.GetConfigurator().Apply(pivotConfig);
 
@@ -19,7 +19,7 @@ SubPivot::SubPivot(){
     _pivotMotor.SetFeedbackGains(_pivotP, _pivotI, _pivotD);
     _pivotMotor.SetFeedforwardGains(PIVOT_S, PIVOT_G, true, PIVOT_V, PIVOT_A);
     _pivotMotor.SetPosition(_shooterPivotEncoder.GetPosition().GetValue());
-    _pivotMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
+    // _pivotMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake); // TODO
     _pivotMotor.SetMotionConstraints(0.2_tps, 1_tr_per_s_sq, 0_tr);
 
     frc::SmartDashboard::PutData("Pivot/Motor", (wpi::Sendable*)&_pivotMotor);
@@ -42,10 +42,12 @@ SubPivot::SubPivot(){
     _pitchTable.insert(9_deg, 33_deg);
     _pitchTable.insert(10_deg, 34.5_deg);
 
-    _pivotMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, HIGH_STOP.value());
-    _pivotMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, LOW_STOP.value()); 
-    _pivotMotor.EnableSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, true);
-    _pivotMotor.EnableSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, true);
+    rev::spark::SparkBaseConfig config;
+    config.softLimit.ForwardSoftLimit(HIGH_STOP.value())
+        .ReverseSoftLimit(LOW_STOP.value())
+        .ForwardSoftLimitEnabled(true)
+        .ReverseSoftLimitEnabled(true);
+    _pivotMotor.AdjustConfig(config);
 }
 
 

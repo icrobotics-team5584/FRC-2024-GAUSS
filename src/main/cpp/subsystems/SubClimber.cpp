@@ -11,7 +11,7 @@
 SubClimber::SubClimber() {
     //Set up left motor
     _lClimbMotor.SetConversionFactor(1.0 / gearRatio);
-    _lClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
+    // _lClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake); // TODO:
     _lClimbMotor.SetFeedbackGains(lP,lI,lD);
     _lClimbMotor.SetFeedforwardGains(0_V, 0_V, false, 5.5_V/1_tps);
     _lClimbMotor.SetMotionConstraints(2_tps, 3_tr_per_s_sq, 0_deg);
@@ -21,7 +21,7 @@ SubClimber::SubClimber() {
 
     //Set up right motor
     _rClimbMotor.SetConversionFactor(1.0 / gearRatio);
-    _rClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
+    // _rClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake); // TODO:
     _rClimbMotor.SetFeedbackGains(rP,rI,rD);
     _rClimbMotor.SetFeedforwardGains(0_V, 0_V, false, 5.5_V/1_tps);
     _rClimbMotor.SetMotionConstraints(2_tps, 3_tr_per_s_sq, 0_deg);
@@ -85,8 +85,8 @@ units::meter_t SubClimber::TurnToDistance(units::turn_t turn) {
 //Drive motor to height
 void SubClimber::DriveToDistance(units::meter_t distance) {
     TargetDistance = distance;
-    _lClimbMotor.SetSmartMotionTarget(DistanceToTurn(distance));
-    _rClimbMotor.SetSmartMotionTarget(DistanceToTurn(distance));
+    _lClimbMotor.SetMaxMotionTarget(DistanceToTurn(distance));
+    _rClimbMotor.SetMaxMotionTarget(DistanceToTurn(distance));
 }
 
 //Run motor with power
@@ -127,10 +127,10 @@ units::meter_t SubClimber::GetRightHeight() {
 
 //Enable or disable top and bottom limit
 void SubClimber::EnableSoftLimit(bool enabled) {
-    _lClimbMotor.EnableSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, enabled);
-    _lClimbMotor.EnableSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, enabled);
-    _rClimbMotor.EnableSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, enabled);
-    _rClimbMotor.EnableSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, enabled);
+  rev::spark::SparkBaseConfig config;
+  config.softLimit.ForwardSoftLimitEnabled(enabled).ReverseSoftLimitEnabled(enabled);
+  _lClimbMotor.AdjustConfig(config);
+  _rClimbMotor.AdjustConfig(config);
 }
 
 //Joystick drive both motor

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <rev/CANSparkBase.h>
+#include <rev/SparkBase.h>
 #include <frc/controller/PIDController.h>
 #include <frc/trajectory/TrapezoidProfile.h>
 #include <frc/simulation/SimDeviceSim.h>
@@ -27,12 +27,12 @@
 class ICSpark : public wpi::Sendable {
  public:
   enum class ControlType {
-    kDutyCycle = (int)rev::CANSparkLowLevel::ControlType::kDutyCycle,
-    kVelocity = (int)rev::CANSparkLowLevel::ControlType::kVelocity,
-    kVoltage = (int)rev::CANSparkLowLevel::ControlType::kVoltage,
-    kPosition = (int)rev::CANSparkLowLevel::ControlType::kPosition,
-    kSmartMotion = (int)rev::CANSparkLowLevel::ControlType::kSmartMotion,
-    kCurrent = (int)rev::CANSparkLowLevel::ControlType::kCurrent,
+    kDutyCycle = (int)rev::spark::SparkLowLevel::ControlType::kDutyCycle,
+    kVelocity = (int)rev::spark::SparkLowLevel::ControlType::kVelocity,
+    kVoltage = (int)rev::spark::SparkLowLevel::ControlType::kVoltage,
+    kPosition = (int)rev::spark::SparkLowLevel::ControlType::kPosition,
+    kMaxMotion = (int)rev::spark::SparkLowLevel::ControlType::kMAXMotionPositionControl,
+    kCurrent = (int)rev::spark::SparkLowLevel::ControlType::kCurrent,
     kMotionProfile = 10
   };
 
@@ -48,9 +48,8 @@ class ICSpark : public wpi::Sendable {
    * @param inbultEncoder rvalue reference to the encoder built into the NEO
    * @param spark Reference to the spark to control
    */
-  ICSpark(rev::CANSparkBase* spark,
-              rev::SparkRelativeEncoder&& inbuiltEncoder,
-              units::ampere_t currentLimit);
+  ICSpark(rev::spark::SparkBase* spark, rev::spark::SparkRelativeEncoder& inbuiltEncoder,
+          rev::spark::SparkBaseConfigAccessor& configAccessor, units::ampere_t currentLimit);
 
   /**
    * Sets position of motor
@@ -87,7 +86,7 @@ class ICSpark : public wpi::Sendable {
    * the motor after the result of the specified control mode. This value is
    * added after the control mode, but before any current limits or ramp rates
    */
-  void SetSmartMotionTarget(units::turn_t target, units::volt_t arbFeedForward = 0.0_V);
+  void SetMaxMotionTarget(units::turn_t target, units::volt_t arbFeedForward = 0.0_V);
 
   /**
    * Sets a closed loop position target (aka reference or goal) for the motor to
@@ -320,22 +319,37 @@ class ICSpark : public wpi::Sendable {
     return units::math::abs(GetVelError()) < tolerance;
   }
 
+  rev::REVLibError AdjustConfig(rev::spark::SparkBaseConfig &config) {
+    return _spark->Configure(config, rev::spark::SparkBase::ResetMode::kNoResetSafeParameters,
+                             rev::spark::SparkBase::PersistMode::kPersistParameters);
+  };
+
+  rev::REVLibError OverwriteConfig(rev::spark::SparkBaseConfig &config) {
+    return _spark->Configure(config, rev::spark::SparkBase::ResetMode::kResetSafeParameters,
+                             rev::spark::SparkBase::PersistMode::kPersistParameters);
+  };
+
+
   // Sendable setup, called automatically when this is passed into smartDashbaord::PutData()
   void InitSendable(wpi::SendableBuilder& builder) override;
   
  protected:
   // Use a relative (alternarte for Max, external for Flex) encoder as the feedback device.
   template <std::derived_from<rev::RelativeEncoder> RelEncoder>
-  void UseRelativeEncoder(RelEncoder&& encoder) {
+  void UseRelativeEncoder(RelEncoder&& encoder, int countsPerRev) {
     _encoder.UseRelative(std::move(encoder));
-    _sparkPidController.SetFeedbackDevice(_encoder.GetPIDFeedbackDevice());
+    _sparkConfig.closedLoop.SetFeedbackSensor(
+        rev::spark::ClosedLoopConfig::FeedbackSensor::kAlternateOrExternalEncoder);
+    AdjustConfig(_sparkConfig);
   }
 
  private:
-  rev::CANSparkBase* _spark;
+  rev::spark::SparkBase* _spark;
+  rev::spark::SparkBaseConfigAccessor _sparkConfigAccessor;
+  rev::spark::SparkBaseConfig _sparkConfig;
 
   // Feedback control objects
-  rev::SparkPIDController _sparkPidController{_spark->GetPIDController()};
+  rev::spark::SparkClosedLoopController _sparkPidController{_spark->GetClosedLoopController()};
   frc::PIDController _rioPidController{0, 0, 0};
   ICSparkEncoder _encoder;
 
@@ -363,7 +377,7 @@ class ICSpark : public wpi::Sendable {
 
   // Control Type (aka mode) management
   ControlType _controlType = ControlType::kDutyCycle;
-  rev::CANSparkLowLevel::ControlType GetREVControlType();
+  rev::spark::SparkLowLevel::ControlType GetREVControlType();
   void SetInternalControlType(ControlType controlType);
   bool InMotionMode();
 
