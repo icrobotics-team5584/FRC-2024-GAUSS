@@ -4,4 +4,6 @@
 
 namespace Logger {
     void logFalcon(ctre::phoenix6::hardware::TalonFX& talonFX, std::string name);
+    void logRio();
+    void logPDH();
 };

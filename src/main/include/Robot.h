@@ -10,6 +10,7 @@
 #include <frc2/command/CommandPtr.h>
 
 #include "RobotContainer.h"
+#include <frc/PowerDistribution.h>
 
 class Robot : public frc::TimedRobot {
  public:
@@ -30,6 +31,7 @@ class Robot : public frc::TimedRobot {
   auto LoadAprilTagLayoutField();
   auto LoadField();
  private:
+  frc::PowerDistribution m_pdp;
   std::optional<frc2::CommandPtr> m_autonomousCommand;
 
   RobotContainer m_container;
