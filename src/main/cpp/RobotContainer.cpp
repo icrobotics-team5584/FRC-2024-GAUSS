@@ -8,7 +8,6 @@
 #include "subsystems/SubShooter.h"
 #include "subsystems/SubPivot.h"
 #include "commands/ShooterCommands.h"
-#include "utilities/POVHelper.h"
 #include "subsystems/SubDrivebase.h"
 #include "subsystems/SubFeeder.h"
 #include "subsystems/SubVision.h"
@@ -90,13 +89,11 @@ void RobotContainer::ConfigureBindings() {
   
 
   //POV
-  POVHelper::Up(&_operatorController).OnFalse(SubClimber::GetInstance().ClimberStop());
-  // POVHelper::Up(&_operatorController).WhileTrue(SubClimber::GetInstance().ClimberManualDrive(-0.5));
-  POVHelper::Up(&_operatorController).WhileTrue(cmd::CmdClimb());
-  POVHelper::Down(&_operatorController).WhileTrue(SubClimber::GetInstance().ClimberManualDrive(0.5));
-  POVHelper::Down(&_operatorController).OnFalse(SubClimber::GetInstance().ClimberStop());
-  POVHelper::Right(&_operatorController).WhileTrue(SubClimber::GetInstance().ClimberAutoReset());
-  // POVHelper::Down(&_operatorController).OnTrue(SubClimber::GetInstance().ClimberResetTop());
+  _operatorController.POVUp().OnFalse(SubClimber::GetInstance().ClimberStop());
+  _operatorController.POVUp().WhileTrue(cmd::CmdClimb());
+  _operatorController.POVDown().WhileTrue(SubClimber::GetInstance().ClimberManualDrive(0.5));
+  _operatorController.POVDown().OnFalse(SubClimber::GetInstance().ClimberStop());
+  _operatorController.POVRight().WhileTrue(SubClimber::GetInstance().ClimberAutoReset());
 
   //Triggers
   frc2::Trigger{[]{return SubFeeder::GetInstance().CheckHasNote();}}.OnTrue(Rumble(1, 0.3_s));  

@@ -13,9 +13,8 @@
 #include <frc/apriltag/AprilTagFields.h>
 #include <map>
 #include <photon/PhotonPoseEstimator.h>
-#include <photon/simulation/SimPhotonCamera.h>
-#include <photon/simulation/SimVisionSystem.h>
-#include <photon/simulation/SimVisionTarget.h>
+#include <photon/simulation/PhotonCameraSim.h>
+#include <photon/simulation/VisionSystemSim.h>
 #include <frc/Filesystem.h>
 #include <frc2/command/SubsystemBase.h>
 
@@ -38,6 +37,7 @@ class SubVision : public frc2::SubsystemBase {
   std::optional<units::degree_t> GetSpeakerYaw();
   std::optional<units::degree_t> GetSpeakerPitch();
   std::optional<units::degree_t> GetLatestSpeakerPitch();
+  std::optional<photon::PhotonPipelineResult> GetLatestResult();
   
   bool IsFacingTarget();
 
@@ -54,12 +54,10 @@ private:
   //     photonlib::PhotonCamera{CAM_NAME1},
   //     _camToBot.Inverse()};
   
-  
-  
-  photon::PhotonCamera camera{CAM_NAME1};
+  photon::PhotonCamera _camera{CAM_NAME1};
 
-  
-  photon::SimVisionSystem _visionSim{CAM_NAME1, 120_deg, _camToBot, 15_m,
-                                        360,         240,    0.0001};
-                                        
+  photon::PhotonCameraSim _cameraSim{&_camera};
+  photon::VisionSystemSim _visionSim{"photonvision sim"};
+
+  std::vector<photon::PhotonPipelineResult> _latestResults;
 };

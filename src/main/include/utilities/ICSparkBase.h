@@ -336,8 +336,8 @@ class ICSpark : public wpi::Sendable {
  protected:
   // Use a relative (alternarte for Max, external for Flex) encoder as the feedback device.
   template <std::derived_from<rev::RelativeEncoder> RelEncoder>
-  void UseRelativeEncoder(RelEncoder&& encoder, int countsPerRev) {
-    _encoder.UseRelative(std::move(encoder));
+  void UseRelativeEncoder(RelEncoder& encoder, int countsPerRev) {
+    _encoder.UseRelative(encoder);
     _sparkConfig.closedLoop.SetFeedbackSensor(
         rev::spark::ClosedLoopConfig::FeedbackSensor::kAlternateOrExternalEncoder);
     AdjustConfig(_sparkConfig);

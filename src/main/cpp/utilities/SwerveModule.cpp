@@ -10,7 +10,7 @@
 #include <iostream>
 
 SwerveModule::SwerveModule(int canDriveMotorID, int canTurnMotorID, int canTurnEncoderID,
-                           double cancoderMagOffset)
+                           units::turn_t cancoderMagOffset)
     : _canDriveMotor(canDriveMotorID),
       _canTurnMotor(canTurnMotorID, 40_A),
       _canTurnEncoder(canTurnEncoderID) {
@@ -22,7 +22,7 @@ SwerveModule::SwerveModule(int canDriveMotorID, int canTurnMotorID, int canTurnE
   _configTurnEncoder.MagnetSensor.SensorDirection = SensorDirectionValue::CounterClockwise_Positive;
   _configTurnEncoder.MagnetSensor.MagnetOffset = cancoderMagOffset;
   _canTurnEncoder.GetConfigurator().Apply(_configTurnEncoder);
-  frc::SmartDashboard::PutNumber("swerve/cancoder "+std::to_string(canTurnEncoderID) + " mag offset", cancoderMagOffset);
+  frc::SmartDashboard::PutNumber("swerve/cancoder "+std::to_string(canTurnEncoderID) + " mag offset", cancoderMagOffset.value());
 
   //Config Turn Motor
   ConfigTurnMotor();
@@ -39,10 +39,10 @@ SwerveModule::SwerveModule(int canDriveMotorID, int canTurnMotorID, int canTurnE
   _configCanDriveMotor.Slot0.kD = DRIVE_D;
   _configCanDriveMotor.CurrentLimits.SupplyCurrentLimitEnable = true;
   _configCanDriveMotor.CurrentLimits.StatorCurrentLimitEnable = true;
-  _configCanDriveMotor.CurrentLimits.SupplyCurrentLimit = 40.0;
-  _configCanDriveMotor.CurrentLimits.SupplyCurrentThreshold = 60.0;
-  _configCanDriveMotor.CurrentLimits.SupplyTimeThreshold = 0.1;
-  _configCanDriveMotor.CurrentLimits.StatorCurrentLimit = 70.0; //Untested
+  _configCanDriveMotor.CurrentLimits.SupplyCurrentLimit = 60.0_A;
+  _configCanDriveMotor.CurrentLimits.SupplyCurrentLowerLimit = 40.0_A;
+  _configCanDriveMotor.CurrentLimits.SupplyCurrentLowerTime = 0.1_s;
+  _configCanDriveMotor.CurrentLimits.StatorCurrentLimit = 70.0_A;
   _configCanDriveMotor.Slot0.kS = DRIVE_S;
   _configCanDriveMotor.Slot0.kV = DRIVE_V;
   _configCanDriveMotor.Slot0.kA = DRIVE_A;
@@ -58,18 +58,22 @@ void SwerveModule::ConfigTurnMotor(){
   _canTurnMotor.EnableClosedLoopWrapping(0_tr, 1_tr);
   _canTurnMotor.SetFeedbackGains(TURN_P, TURN_I, TURN_D);
   _canTurnMotor.SetInverted(true);
-  _canTurnMotor.SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
+  // _canTurnMotor.SetIdleMode(rev::spark::SparkMax::IdleMode::kBrake); // TODO
   //_canTurnMotor.BurnFlash();
   //_canTurnMotor.SetCANTimeout(10);
 }
 
-void SwerveModule::SetDesiredState(const frc::SwerveModuleState& referenceState) {
+void SwerveModule::SetDesiredState(frc::SwerveModuleState referenceState) {
   // Optimize the reference state to avoid spinning further than 90 degrees
-  auto targetState = frc::SwerveModuleState::Optimize(referenceState, GetAngle());
+  auto currentAngle = GetAngle();
+  referenceState.Optimize(currentAngle);
+
+  // Slow down drive speed when not pointing the right way. This results in smoother driving.
+  referenceState.CosineScale(currentAngle);
 
   // Drive! These functions do some conversions and send targets to falcons
-  SetDesiredAngle(targetState.angle.Degrees());
-  SetDesiredVelocity(targetState.speed);
+  SetDesiredAngle(referenceState.angle.Degrees());
+  SetDesiredVelocity(referenceState.speed);
 }
 
 frc::SwerveModulePosition SwerveModule::GetPosition() {

@@ -91,6 +91,16 @@
     "xstring": "cpp",
     "xtr1common": "cpp",
     "xtree": "cpp",
-    "xutility": "cpp"
+    "xutility": "cpp",
+    "complex": "cpp",
+    "deque": "cpp",
+    "filesystem": "cpp",
+    "numbers": "cpp",
+    "numeric": "cpp",
+    "queue": "cpp",
+    "random": "cpp",
+    "ranges": "cpp",
+    "valarray": "cpp",
+    "expected": "cpp"
   }
 }

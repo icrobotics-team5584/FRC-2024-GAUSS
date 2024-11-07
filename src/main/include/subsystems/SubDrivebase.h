@@ -82,10 +82,10 @@ class SubDrivebase : public frc2::SubsystemBase {
   frc::Translation2d _backLeftLocation{-306.141_mm, 308.33_mm};
   frc::Translation2d _backRightLocation{-306.141_mm, -308.33_mm};
 
-  const double FRONT_RIGHT_MAG_OFFSET = -0.375732;
-  const double FRONT_LEFT_MAG_OFFSET = -0.941406;
-  const double BACK_RIGHT_MAG_OFFSET = -0.462891;
-  const double BACK_LEFT_MAG_OFFSET = -0.329590;
+  const units::turn_t FRONT_RIGHT_MAG_OFFSET = -0.375732_tr;
+  const units::turn_t FRONT_LEFT_MAG_OFFSET = -0.941406_tr;
+  const units::turn_t BACK_RIGHT_MAG_OFFSET = -0.462891_tr;
+  const units::turn_t BACK_LEFT_MAG_OFFSET = -0.329590_tr;
 
   SwerveModule _frontLeft{canid::DriveBaseFrontLeftDrive, canid::DriveBaseFrontLeftTurn,
                           canid::DriveBaseFrontLeftEncoder, FRONT_LEFT_MAG_OFFSET};
@@ -132,7 +132,7 @@ class SubDrivebase : public frc2::SubsystemBase {
 
   // Sysid
   frc2::sysid::SysIdRoutine _sysIdRoutine{
-      frc2::sysid::Config{std::nullopt, std::nullopt, std::nullopt, std::nullopt},
+      frc2::sysid::Config{std::nullopt, std::nullopt, std::nullopt, nullptr},
       frc2::sysid::Mechanism{[this](units::volt_t driveVoltage) {
                                _frontLeft.DriveStraightVolts(driveVoltage);
                                _backLeft.DriveStraightVolts(driveVoltage);

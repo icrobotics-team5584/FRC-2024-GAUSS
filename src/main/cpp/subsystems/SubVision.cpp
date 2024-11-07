@@ -4,31 +4,37 @@
 
 #include "subsystems/SubVision.h"
 #include "subsystems/SubDrivebase.h"
+#include <photon/simulation/VisionTargetSim.h>
 #include <frc/DriverStation.h>
 
 SubVision::SubVision() {
-  for (int i = 0; i <= 18; i++) {
-    auto pose = _tagLayout.GetTagPose(i);
-    if (pose.has_value()) {
-      photon::SimVisionTarget simTag{pose.value(), 8_in, 8_in, i};
-      _visionSim.AddSimVisionTarget(simTag);
-      SubDrivebase::GetInstance().DisplayPose(fmt::format("tag{}", i), pose.value().ToPose2d());
-    }
+  _visionSim.AddAprilTags(_tagLayout);
+  _visionSim.AddCamera(&_cameraSim, _camToBot.Inverse());
+  
+  for (auto target : _visionSim.GetVisionTargets()) {
+    SubDrivebase::GetInstance().DisplayPose(fmt::format("tag{}", target.fiducialId),
+                                            target.GetPose().ToPose2d());
   }
 }
 
 // This method will be called once per scheduler run
 void SubVision::Periodic() {
-  const auto& result = camera.GetLatestResult();
-  double _pitchtotarget = {result.GetBestTarget().GetPitch()};
-  frc::SmartDashboard::PutNumber("Vision/April Pitch", _pitchtotarget);
+  _latestResults = _camera.GetAllUnreadResults();
   frc::SmartDashboard::PutNumber("Vision/Speaker Pitch", GetSpeakerPitch().value_or(-1000_deg).value());
   frc::SmartDashboard::PutNumber("Target/YawOnTarget", IsFacingTarget());
-  }
+}
 
 void SubVision::SimulationPeriodic() {
-  _visionSim.ProcessFrame(SubDrivebase::GetInstance().GetPose());
+  _visionSim.Update(SubDrivebase::GetInstance().GetPose());
 };
+
+// get latest result
+std::optional<photon::PhotonPipelineResult> SubVision::GetLatestResult() {
+  if (!_latestResults.empty()) {
+    return _latestResults.back();
+  }
+  return std::nullopt;
+}
 
 std::optional<photon::PhotonTrackedTarget> SubVision::GetSpeakerTarget() {
   auto alliance = frc::DriverStation::GetAlliance();
@@ -45,7 +51,11 @@ std::optional<photon::PhotonTrackedTarget> SubVision::GetSpeakerTarget() {
       desiredIDs[0] = 4;
       desiredIDs[1] = 7;
     }
-  auto latestCameraResult = camera.GetLatestResult();
+  auto latestCameraResultOpt = GetLatestResult();
+  if (!latestCameraResultOpt.has_value()) {
+    return std::nullopt;
+  }
+  auto latestCameraResult = latestCameraResultOpt.value();
   auto latestTargets = latestCameraResult.GetTargets();
   auto checkRightApriltag = [desiredIDs](photon::PhotonTrackedTarget tag){
     return (tag.GetFiducialId() == desiredIDs[0] || tag.GetFiducialId() == desiredIDs[1]);

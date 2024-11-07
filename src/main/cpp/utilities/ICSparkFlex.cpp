@@ -15,5 +15,5 @@ double ICSparkFlex::Get() const { return ICSpark::GetDutyCycle(); }
 void ICSparkFlex::StopMotor() { ICSpark::StopMotor(); }
 
 void ICSparkFlex::UseExternalEncoder(int countsPerRev) {
-  ICSpark::UseRelativeEncoder(SparkFlex::GetExternalEncoder());
+  ICSpark::UseRelativeEncoder(SparkFlex::GetExternalEncoder(), countsPerRev);
 }

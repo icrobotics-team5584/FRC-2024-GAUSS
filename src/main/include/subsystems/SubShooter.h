@@ -41,7 +41,7 @@ class SubShooter : public frc2::SubsystemBase {
  private:
   ctre::phoenix6::hardware::TalonFX _ShooterFlywheelMotorLeft {canid::ShooterFlywheelMotorLeft};
   ctre::phoenix6::hardware::TalonFX _ShooterFlywheelMotorRight {canid::ShooterFlywheelMotorRight};
-  ctre::phoenix6::controls::VelocityVoltage _flywheelTargetVelocity;
+  ctre::phoenix6::controls::VelocityVoltage _flywheelTargetVelocity{0_tps};
   
   units::turns_per_second_t ShooterOff = 0_tps;
   units::turns_per_second_t SpeakerSpeedLeft = 50_tps;

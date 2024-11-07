@@ -231,15 +231,13 @@ frc::ChassisSpeeds SubDrivebase::GetRobotRelativeSpeeds() {
   return _kinematics.ToChassisSpeeds(fl, fr, bl, br);
 }
 
-// Syncs encoder values when the robot is turned on
 void SubDrivebase::SyncSensors() {
   _frontLeft.SyncSensors();
   _frontRight.SyncSensors();
   _backLeft.SyncSensors();
   _backRight.SyncSensors();
-  _gyro.Calibrate();
 
-//Set config turn motors so it can run in auto init also. Had issues with parameters not being set on startup
+  // config turn motors so it can run in auto init also. Had issues with parameters not being set on startup
   _frontLeft.ConfigTurnMotor();
   _frontRight.ConfigTurnMotor();
   _backLeft.ConfigTurnMotor();

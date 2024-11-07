@@ -9,7 +9,7 @@
 
 ICSpark::ICSpark(rev::spark::SparkBase* spark, rev::spark::SparkRelativeEncoder& inbuiltEncoder,
                  rev::spark::SparkBaseConfigAccessor& configAccessor, units::ampere_t currentLimit)
-    : _spark(spark), _encoder(inbuiltEncoder), _sparkConfigAccessor(configAccessor) {
+    : _spark(spark), _sparkConfigAccessor(configAccessor), _encoder(inbuiltEncoder) {
   _spark->Configure(rev::spark::SparkBaseConfig{}.SmartCurrentLimit(currentLimit.value()),
                     rev::spark::SparkBase::ResetMode::kNoResetSafeParameters,
                     rev::spark::SparkBase::PersistMode::kPersistParameters);
@@ -184,13 +184,13 @@ void ICSpark::SetMotionConstraints(units::turns_per_second_t maxVelocity,
 }
 
 void ICSpark::SetMotionMaxVel(units::turns_per_second_t maxVelocity) {
-  auto accel = _sparkConfigAccessor.closedLoop.maxMotion.GetMaxAcceleration()  * 1_tr_per_s_sq;
+  auto accel = _sparkConfigAccessor.closedLoop.maxMotion.GetMaxAcceleration() * 1_tr_per_s_sq;
   auto tolerance = _sparkConfigAccessor.closedLoop.maxMotion.GetAllowedClosedLoopError() * 1_tr;
   SetMotionConstraints(maxVelocity, accel, tolerance);
 }
 
 void ICSpark::SetMotionMaxAccel(units::turns_per_second_squared_t maxAcceleration) {
-  auto vel = _sparkConfigAccessor.closedLoop.maxMotion.GetMaxVelocity()  * 1_tr_per_s_sq;
+  auto vel = _sparkConfigAccessor.closedLoop.maxMotion.GetMaxVelocity() * 1_tps;
   auto tolerance = _sparkConfigAccessor.closedLoop.maxMotion.GetAllowedClosedLoopError() * 1_tr;
   SetMotionConstraints(vel, maxAcceleration, tolerance);
 }
