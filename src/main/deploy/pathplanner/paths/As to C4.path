@@ -1,5 +1,5 @@
 {
-  "version": 1.0,
+  "version": "2025.0",
   "waypoints": [
     {
       "anchor": {
@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.262612787527536,
-        "y": 0.7038327223321009
+        "x": 6.262612787527537,
+        "y": 0.703832722332101
       },
       "isLocked": false,
       "linkedName": "Speaker-Side Shoot Pos"
@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 4.991222307694257,
-        "y": 0.6675176831095462
+        "y": 0.6675176831095466
       },
       "nextControl": {
         "x": 8.485342882161001,
@@ -37,7 +37,7 @@
       },
       "prevControl": {
         "x": 5.091529132949387,
-        "y": -0.16276918205573104
+        "y": -0.16276918205573132
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,8 +47,7 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.85,
-      "rotationDegrees": -160.0,
-      "rotateFast": false
+      "rotationDegrees": -160.0
     }
   ],
   "constraintZones": [
@@ -60,7 +59,9 @@
         "maxVelocity": 3.5,
         "maxAcceleration": 5.0,
         "maxAngularVelocity": 540.0,
-        "maxAngularAcceleration": 720.0
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
       }
     },
     {
@@ -71,7 +72,9 @@
         "maxVelocity": 4.3,
         "maxAcceleration": 5.0,
         "maxAngularVelocity": 540.0,
-        "maxAngularAcceleration": 720.0
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
       }
     },
     {
@@ -82,14 +85,18 @@
         "maxVelocity": 3.5,
         "maxAcceleration": 5.0,
         "maxAngularVelocity": 540.0,
-        "maxAngularAcceleration": 720.0
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
       }
     }
   ],
+  "pointTowardsZones": [],
   "eventMarkers": [
     {
       "name": "New Event Marker",
       "waypointRelativePos": 0.55,
+      "endWaypointRelativePos": null,
       "command": {
         "type": "parallel",
         "data": {
@@ -107,6 +114,7 @@
     {
       "name": "New Event Marker",
       "waypointRelativePos": 0.65,
+      "endWaypointRelativePos": null,
       "command": {
         "type": "parallel",
         "data": {
@@ -123,21 +131,22 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 5.0,
+    "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 120.0,
-    "rotateFast": false
+    "rotation": 119.99999999999999
   },
   "reversed": false,
   "folder": null,
-  "previewStartingState": {
-    "rotation": 140.0,
-    "velocity": 0
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

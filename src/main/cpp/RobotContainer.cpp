@@ -34,8 +34,6 @@ RobotContainer::RobotContainer(){
           frc2::cmd::WaitUntil(
               [] { return SubPivot::GetInstance().IsOnTarget(); })));
 
-  std::shared_ptr<pathplanner::PathPlannerPath> exampleChoreoTraj = pathplanner::PathPlannerPath::fromChoreoTrajectory("AA1.1");
-
   SubDrivebase::GetInstance().SetDefaultCommand(
       SubDrivebase::GetInstance().JoystickDrive(_driverController, false));
   
