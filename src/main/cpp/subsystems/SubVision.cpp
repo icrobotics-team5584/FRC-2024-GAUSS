@@ -8,24 +8,24 @@
 #include <frc/DriverStation.h>
 
 SubVision::SubVision() {
-  _visionSim.AddAprilTags(_tagLayout);
-  _visionSim.AddCamera(&_cameraSim, _camToBot.Inverse());
+  // _visionSim.AddAprilTags(_tagLayout);
+  // _visionSim.AddCamera(&_cameraSim, _camToBot.Inverse());
   
-  for (auto target : _visionSim.GetVisionTargets()) {
-    SubDrivebase::GetInstance().DisplayPose(fmt::format("tag{}", target.fiducialId),
-                                            target.GetPose().ToPose2d());
-  }
+  // for (auto target : _visionSim.GetVisionTargets()) {
+  //   SubDrivebase::GetInstance().DisplayPose(fmt::format("tag{}", target.fiducialId),
+  //                                           target.GetPose().ToPose2d());
+  // }
 }
 
 // This method will be called once per scheduler run
 void SubVision::Periodic() {
-  _latestResults = _camera.GetAllUnreadResults();
+  // _latestResults = _camera.GetAllUnreadResults();
   frc::SmartDashboard::PutNumber("Vision/Speaker Pitch", GetSpeakerPitch().value_or(-1000_deg).value());
   frc::SmartDashboard::PutNumber("Target/YawOnTarget", IsFacingTarget());
 }
 
 void SubVision::SimulationPeriodic() {
-  _visionSim.Update(SubDrivebase::GetInstance().GetPose());
+  // _visionSim.Update(SubDrivebase::GetInstance().GetPose());
 };
 
 // get latest result
