@@ -54,10 +54,10 @@ private:
   //     photonlib::PhotonCamera{CAM_NAME1},
   //     _camToBot.Inverse()};
   
-  // photon::PhotonCamera _camera{CAM_NAME1};
+  photon::PhotonCamera _camera{CAM_NAME1};
 
-  // photon::PhotonCameraSim _cameraSim{&_camera};
-  // photon::VisionSystemSim _visionSim{"photonvision sim"};
+  photon::PhotonCameraSim _cameraSim{&_camera};
+  photon::VisionSystemSim _visionSim{"photonvision sim"};
 
   std::vector<photon::PhotonPipelineResult> _latestResults;
 };

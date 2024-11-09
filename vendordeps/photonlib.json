@@ -1,57 +1,98 @@
 {
     "fileName": "photonlib.json",
     "name": "photonlib",
-    "version": "dev-v2025.0.0-alpha-0-20-g58a0597c",
+    "version": "dev-v2024.3.0-122-g5e1a9395", // Must build phtonlib from source https://github.com/mcm001/photonvision/tree/20241108_tsp_bind_static (or get a copy from liam) to get this version. Follow these instructions: https://docs.photonvision.org/en/latest/docs/contributing/building-photon.html#using-photonlib-builds
     "uuid": "515fe07e-bfc6-11fa-b3de-0242ac130004",
     "frcYear": "2025",
     "mavenUrls": [
-        "https://maven.photonvision.org/repository/internal",
-        "https://maven.photonvision.org/repository/snapshots"
+      "https://maven.photonvision.org/repository/internal",
+      "https://maven.photonvision.org/repository/snapshots"
     ],
     "jsonUrl": "https://maven.photonvision.org/repository/internal/org/photonvision/photonlib-json/1.0/photonlib-json-1.0.json",
-    "jniDependencies": [],
+    "jniDependencies": [
+      {
+        "groupId": "edu.wpi.first.wpilibc",
+        "artifactId": "wpilibc-cpp",
+        "version": "2025.1.1-beta-1",
+        "skipInvalidPlatforms": true,
+        "isJar": false,
+        "validPlatforms": [
+          "windowsx86-64",
+          "linuxathena",
+          "linuxx86-64",
+          "osxuniversal"
+        ]
+      },
+      {
+        "groupId": "org.photonvision",
+        "artifactId": "photontargeting-cpp",
+        "version": "dev-v2024.3.0-122-g5e1a9395",
+        "skipInvalidPlatforms": true,
+        "isJar": false,
+        "validPlatforms": [
+          "windowsx86-64",
+          "linuxathena",
+          "linuxx86-64",
+          "osxuniversal"
+        ]
+      },
+      {
+        "groupId": "org.photonvision",
+        "artifactId": "photontargeting-jni",
+        "version": "dev-v2024.3.0-122-g5e1a9395",
+        "skipInvalidPlatforms": true,
+        "isJar": true,
+        "validPlatforms": [
+          "windowsx86-64",
+          "linuxathena",
+          "linuxx86-64",
+          "osxuniversal"
+        ]
+      }
+    ],
     "cppDependencies": [
-        {
-            "groupId": "org.photonvision",
-            "artifactId": "photonlib-cpp",
-            "version": "dev-v2025.0.0-alpha-0-20-g58a0597c",
-            "libName": "photonlib",
-            "headerClassifier": "headers",
-            "sharedLibrary": true,
-            "skipInvalidPlatforms": true,
-            "binaryPlatforms": [
-                "windowsx86-64",
-                "linuxathena",
-                "linuxx86-64",
-                "osxuniversal"
-            ]
-        },
-        {
-            "groupId": "org.photonvision",
-            "artifactId": "photontargeting-cpp",
-            "version": "dev-v2025.0.0-alpha-0-20-g58a0597c",
-            "libName": "photontargeting",
-            "headerClassifier": "headers",
-            "sharedLibrary": true,
-            "skipInvalidPlatforms": true,
-            "binaryPlatforms": [
-                "windowsx86-64",
-                "linuxathena",
-                "linuxx86-64",
-                "osxuniversal"
-            ]
-        }
+      {
+        "groupId": "org.photonvision",
+        "artifactId": "photonlib-cpp",
+        "version": "dev-v2024.3.0-122-g5e1a9395",
+        "libName": "photonlib",
+        "headerClassifier": "headers",
+        "sharedLibrary": true,
+        "skipInvalidPlatforms": true,
+        "binaryPlatforms": [
+          "windowsx86-64",
+          "linuxathena",
+          "linuxx86-64",
+          "osxuniversal"
+        ]
+      },
+      {
+        "groupId": "org.photonvision",
+        "artifactId": "photontargeting-cpp",
+        "version": "dev-v2024.3.0-122-g5e1a9395",
+        "libName": "photontargeting",
+        "headerClassifier": "headers",
+        "sharedLibrary": true,
+        "skipInvalidPlatforms": true,
+        "binaryPlatforms": [
+          "windowsx86-64",
+          "linuxathena",
+          "linuxx86-64",
+          "osxuniversal"
+        ]
+      }
     ],
     "javaDependencies": [
-        {
-            "groupId": "org.photonvision",
-            "artifactId": "photonlib-java",
-            "version": "dev-v2025.0.0-alpha-0-20-g58a0597c"
-        },
-        {
-            "groupId": "org.photonvision",
-            "artifactId": "photontargeting-java",
-            "version": "dev-v2025.0.0-alpha-0-20-g58a0597c"
-        }
+      {
+        "groupId": "org.photonvision",
+        "artifactId": "photonlib-java",
+        "version": "dev-v2024.3.0-122-g5e1a9395"
+      },
+      {
+        "groupId": "org.photonvision",
+        "artifactId": "photontargeting-java",
+        "version": "dev-v2024.3.0-122-g5e1a9395"
+      }
     ]
-}
+  }
+  

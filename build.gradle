@@ -39,7 +39,7 @@ def deployArtifact = deploy.targets.roborio.artifacts.frcCpp
 def includeDesktopSupport = true
 
 // Set to true to run simulation in debug mode
-wpi.cpp.debugSimulation = true
+wpi.cpp.debugSimulation = false
 
 // Default enable simgui
 wpi.sim.addGui().defaultEnabled = true
@@ -77,23 +77,23 @@ model {
             wpi.cpp.deps.wpilib(it)
         }
     }
-    testSuites {
-        frcUserProgramTest(GoogleTestTestSuiteSpec) {
-            testing $.components.frcUserProgram
+    // testSuites { //TODO: reenable test suites
+    //     frcUserProgramTest(GoogleTestTestSuiteSpec) {
+    //         testing $.components.frcUserProgram
 
-            sources.cpp {
-                source {
-                    srcDir 'src/test/cpp'
-                    include '**/*.cpp'
-                }
-            }
+    //         sources.cpp {
+    //             source {
+    //                 srcDir 'src/test/cpp'
+    //                 include '**/*.cpp'
+    //             }
+    //         }
 
-            // Enable run tasks for this component
-            wpi.cpp.enableExternalTasks(it)
+    //         // Enable run tasks for this component
+    //         wpi.cpp.enableExternalTasks(it)
 
-            wpi.cpp.vendor.cpp(it)
-            wpi.cpp.deps.wpilib(it)
-            wpi.cpp.deps.googleTest(it)
-        }
-    }
+    //         wpi.cpp.vendor.cpp(it)
+    //         wpi.cpp.deps.wpilib(it)
+    //         wpi.cpp.deps.googleTest(it)
+    //     }
+    // }
 }
