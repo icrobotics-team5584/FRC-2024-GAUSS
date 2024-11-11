@@ -1,7 +1,7 @@
 {
     "fileName": "photonlib.json",
     "name": "photonlib",
-    "version": "dev-v2024.3.0-122-g5e1a9395", // Must build phtonlib from source https://github.com/mcm001/photonvision/tree/20241108_tsp_bind_static (or get a copy from liam) to get this version. Follow these instructions: https://docs.photonvision.org/en/latest/docs/contributing/building-photon.html#using-photonlib-builds
+    "version": "v2025.0.0-beta-1",
     "uuid": "515fe07e-bfc6-11fa-b3de-0242ac130004",
     "frcYear": "2025",
     "mavenUrls": [
@@ -26,7 +26,7 @@
       {
         "groupId": "org.photonvision",
         "artifactId": "photontargeting-cpp",
-        "version": "dev-v2024.3.0-122-g5e1a9395",
+        "version": "v2025.0.0-beta-1",
         "skipInvalidPlatforms": true,
         "isJar": false,
         "validPlatforms": [
@@ -39,7 +39,7 @@
       {
         "groupId": "org.photonvision",
         "artifactId": "photontargeting-jni",
-        "version": "dev-v2024.3.0-122-g5e1a9395",
+        "version": "v2025.0.0-beta-1",
         "skipInvalidPlatforms": true,
         "isJar": true,
         "validPlatforms": [
@@ -54,7 +54,7 @@
       {
         "groupId": "org.photonvision",
         "artifactId": "photonlib-cpp",
-        "version": "dev-v2024.3.0-122-g5e1a9395",
+        "version": "v2025.0.0-beta-1",
         "libName": "photonlib",
         "headerClassifier": "headers",
         "sharedLibrary": true,
@@ -69,7 +69,7 @@
       {
         "groupId": "org.photonvision",
         "artifactId": "photontargeting-cpp",
-        "version": "dev-v2024.3.0-122-g5e1a9395",
+        "version": "v2025.0.0-beta-1",
         "libName": "photontargeting",
         "headerClassifier": "headers",
         "sharedLibrary": true,
@@ -86,12 +86,12 @@
       {
         "groupId": "org.photonvision",
         "artifactId": "photonlib-java",
-        "version": "dev-v2024.3.0-122-g5e1a9395"
+        "version": "v2025.0.0-beta-1"
       },
       {
         "groupId": "org.photonvision",
         "artifactId": "photontargeting-java",
-        "version": "dev-v2024.3.0-122-g5e1a9395"
+        "version": "v2025.0.0-beta-1"
       }
     ]
   }
