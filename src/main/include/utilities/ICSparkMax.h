@@ -2,7 +2,7 @@
 
 #include <rev/SparkMax.h>
 
-#include "utilities/ICSparkBase.h"
+#include "utilities/ICSpark.h"
 
 /**
  * Helper class to setup an ICSpark to control a Spark Max. See ICSpark for

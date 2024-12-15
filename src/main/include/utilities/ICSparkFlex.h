@@ -2,7 +2,7 @@
 
 #include <rev/SparkFlex.h>
 
-#include "utilities/ICSparkBase.h"
+#include "utilities/ICSpark.h"
 
 /**
  * Helper class to setup an ICSpark to control a Spark Flex. See ICSpark for
