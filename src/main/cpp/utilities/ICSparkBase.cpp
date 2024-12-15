@@ -67,6 +67,11 @@ rev::REVLibError ICSpark::Configure(rev::spark::SparkBaseConfig& config,
   _minClosedLoopOutputCache = _sparkConfigAccessor.closedLoop.GetMinOutput();
   _maxClosedLoopOutputCache = _sparkConfigAccessor.closedLoop.GetMaxOutput();
 
+  // Set the rio pid gains to match the spark config
+  _rioPidController.SetPID(_sparkConfigAccessor.closedLoop.GetP(),
+                           _sparkConfigAccessor.closedLoop.GetI(),
+                           _sparkConfigAccessor.closedLoop.GetD());
+
   return err;
 }
 
