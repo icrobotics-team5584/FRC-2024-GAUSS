@@ -9,30 +9,40 @@
 
 
 SubPivot::SubPivot(){
-    ctre::phoenix6::configs::CANcoderConfiguration pivotConfig{};
-    //pivotConfig.MagnetSensor.MagnetOffset = 0.5164954444444444; original offset
-    pivotConfig.MagnetSensor.MagnetOffset = 0.228271421875_tr;
-    _pivotMotor.SetInverted(true);
-    _shooterPivotEncoder.GetConfigurator().Apply(pivotConfig);
+    // Config cancoder
+    ctre::phoenix6::configs::CANcoderConfiguration canCoderConfig{};
+    canCoderConfig.MagnetSensor.MagnetOffset = 0.228271421875_tr;
+    _shooterPivotEncoder.GetConfigurator().Apply(canCoderConfig);
 
-    _pivotMotor.SetConversionFactor(1/PIVOT_GEAR_RATIO);
-    _pivotMotor.SetFeedbackGains(_pivotP, _pivotI, _pivotD);
+    // Config pivot motor
+    rev::spark::SparkBaseConfig pivotMotorConfig{};
+    pivotMotorConfig
+        .Inverted(true)
+        .SetIdleMode(rev::spark::SparkBaseConfig::IdleMode::kBrake);
+    pivotMotorConfig.closedLoop
+        .P(_pivotP)
+        .I(_pivotI)
+        .D(_pivotD);
+    pivotMotorConfig.closedLoop.maxMotion
+        .MaxVelocity(0.2)
+        .MaxAcceleration(1)
+        .AllowedClosedLoopError(0);
+    pivotMotorConfig.softLimit
+        .ForwardSoftLimit(HIGH_STOP.value())
+        .ReverseSoftLimit(LOW_STOP.value())
+        .ForwardSoftLimitEnabled(true)
+        .ReverseSoftLimitEnabled(true);
+    pivotMotorConfig.encoder
+        .PositionConversionFactor(1 / PIVOT_GEAR_RATIO)
+        .VelocityConversionFactor(1 / PIVOT_GEAR_RATIO / 60); // divide by 60 to turn RPM to tps
+    _pivotMotor.AdjustConfig(pivotMotorConfig);
+
     _pivotMotor.SetFeedforwardGains(PIVOT_S, PIVOT_G, true, PIVOT_V, PIVOT_A);
     _pivotMotor.SetPosition(_shooterPivotEncoder.GetPosition().GetValue());
-    // _pivotMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake); // TODO
-    _pivotMotor.SetMotionConstraints(0.2_tps, 1_tr_per_s_sq, 0_tr);
 
-    frc::SmartDashboard::PutData("Pivot/Motor", (wpi::Sendable*)&_pivotMotor);
+    frc::SmartDashboard::PutData("Pivot/Motor", &_pivotMotor);
 
-    //Setup shooter pitch table
-    // _pitchTable.insert(-12_deg, 9.25_deg);
-    // _pitchTable.insert(-11_deg, 10_deg);
-    // _pitchTable.insert(-10_deg, 11_deg);
-    // _pitchTable.insert(-9_deg, 12.5_deg);
-    // _pitchTable.insert(-4.5_deg, 17_deg);
-    // _pitchTable.insert(0_deg, 21.5_deg);
-    // _pitchTable.insert(9_deg, 28_deg);
-    // _pitchTable.insert(10_deg, 29_deg);
+    // Setup shooter pitch table
     _pitchTable.insert(-12_deg, 13.75_deg);
     _pitchTable.insert(-11_deg, 14.5_deg);
     _pitchTable.insert(-10_deg, 15.5_deg);
@@ -41,13 +51,6 @@ SubPivot::SubPivot(){
     _pitchTable.insert(0_deg, 27_deg);
     _pitchTable.insert(9_deg, 33_deg);
     _pitchTable.insert(10_deg, 34.5_deg);
-
-    rev::spark::SparkBaseConfig config;
-    config.softLimit.ForwardSoftLimit(HIGH_STOP.value())
-        .ReverseSoftLimit(LOW_STOP.value())
-        .ForwardSoftLimitEnabled(true)
-        .ReverseSoftLimitEnabled(true);
-    _pivotMotor.AdjustConfig(config);
 }
 
 

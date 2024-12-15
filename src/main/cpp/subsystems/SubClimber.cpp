@@ -9,32 +9,39 @@
 #include <frc/MathUtil.h>
 
 SubClimber::SubClimber() {
+    // Make common config for left and right
+    rev::spark::SparkBaseConfig config;
+    config
+        .SetIdleMode(rev::spark::SparkBaseConfig::IdleMode::kBrake);
+    config.softLimit
+        .ForwardSoftLimit(DistanceToTurn(TOP_HEIGHT).value())
+        .ReverseSoftLimit(DistanceToTurn(0_m).value());
+    config.encoder
+        .PositionConversionFactor(1.0 / gearRatio)
+        .VelocityConversionFactor(1.0 / gearRatio / 60); // divide by 60 to turn RPM to tps
+    config.closedLoop.maxMotion
+        .MaxVelocity(2)
+        .MaxAcceleration(3)
+        .AllowedClosedLoopError(0);
+
     //Set up left motor
-    _lClimbMotor.SetConversionFactor(1.0 / gearRatio);
-    // _lClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake); // TODO:
-    _lClimbMotor.SetFeedbackGains(lP,lI,lD);
     _lClimbMotor.SetFeedforwardGains(0_V, 0_V, false, 5.5_V/1_tps);
-    _lClimbMotor.SetMotionConstraints(2_tps, 3_tr_per_s_sq, 0_deg);
-    _lClimbMotor.SetInverted(false);
-    // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TOP_HEIGHT).value());
-    // _lClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0_m).value());
+    config.closedLoop.P(lP).I(lI).D(lD);
+    config.Inverted(false);
+    _lClimbMotor.AdjustConfig(config);
 
     //Set up right motor
-    _rClimbMotor.SetConversionFactor(1.0 / gearRatio);
-    // _rClimbMotor.SetIdleMode(rev::CANSparkBase::IdleMode::kBrake); // TODO:
-    _rClimbMotor.SetFeedbackGains(rP,rI,rD);
     _rClimbMotor.SetFeedforwardGains(0_V, 0_V, false, 5.5_V/1_tps);
-    _rClimbMotor.SetMotionConstraints(2_tps, 3_tr_per_s_sq, 0_deg);
-    _rClimbMotor.SetInverted(true);
-    // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kForward, DistanceToTurn(TOP_HEIGHT).value());
-    // _rClimbMotor.SetSoftLimit(rev::CANSparkBase::SoftLimitDirection::kReverse, DistanceToTurn(0_m).value()); 
-    
+    config.closedLoop.P(rP).I(rI).D(rD);
+    config.Inverted(true);
+    _rClimbMotor.AdjustConfig(config);
+
     //Enable top and bottom limit
     EnableSoftLimit(false);
 
     //Put motor data to dashboard
-    frc::SmartDashboard::PutData("Climber/Left motor", (wpi::Sendable*)&_lClimbMotor);
-    frc::SmartDashboard::PutData("Climber/Right motor", (wpi::Sendable*)&_rClimbMotor);
+    frc::SmartDashboard::PutData("Climber/Left motor", &_lClimbMotor);
+    frc::SmartDashboard::PutData("Climber/Right motor", &_rClimbMotor);
 };
 
 void SubClimber::Periodic() {

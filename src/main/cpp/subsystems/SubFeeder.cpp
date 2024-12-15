@@ -10,7 +10,7 @@
 
 SubFeeder::SubFeeder() {
     frc::SmartDashboard::PutData("Feeder/Motor", (wpi::Sendable*)&_feederMotor);
-    _feederMotor.SetInverted(true);
+    _feederMotor.AdjustConfig(rev::spark::SparkBaseConfig().Inverted(true));
 }
 
 frc2::CommandPtr SubFeeder::FeedToIntake() {
