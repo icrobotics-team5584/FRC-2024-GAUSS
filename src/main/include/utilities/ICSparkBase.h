@@ -307,12 +307,41 @@ class ICSpark : public wpi::Sendable {
     return units::math::abs(GetVelError()) < tolerance;
   }
 
+  /**
+   * Set the configuration for the SPARK.
+   *
+   * <p>If @c resetMode is ResetMode::kResetSafeParameters, this
+   * method will reset safe writable parameters to their default values before
+   * setting the given configuration. The following parameters will not be
+   * reset by this action: CAN ID, Motor Type, Idle Mode, PWM Input Deadband,
+   * and Duty Cycle Offset.
+   *
+   * <p>If @c persistMode is PersistMode::kPersistParameters, this
+   * method will save all parameters to the SPARK's non-volatile memory after
+   * setting the given configuration. This will allow parameters to persist
+   * across power cycles.
+   *
+   * @param config The desired SPARK configuration
+   * @param resetMode Whether to reset safe parameters before setting the
+   * configuration
+   * @param persistMode Whether to persist the parameters after setting the
+   * configuration
+   * @return REVLibError::kOk if successful
+   */
   rev::REVLibError Configure(rev::spark::SparkBaseConfig& config,
                              rev::spark::SparkBase::ResetMode resetMode,
                              rev::spark::SparkBase::PersistMode persistMode);
 
+  /**  
+   * Convenience method for calling 
+   * Configure(config, ResetMode::kNoResetSafeParameters, PersistMode::kPersistParameters)
+   */
   rev::REVLibError AdjustConfig(rev::spark::SparkBaseConfig &config);
 
+  /**  
+   * Convenience method for calling 
+   * Configure(config, ResetMode::kResetSafeParameters, PersistMode::kPersistParameters)
+   */
   rev::REVLibError OverwriteConfig(rev::spark::SparkBaseConfig &config);
 
 
