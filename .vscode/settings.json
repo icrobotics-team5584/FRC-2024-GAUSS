@@ -101,6 +101,7 @@
     "random": "cpp",
     "ranges": "cpp",
     "valarray": "cpp",
-    "expected": "cpp"
+    "expected": "cpp",
+    "regex": "cpp"
   }
 }

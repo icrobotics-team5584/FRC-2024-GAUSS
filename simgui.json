@@ -11,7 +11,12 @@
           "open": true
         }
       },
-      "SPARK MAX [17]": {
+      " Talon FX (v6)[1]": {
+        "header": {
+          "open": true
+        }
+      },
+      "SPARK MAX [13]": {
         "header": {
           "open": true
         }
@@ -72,10 +77,10 @@
             "open": true
           }
         },
-        "Vision": {
+        "open": true,
+        "swerve": {
           "open": true
-        },
-        "open": true
+        }
       },
       "photonvision": {
         "arducam": {
@@ -86,8 +91,7 @@
             "open": true
           },
           "open": true
-        },
-        "open": true
+        }
       }
     }
   },
@@ -135,7 +139,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 0,
+          "height": 374,
           "series": [
             {
               "color": [
@@ -287,7 +291,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 270,
+          "height": 93,
           "series": [
             {
               "color": [
@@ -315,7 +319,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 0,
+          "height": 390,
           "series": [
             {
               "color": [
@@ -355,7 +359,28 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "name": "Climber",
+        "visible": false
+      }
+    },
+    "Plot <6>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 340
+        }
+      ],
+      "window": {
+        "name": "Swerve",
+        "visible": false
+      }
     }
   }
 }
