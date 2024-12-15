@@ -10,13 +10,8 @@
 ICSpark::ICSpark(rev::spark::SparkBase* spark, rev::spark::SparkRelativeEncoder& inbuiltEncoder,
                  rev::spark::SparkBaseConfigAccessor& configAccessor, units::ampere_t currentLimit)
     : _spark(spark), _sparkConfigAccessor(configAccessor), _encoder(inbuiltEncoder) {
-  _spark->Configure(rev::spark::SparkBaseConfig{}.SmartCurrentLimit(currentLimit.value()),
-                    rev::spark::SparkBase::ResetMode::kNoResetSafeParameters,
-                    rev::spark::SparkBase::PersistMode::kPersistParameters);
+  OverwriteConfig(_sparkConfig.SmartCurrentLimit(currentLimit.value()));
   SetConversionFactor(1);  // Makes the internal encoder use revs per sec not revs per min
-
-  // _sparkPidController.SetSmartMotionMinOutputVelocity(0); TODO: Do we need this with max motion?
-  SetClosedLoopOutputRange(-1, 1);
 }
 
 void ICSpark::InitSendable(wpi::SendableBuilder& builder) {
@@ -37,10 +32,53 @@ void ICSpark::InitSendable(wpi::SendableBuilder& builder) {
   builder.AddDoubleProperty("Gains/FF A Gain",            [&] { return _feedforwardAcceleration.value(); },       [&](double A) { SetFeedforwardAcceleration(VoltsPerTpsSq{A}); });
   builder.AddDoubleProperty("Gains/FF Linear G Gain",     [&] { return _feedforwardLinearGravity.value(); },      [&](double lG) { SetFeedforwardLinearGravity(lG*1_V); });
   builder.AddDoubleProperty("Gains/FF Rotational G Gain", [&] { return _feedforwardRotationalGravity.value(); },  [&](double rG) { SetFeedforwardRotationalGravity(rG*1_V); });
-  builder.AddDoubleProperty("Motion Config/Max vel",      [&] { return _sparkConfigAccessor.closedLoop.maxMotion.GetMaxVelocity(); },    [&](double vel) { SetMotionMaxVel(vel*1_tps); });
-  builder.AddDoubleProperty("Motion Config/Max accel",    [&] { return _sparkConfigAccessor.closedLoop.maxMotion.GetMaxAcceleration(); },[&](double accel) { SetMotionMaxAccel(accel*1_tr_per_s_sq); });
+  builder.AddDoubleProperty("Motion Config/Max vel",      [&] { return _motionConstraints.maxVelocity.value(); },    [&](double vel) { SetMotionMaxVel(vel*1_tps); });
+  builder.AddDoubleProperty("Motion Config/Max accel",    [&] { return _motionConstraints.maxAcceleration.value(); },[&](double accel) { SetMotionMaxAccel(accel*1_tr_per_s_sq); });
   // clang-format on
 }
+
+rev::REVLibError ICSpark::Configure(rev::spark::SparkBaseConfig& config,
+                                    rev::spark::SparkBase::ResetMode resetMode,
+                                    rev::spark::SparkBase::PersistMode persistMode) {
+  // Run the configuration and save any errors
+  auto err = _spark->Configure(config, resetMode, persistMode);
+
+  // Cache the motion profile config for sim and feed forward model
+  _motionProfileTolerance =
+      _sparkConfigAccessor.closedLoop.maxMotion.GetAllowedClosedLoopError() * 1_tr;
+  units::turns_per_second_t maxVelocity =
+      _sparkConfigAccessor.closedLoop.maxMotion.GetMaxVelocity() * 1_tps;
+  units::turns_per_second_squared_t maxAcceleration =
+      _sparkConfigAccessor.closedLoop.maxMotion.GetMaxAcceleration() * 1_tr_per_s_sq;
+  _motionConstraints = {maxVelocity, maxAcceleration};
+  _motionProfile = frc::TrapezoidProfile<units::turns>{_motionConstraints};
+
+  // Cache the wrapping settings for sim
+  bool closedLoopEnabled = _sparkConfigAccessor.closedLoop.GetPositionWrappingEnabled();
+  if (closedLoopEnabled) {
+    _rioPidController.EnableContinuousInput(
+        _sparkConfigAccessor.closedLoop.GetPositionWrappingMinInput(),
+        _sparkConfigAccessor.closedLoop.GetPositionWrappingMaxInput());
+  } else {
+    _rioPidController.DisableContinuousInput();
+  }
+
+  // Cache the min and max closed loop outputs for sim
+  _minClosedLoopOutputCache = _sparkConfigAccessor.closedLoop.GetMinOutput();
+  _maxClosedLoopOutputCache = _sparkConfigAccessor.closedLoop.GetMaxOutput();
+
+  return err;
+}
+
+rev::REVLibError ICSpark::AdjustConfig(rev::spark::SparkBaseConfig &config) {
+  return Configure(config, rev::spark::SparkBase::ResetMode::kNoResetSafeParameters,
+                            rev::spark::SparkBase::PersistMode::kPersistParameters);
+};
+
+rev::REVLibError ICSpark::OverwriteConfig(rev::spark::SparkBaseConfig &config) {
+  return Configure(config, rev::spark::SparkBase::ResetMode::kResetSafeParameters,
+                            rev::spark::SparkBase::PersistMode::kPersistParameters);
+};
 
 void ICSpark::SetPosition(units::turn_t position) {
   _encoder.SetPosition(position.value());
@@ -174,25 +212,22 @@ rev::spark::SparkLowLevel::ControlType ICSpark::GetREVControlType() {
 void ICSpark::SetMotionConstraints(units::turns_per_second_t maxVelocity,
                                    units::turns_per_second_squared_t maxAcceleration,
                                    units::turn_t tolerance) {
-  // TODO: move all configs to a func that intercepts spark.configure()?
   _sparkConfig.closedLoop.maxMotion.MaxVelocity(maxVelocity.value())
       .MaxAcceleration(maxAcceleration.value());
-  _spark->Configure(_sparkConfig, rev::spark::SparkBase::ResetMode::kNoResetSafeParameters,
-                    rev::spark::SparkBase::PersistMode::kPersistParameters);
-
-  _motionProfile = frc::TrapezoidProfile<units::turns>{{maxVelocity, maxAcceleration}};
+  AdjustConfigWithoutCache(_sparkConfig);
+  _motionConstraints = {maxVelocity, maxAcceleration};
+  _motionProfileTolerance = tolerance;
+  _motionProfile = frc::TrapezoidProfile<units::turns>{_motionConstraints};
 }
 
 void ICSpark::SetMotionMaxVel(units::turns_per_second_t maxVelocity) {
-  auto accel = _sparkConfigAccessor.closedLoop.maxMotion.GetMaxAcceleration() * 1_tr_per_s_sq;
-  auto tolerance = _sparkConfigAccessor.closedLoop.maxMotion.GetAllowedClosedLoopError() * 1_tr;
-  SetMotionConstraints(maxVelocity, accel, tolerance);
+  auto accel = _motionConstraints.maxAcceleration;
+  SetMotionConstraints(maxVelocity, accel, _motionProfileTolerance);
 }
 
 void ICSpark::SetMotionMaxAccel(units::turns_per_second_squared_t maxAcceleration) {
-  auto vel = _sparkConfigAccessor.closedLoop.maxMotion.GetMaxVelocity() * 1_tps;
-  auto tolerance = _sparkConfigAccessor.closedLoop.maxMotion.GetAllowedClosedLoopError() * 1_tr;
-  SetMotionConstraints(vel, maxAcceleration, tolerance);
+  auto vel = _motionConstraints.maxVelocity;
+  SetMotionConstraints(vel, maxAcceleration, _motionProfileTolerance);
 }
 
 void ICSpark::SetConversionFactor(double rotationsToDesired) {
@@ -238,19 +273,19 @@ void ICSpark::SetFeedbackGains(double P, double I, double D) {
 
 void ICSpark::SetFeedbackProportional(double P) {
   _sparkConfig.closedLoop.P(P);
-  AdjustConfig(_sparkConfig);
+  AdjustConfigWithoutCache(_sparkConfig);
   _rioPidController.SetP(P);
 }
 
 void ICSpark::SetFeedbackIntegral(double I) {
   _sparkConfig.closedLoop.I(I);
-  AdjustConfig(_sparkConfig);
+  AdjustConfigWithoutCache(_sparkConfig);
   _rioPidController.SetI(I);
 }
 
 void ICSpark::SetFeedbackDerivative(double D) {
   _sparkConfig.closedLoop.D(D);
-  AdjustConfig(_sparkConfig);
+  AdjustConfigWithoutCache(_sparkConfig);
   _rioPidController.SetD(D);
 }
 
@@ -292,13 +327,6 @@ void ICSpark::SetFeedforwardAcceleration(VoltsPerTpsSq A, bool updateSparkNow) {
   if (updateSparkNow) UpdateControls(0_s);
 }
 
-void ICSpark::SetClosedLoopOutputRange(double minOutputPercent, double maxOutputPercent) {
-  _minPidOutputCache = minOutputPercent;
-  _maxPidOutputCache = maxOutputPercent;
-  _sparkConfig.closedLoop.OutputRange(minOutputPercent, maxOutputPercent);
-  AdjustConfig(_sparkConfig);
-}
-
 units::turns_per_second_t ICSpark::GetVelocity() {
   if constexpr (frc::RobotBase::IsSimulation()) {
     return _simVelocity;
@@ -325,7 +353,9 @@ units::volt_t ICSpark::GetMotorVoltage() {
 
 units::volt_t ICSpark::CalcSimVoltage() {
   units::volt_t output = 0_V;
-  double posConversionFactor = _sparkConfigAccessor.encoder.GetPositionConversionFactor();
+  // Allowing use of config accessor in the sim only functions
+  // Don't use them in hardware code because they are blocking calls and wait on CAN bus responses.
+  double posConversionFactor = _sparkConfigAccessor.encoder.GetPositionConversionFactor(); 
   double velConversionFactor = _sparkConfigAccessor.encoder.GetVelocityConversionFactor();
 
   switch (_controlType) {
@@ -354,11 +384,6 @@ units::volt_t ICSpark::CalcSimVoltage() {
       break;
 
     case ControlType::kMaxMotion:
-      output = units::volt_t{
-          _rioPidController.Calculate(GetVelocity().value(), _latestMotionTarget.velocity.value()) /
-          velConversionFactor};
-      break;
-
     case ControlType::kMotionProfile:
       output = units::volt_t{
           _rioPidController.Calculate(GetPosition().value(), _latestMotionTarget.position.value()) /
@@ -383,7 +408,7 @@ units::volt_t ICSpark::CalcSimVoltage() {
     output = 0_V;
   }
 
-  output = std::clamp(output, _minPidOutputCache * 12_V, _maxPidOutputCache * 12_V);
+  output = std::clamp(output, _minClosedLoopOutputCache * 12_V, _maxClosedLoopOutputCache * 12_V);
 
   // store a latest copy because we can't call calculate() on the rio pid controller whenever we
   // want, it expects to be called at a specific frequency.
@@ -405,8 +430,7 @@ bool ICSpark::InMotionMode() {
 ICSpark::MPState ICSpark::CalcNextMotionTarget(MPState current, units::turn_t goalPosition,
                                                units::second_t lookahead) {
   units::turn_t error = units::math::abs(goalPosition - GetPosition());
-  units::turn_t tolerance = _sparkConfigAccessor.closedLoop.maxMotion.GetAllowedClosedLoopError() * 1_tr;
-  if (error < tolerance) {
+  if (error < _motionProfileTolerance) {
     return MPState{GetPosition(), 0_tps};
   }
 

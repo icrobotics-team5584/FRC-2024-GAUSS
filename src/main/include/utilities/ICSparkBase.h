@@ -271,18 +271,6 @@ class ICSpark : public wpi::Sendable {
   void SetFeedforwardAcceleration(VoltsPerTpsSq A, bool updateSparkNow = true);
 
   /**
-   * Set the min amd max output for the closed loop mode.
-   *
-   * This uses the Set Parameter API and should be used infrequently. The parameter does not presist
-   * unless burnFlash() is called.
-   *
-   * @param minOutputPercent Power minimum allowed (-1.0 to 1.0)
-   *
-   * @param maxOutputPercent Power maximum allowed (-1.0 to 1.0)
-   */
-  void SetClosedLoopOutputRange(double minOutputPercent, double maxOutputPercent);
-
-  /**
    * Switch to using an external absolute encoder connected to the data port on
    * the SPARK. To use a relative encoder, check the Spark Max and Spark Flex
    * specific implimentation. The Max uses "Alternate encoders" while the Flex
@@ -319,15 +307,13 @@ class ICSpark : public wpi::Sendable {
     return units::math::abs(GetVelError()) < tolerance;
   }
 
-  rev::REVLibError AdjustConfig(rev::spark::SparkBaseConfig &config) {
-    return _spark->Configure(config, rev::spark::SparkBase::ResetMode::kNoResetSafeParameters,
-                             rev::spark::SparkBase::PersistMode::kPersistParameters);
-  };
+  rev::REVLibError Configure(rev::spark::SparkBaseConfig& config,
+                             rev::spark::SparkBase::ResetMode resetMode,
+                             rev::spark::SparkBase::PersistMode persistMode);
 
-  rev::REVLibError OverwriteConfig(rev::spark::SparkBaseConfig &config) {
-    return _spark->Configure(config, rev::spark::SparkBase::ResetMode::kResetSafeParameters,
-                             rev::spark::SparkBase::PersistMode::kPersistParameters);
-  };
+  rev::REVLibError AdjustConfig(rev::spark::SparkBaseConfig &config);
+
+  rev::REVLibError OverwriteConfig(rev::spark::SparkBaseConfig &config);
 
 
   // Sendable setup, called automatically when this is passed into smartDashbaord::PutData()
@@ -347,6 +333,10 @@ class ICSpark : public wpi::Sendable {
   rev::spark::SparkBase* _spark;
   rev::spark::SparkBaseConfigAccessor _sparkConfigAccessor;
   rev::spark::SparkBaseConfig _sparkConfig;
+  rev::REVLibError AdjustConfigWithoutCache(rev::spark::SparkBaseConfig& config) {
+    return _spark->Configure(config, rev::spark::SparkBase::ResetMode::kNoResetSafeParameters,
+                             rev::spark::SparkBase::PersistMode::kPersistParameters);
+  }
 
   // Feedback control objects
   rev::spark::SparkClosedLoopController _sparkPidController{_spark->GetClosedLoopController()};
@@ -367,10 +357,11 @@ class ICSpark : public wpi::Sendable {
   units::turn_t _positionTarget{0};
   units::turns_per_second_t _velocityTarget{0};
   units::volt_t _voltageTarget{0};
-  frc::TrapezoidProfile<units::turns> _motionProfile{
-      {units::turns_per_second_t{0},
-       units::turns_per_second_squared_t{0}}  // constraints updated by SetMotionConfig
-  };
+  frc::TrapezoidProfile<units::angle::turns>::Constraints _motionConstraints{
+      units::turns_per_second_t{0},
+      units::turns_per_second_squared_t{0}
+  }; // constraints updated by SetMotionConstraints() or Configure()
+  frc::TrapezoidProfile<units::turns> _motionProfile{_motionConstraints};
   MPState CalcNextMotionTarget(MPState current, units::turn_t goalPosition,
                                units::second_t lookahead = 20_ms);
   MPState _latestMotionTarget;
@@ -381,10 +372,11 @@ class ICSpark : public wpi::Sendable {
   void SetInternalControlType(ControlType controlType);
   bool InMotionMode();
 
-  // Store a cache of the min and max PID outputs configured in the Spark since
-  // requesting them causes slow, blocking CAN calls.
-  double _minPidOutputCache = -1;
-  double _maxPidOutputCache = 1;
+  // Store a cache of some of the config values since requesting them causes slow, blocking CAN
+  // calls.
+  double _minClosedLoopOutputCache = -1;
+  double _maxClosedLoopOutputCache = 1;
+  units::turn_t _motionProfileTolerance = 0_tr;
 
   // Simulation info. We don't use the WPI managed SimDeviceSim data because the REV Spark classes
   // control those values and often overwrite what we want to set.
