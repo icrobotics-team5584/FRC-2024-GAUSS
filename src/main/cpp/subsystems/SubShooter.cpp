@@ -75,8 +75,8 @@ bool SubShooter::IsOnTarget() {
     auto leftVelocity = _ShooterFlywheelMotorLeft.GetVelocity().GetValue();
     auto rightVelocity = _ShooterFlywheelMotorRight.GetVelocity().GetValue();
     if (
-        // units::math::abs(target - leftVelocity) < tolerance
-        units::math::abs(target - rightVelocity) < tolerance
+        units::math::abs(target - leftVelocity) < tolerance
+        && units::math::abs(target - rightVelocity) < tolerance
         )
     {
         return true;
