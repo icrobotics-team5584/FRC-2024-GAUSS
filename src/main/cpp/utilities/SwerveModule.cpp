@@ -3,7 +3,6 @@
 // the WPILib BSD license file in the root directory of this project.
 
 #include "utilities/SwerveModule.h"
-// #include "utilities/Conversion.h"
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/MathUtil.h>
 #include <frc/RobotBase.h>
@@ -18,7 +17,7 @@ SwerveModule::SwerveModule(int canDriveMotorID, int canTurnMotorID, int canTurnE
   using namespace ctre::phoenix6::configs;
 
   // Config CANCoder
-  _configTurnEncoder.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue::Unsigned_0To1;
+  _configTurnEncoder.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1_tr;
   _configTurnEncoder.MagnetSensor.SensorDirection = SensorDirectionValue::CounterClockwise_Positive;
   _configTurnEncoder.MagnetSensor.MagnetOffset = cancoderMagOffset;
   _canTurnEncoder.GetConfigurator().Apply(_configTurnEncoder);
@@ -27,7 +26,7 @@ SwerveModule::SwerveModule(int canDriveMotorID, int canTurnMotorID, int canTurnE
   //Config Turn Motor
   ConfigTurnMotor();
   SyncSensors();
-  frc::SmartDashboard::PutData("swerve/turn motor "+std::to_string(canTurnMotorID), (wpi::Sendable*)&_canTurnMotor);
+  frc::SmartDashboard::PutData("swerve/turn motor "+std::to_string(canTurnMotorID), &_canTurnMotor);
 
   // Config Driving Motor
   _canDriveMotor.GetConfigurator().Apply(TalonFXConfiguration{});
@@ -51,16 +50,23 @@ SwerveModule::SwerveModule(int canDriveMotorID, int canTurnMotorID, int canTurnE
 }
 
 void SwerveModule::ConfigTurnMotor(){
-    // Config Turning Motor
- // _canTurnMotor.RestoreFactoryDefaults();
-  //_canTurnMotor.SetCANTimeout(500);
-  _canTurnMotor.SetConversionFactor(1.0 / TURNING_GEAR_RATIO);
-  _canTurnMotor.EnableClosedLoopWrapping(0_tr, 1_tr);
-  _canTurnMotor.SetFeedbackGains(TURN_P, TURN_I, TURN_D);
-  _canTurnMotor.SetInverted(true);
-  // _canTurnMotor.SetIdleMode(rev::spark::SparkMax::IdleMode::kBrake); // TODO
-  //_canTurnMotor.BurnFlash();
-  //_canTurnMotor.SetCANTimeout(10);
+  // Config Turning Motor
+  rev::spark::SparkBaseConfig config;
+  config.encoder
+    .PositionConversionFactor(1.0 / TURNING_GEAR_RATIO)
+    .VelocityConversionFactor(1.0 / TURNING_GEAR_RATIO / 60.0);
+  config.closedLoop
+    .P(TURN_P)
+    .I(TURN_I)
+    .D(TURN_D)
+    .PositionWrappingEnabled(true)
+    .PositionWrappingMinInput(0)
+    .PositionWrappingMaxInput(1);
+  config
+    .Inverted(true)
+    .SetIdleMode(rev::spark::SparkBaseConfig::IdleMode::kBrake);
+  
+  _canTurnMotor.AdjustConfig(config);
 }
 
 void SwerveModule::SetDesiredState(frc::SwerveModuleState referenceState) {
