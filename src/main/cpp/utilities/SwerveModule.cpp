@@ -7,6 +7,7 @@
 #include <frc/MathUtil.h>
 #include <frc/RobotBase.h>
 #include <iostream>
+#include "utilities/RobotLogs.h"
 
 SwerveModule::SwerveModule(int canDriveMotorID, int canTurnMotorID, int canTurnEncoderID,
                            units::turn_t cancoderMagOffset)
@@ -21,7 +22,7 @@ SwerveModule::SwerveModule(int canDriveMotorID, int canTurnMotorID, int canTurnE
   _configTurnEncoder.MagnetSensor.SensorDirection = SensorDirectionValue::CounterClockwise_Positive;
   _configTurnEncoder.MagnetSensor.MagnetOffset = cancoderMagOffset;
   _canTurnEncoder.GetConfigurator().Apply(_configTurnEncoder);
-  frc::SmartDashboard::PutNumber("swerve/cancoder "+std::to_string(canTurnEncoderID) + " mag offset", cancoderMagOffset.value());
+  Logger::Log("swerve/cancoder "+std::to_string(canTurnEncoderID) + " mag offset", cancoderMagOffset);
 
   //Config Turn Motor
   ConfigTurnMotor();
@@ -95,12 +96,12 @@ void SwerveModule::SendSensorsToDash() {
   std::string turnMotorName = "swerve/turn motor " + std::to_string(_canTurnMotor.GetDeviceId());
   std::string turnEncoderName = "swerve/turn encoder " + std::to_string(_canTurnEncoder.GetDeviceID());
 
-  frc::SmartDashboard::PutNumber(driveMotorName + " Target velocity", _canDriveMotor.GetClosedLoopReference().GetValue());
-  frc::SmartDashboard::PutNumber(driveMotorName + " velocity", _canDriveMotor.GetVelocity().GetValue().value());
-  frc::SmartDashboard::PutNumber(turnMotorName  + " position", GetAngle().Degrees().value()/360.0);
-  frc::SmartDashboard::PutNumber(turnMotorName  + " target", _canTurnMotor.GetPositionTarget().value());
-  frc::SmartDashboard::PutNumber(turnMotorName  + " error", _canTurnMotor.GetPosError().value());
-  frc::SmartDashboard::PutNumber(turnEncoderName+ " Abs position", _canTurnEncoder.GetAbsolutePosition().GetValue().value());
+  Logger::Log(driveMotorName + " Target velocity", _canDriveMotor.GetClosedLoopReference());
+  Logger::Log(driveMotorName + " velocity", _canDriveMotor.GetVelocity());
+  Logger::Log(turnMotorName  + " position", GetAngle());
+  Logger::Log(turnMotorName  + " target", _canTurnMotor.GetPositionTarget());
+  Logger::Log(turnMotorName  + " error", _canTurnMotor.GetPosError());
+  Logger::Log(turnEncoderName+ " Abs position", _canTurnEncoder.GetAbsolutePosition());
   // clang-format on
 }
 
