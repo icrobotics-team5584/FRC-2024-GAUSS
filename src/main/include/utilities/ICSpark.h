@@ -1,6 +1,7 @@
 #pragma once
 
 #include <rev/SparkBase.h>
+#include <rev/SparkSim.h>
 #include <frc/controller/PIDController.h>
 #include <frc/trajectory/TrapezoidProfile.h>
 #include <frc/simulation/SimDeviceSim.h>
@@ -20,7 +21,7 @@
 /**
  * Wrapper around the Rev CANSparkBase class with some convenience features.
  * - Required Current Limit Setting
- * - Better simulation support (see CalcSimVoltage() and UpdateSimEncoder())
+ * - Better simulation support (see CalcSimVoltage() and IterateSim())
  * - Uses C++ units
  * - Encoder and pid functions are built into this class
  */
@@ -111,7 +112,7 @@ class ICSpark : public wpi::Sendable {
 
   /**
    * Update motion profile targets and feedforward calculations. This is required to be called
-   * periodically when you use a motion profile using the Motion Profile or Smart Motion modes.
+   * periodically when you use the Motion Profile control type or any feedforward gains.
    *
    * @param loopTime The frequency at which this is being called. 20ms is the default loop time for
    * WPILib periodic functions.
@@ -160,13 +161,34 @@ class ICSpark : public wpi::Sendable {
   units::volt_t CalcSimVoltage();
 
   /**
-   * It is the user's responsibility to update the encoder position and
-   * velocity when in simulation. To do this, use WPILib's physics simulation
-   * classes at
-   * https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/physics-sim.html
-   * to get the position and velocity of the mechanism attached to this motor.
+   * Run internal calculations and set internal state.
+   * This method belongs in Simulation Periodic. Use a WPILib physics simulation class or equivalent
+   * to calculate the velocity from the applied output and pass it in to this method, which will
+   * update the simulated state of the motor.
+   *
+   * Simulating a Spark this way will use the configurations and controls of the original
+   * CANSparkMax or CANSparkFlex device to simulate velocity noise, all supported control modes
+   * (including MAXMotion), arb feedforward input, voltage compensation, limit switches, soft
+   * limits, and current limiting, with algorithms translated directly from the Spark firmware.
+   *
+   * This method will update the CANSparkSim's position and velocity, accessible with getPosition()
+   * and getVelocity(). These values are automatically used as the selected feedback sensor for
+   * calculations like closed-loop control and soft limits, and are reflected in the selected
+   * sensor's value. Other sensors each have their own Sim class, which can be used to inject their
+   * positions based on these calculations, to match how they are configured physically. For
+   * example, to represent an Absolute Encoder on a 1:5 ratio from the mechanism,
+   * SparkAbsoluteEncoderSim.iterate(double, double) is called each simulationPeriodic loop with a
+   * velocity divided by 5. The selected sensor's position and velocity will automatically be
+   * updated to match the CANSparkSim's when this method is called.
+   *
+   * Parameters:
+   * @param velocity - The externally calculated velocity in units after conversion. The internal
+   * simulation state will 'lag' slightly behind this input due to the SPARK Device internal
+   * filtering. Noise will also be added.
+   * @param vbus - Bus voltage in volts (See WPILib's BatterySim class to simulate this, or use 12V)
+   * @param dt - Simulation time step in seconds
    */
-  void UpdateSimEncoder(units::turn_t position, units::turns_per_second_t velocity);
+  void IterateSim(units::turns_per_second_t velocity, units::volt_t batteryVoltage = 12_V);
 
   /**
    * Gets the current closed loop control type.
@@ -309,23 +331,22 @@ class ICSpark : public wpi::Sendable {
 
   /**
    * Set the configuration for the SPARK.
+   * When configuring the conversion factors, the ICSpark assumes you are converting position into
+   * rotations and velocity into turns per second. Make sure to check whether your velocity
+   * coversion factor needs to be divided by 60 to transform RPM into tps!
    *
-   * <p>If @c resetMode is ResetMode::kResetSafeParameters, this
-   * method will reset safe writable parameters to their default values before
-   * setting the given configuration. The following parameters will not be
-   * reset by this action: CAN ID, Motor Type, Idle Mode, PWM Input Deadband,
+   * If @c resetMode is ResetMode::kResetSafeParameters, this method will reset safe writable
+   * parameters to their default values before setting the given configuration. The following
+   * parameters will not be reset by this action: CAN ID, Motor Type, Idle Mode, PWM Input Deadband,
    * and Duty Cycle Offset.
    *
-   * <p>If @c persistMode is PersistMode::kPersistParameters, this
-   * method will save all parameters to the SPARK's non-volatile memory after
-   * setting the given configuration. This will allow parameters to persist
-   * across power cycles.
+   * If @c persistMode is PersistMode::kPersistParameters, this method will save all parameters
+   * to the SPARK's non-volatile memory after setting the given configuration. This will allow
+   * parameters to persist across power cycles.
    *
    * @param config The desired SPARK configuration
-   * @param resetMode Whether to reset safe parameters before setting the
-   * configuration
-   * @param persistMode Whether to persist the parameters after setting the
-   * configuration
+   * @param resetMode Whether to reset safe parameters before setting the configuration
+   * @param persistMode Whether to persist the parameters after setting the configuration
    * @return REVLibError::kOk if successful
    */
   rev::REVLibError Configure(rev::spark::SparkBaseConfig& config,
@@ -395,10 +416,9 @@ class ICSpark : public wpi::Sendable {
                                units::second_t lookahead = 20_ms);
   MPState _latestMotionTarget;
 
-  // Control Type (aka mode) management
+  // Control Type management
   ControlType _controlType = ControlType::kDutyCycle;
   rev::spark::SparkLowLevel::ControlType GetREVControlType();
-  void SetInternalControlType(ControlType controlType);
   bool InMotionMode();
 
   // Store a cache of some of the config values since requesting them causes slow, blocking CAN
@@ -407,10 +427,10 @@ class ICSpark : public wpi::Sendable {
   double _maxClosedLoopOutputCache = 1;
   units::turn_t _motionProfileTolerance = 0_tr;
 
-  // Simulation info. We don't use the WPI managed SimDeviceSim data because the REV Spark classes
-  // control those values and often overwrite what we want to set.
-  units::turns_per_second_t _simVelocity = 0_tps;
-  units::volt_t _simVoltage =
-      0_V;  // store a latest copy because we can't call calculate() on the pid controller whenever
-            // we want, it expects to be called at a specific frequency.
+  // Simulation objects
+  frc::DCMotor _simMotor = frc::DCMotor::NeoVortex();
+  rev::spark::SparkSim _simSpark;
+  // store a latest copy of sim voltage because we can't call calculate() on the pid controller
+  // whenever we want, it expects to be called at a specific frequency.
+  units::volt_t _simVoltage = 0_V;  
 };

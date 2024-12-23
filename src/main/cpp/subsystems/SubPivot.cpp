@@ -33,8 +33,8 @@ SubPivot::SubPivot(){
         .ForwardSoftLimitEnabled(true)
         .ReverseSoftLimitEnabled(true);
     pivotMotorConfig.encoder
-        .PositionConversionFactor(1 / PIVOT_GEAR_RATIO)
-        .VelocityConversionFactor(1 / PIVOT_GEAR_RATIO / 60); // divide by 60 to turn RPM to tps
+        .PositionConversionFactor(1.0 / PIVOT_GEAR_RATIO)
+        .VelocityConversionFactor(PIVOT_GEAR_RATIO / 60); // divide by 60 to turn RPM to tps
     _pivotMotor.AdjustConfig(pivotMotorConfig);
 
     _pivotMotor.SetFeedforwardGains(PIVOT_S, PIVOT_G, true, PIVOT_V, PIVOT_A);
@@ -78,8 +78,8 @@ frc2::CommandPtr SubPivot::CmdPivotFromVision(std::function<units::degree_t()> t
 void SubPivot::SimulationPeriodic(){
     _pivotSim.SetInputVoltage(_pivotMotor.CalcSimVoltage());
     _pivotSim.Update(20_ms);
-
-    _pivotMotor.UpdateSimEncoder(_pivotSim.GetAngle(), _pivotSim.GetVelocity());
+    auto vel = _pivotSim.GetVelocity();
+    _pivotMotor.IterateSim(vel);
 }
 
 bool SubPivot::IsOnTarget() {

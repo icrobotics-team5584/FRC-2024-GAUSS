@@ -9,7 +9,10 @@
 
 ICSpark::ICSpark(rev::spark::SparkBase* spark, rev::spark::SparkRelativeEncoder& inbuiltEncoder,
                  rev::spark::SparkBaseConfigAccessor& configAccessor, units::ampere_t currentLimit)
-    : _spark(spark), _sparkConfigAccessor(configAccessor), _encoder(inbuiltEncoder) {
+    : _spark(spark),
+      _sparkConfigAccessor(configAccessor),
+      _encoder(inbuiltEncoder),
+      _simSpark(spark, &_simMotor) {
   OverwriteConfig(_sparkConfig.SmartCurrentLimit(currentLimit.value()));
   SetConversionFactor(1);  // Makes the internal encoder use revs per sec not revs per min
 }
@@ -95,7 +98,7 @@ void ICSpark::SetPositionTarget(units::turn_t target, units::volt_t arbFeedForwa
   _voltageTarget = 0_V;
   _arbFeedForward = arbFeedForward;
   _latestModelFeedForward = CalculateFeedforward(target, 0_tps);
-  SetInternalControlType(ControlType::kPosition);
+  _controlType = ControlType::kPosition;
 
   _sparkPidController.SetReference(target.value(), rev::spark::SparkLowLevel::ControlType::kPosition, 0,
                                    _arbFeedForward.value() + _latestModelFeedForward.value());
@@ -107,7 +110,7 @@ void ICSpark::SetMaxMotionTarget(units::turn_t target, units::volt_t arbFeedForw
   _voltageTarget = 0_V;
   _arbFeedForward = arbFeedForward;
   _latestMotionTarget = {GetPosition(), GetVelocity()};
-  SetInternalControlType(ControlType::kMaxMotion);
+  _controlType = ControlType::kMaxMotion;
 
   UpdateControls();
 }
@@ -118,7 +121,7 @@ void ICSpark::SetMotionProfileTarget(units::turn_t target, units::volt_t arbFeed
   _voltageTarget = 0_V;
   _arbFeedForward = arbFeedForward;
   _latestMotionTarget = {GetPosition(), GetVelocity()};
-  SetInternalControlType(ControlType::kMotionProfile);
+  _controlType = ControlType::kMotionProfile;
 
   UpdateControls();
 }
@@ -129,7 +132,7 @@ void ICSpark::SetVelocityTarget(units::turns_per_second_t target, units::volt_t 
   _voltageTarget = 0_V;
   _arbFeedForward = arbFeedForward;
   _latestModelFeedForward = CalculateFeedforward(0_tr, _velocityTarget);
-  SetInternalControlType(ControlType::kVelocity);
+  _controlType = ControlType::kVelocity;
 
   _sparkPidController.SetReference(target.value(), rev::spark::SparkLowLevel::ControlType::kVelocity, 0,
                                    _arbFeedForward.value() + _latestModelFeedForward.value());
@@ -141,7 +144,7 @@ void ICSpark::SetDutyCycle(double speed) {
   _voltageTarget = 0_V;
   _arbFeedForward = 0_V;
   _latestModelFeedForward = 0_V;
-  SetInternalControlType(ControlType::kDutyCycle);
+  _controlType = ControlType::kDutyCycle;
 
   _simVoltage = std::clamp(speed, -1.0, 1.0) * _spark->GetBusVoltage() * 1_V;
   _sparkPidController.SetReference(speed, rev::spark::SparkLowLevel::ControlType::kDutyCycle);
@@ -152,7 +155,7 @@ void ICSpark::SetVoltage(units::volt_t output) {
   _positionTarget = units::turn_t{0};
   _voltageTarget = output;
   _arbFeedForward = 0_V;
-  SetInternalControlType(ControlType::kVoltage);
+  _controlType = ControlType::kVoltage;
 
   _simVoltage = output;
   _sparkPidController.SetReference(output.value(), rev::spark::SparkLowLevel::ControlType::kVoltage);
@@ -201,10 +204,6 @@ units::volt_t ICSpark::CalculateFeedforward(units::turn_t pos, units::turns_per_
          _feedforwardAcceleration * accel;
 }
 
-void ICSpark::SetInternalControlType(ControlType controlType) {
-  _controlType = controlType;
-}
-
 rev::spark::SparkLowLevel::ControlType ICSpark::GetREVControlType() {
   auto controlType = GetControlType();
   if (controlType == ControlType::kMotionProfile) {
@@ -236,12 +235,15 @@ void ICSpark::SetMotionMaxAccel(units::turns_per_second_squared_t maxAcceleratio
 }
 
 void ICSpark::SetConversionFactor(double rotationsToDesired) {
-  _sparkConfig.encoder.PositionConversionFactor(rotationsToDesired)
-      .VelocityConversionFactor(rotationsToDesired / 60);
-  _sparkConfig.absoluteEncoder.PositionConversionFactor(rotationsToDesired)
-      .VelocityConversionFactor(rotationsToDesired / 60);
-  _sparkConfig.analogSensor.PositionConversionFactor(rotationsToDesired)
-      .VelocityConversionFactor(rotationsToDesired / 60);
+  _sparkConfig.encoder
+    .PositionConversionFactor(1.0 / rotationsToDesired)
+    .VelocityConversionFactor(rotationsToDesired / 60);
+  _sparkConfig.absoluteEncoder
+    .PositionConversionFactor(1.0 / rotationsToDesired)
+    .VelocityConversionFactor(rotationsToDesired / 60);
+  _sparkConfig.analogSensor
+    .PositionConversionFactor(1.0 / rotationsToDesired)
+    .VelocityConversionFactor(rotationsToDesired / 60);
   AdjustConfig(_sparkConfig);
 }
 
@@ -333,11 +335,7 @@ void ICSpark::SetFeedforwardAcceleration(VoltsPerTpsSq A, bool updateSparkNow) {
 }
 
 units::turns_per_second_t ICSpark::GetVelocity() {
-  if constexpr (frc::RobotBase::IsSimulation()) {
-    return _simVelocity;
-  } else {
-    return units::turns_per_second_t{_encoder.GetVelocity()};
-  }
+  return units::turns_per_second_t{_encoder.GetVelocity()};
 }
 
 double ICSpark::GetDutyCycle() const {
@@ -422,9 +420,9 @@ units::volt_t ICSpark::CalcSimVoltage() {
   return output;
 }
 
-void ICSpark::UpdateSimEncoder(units::turn_t position, units::turns_per_second_t velocity) {
-  _encoder.SetPosition(position.value());
-  _simVelocity = velocity;
+void ICSpark::IterateSim(units::turns_per_second_t velocity, units::volt_t batteryVoltage) {
+  const units::second_t dt = 20_ms;
+  _simSpark.iterate(velocity.value(), batteryVoltage.value(), dt.value());
 }
 
 bool ICSpark::InMotionMode() {

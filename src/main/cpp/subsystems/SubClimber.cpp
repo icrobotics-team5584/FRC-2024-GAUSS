@@ -18,7 +18,7 @@ SubClimber::SubClimber() {
         .ReverseSoftLimit(DistanceToTurn(0_m).value());
     config.encoder
         .PositionConversionFactor(1.0 / gearRatio)
-        .VelocityConversionFactor(1.0 / gearRatio / 60); // divide by 60 to turn RPM to tps
+        .VelocityConversionFactor(gearRatio / 60); // divide by 60 to turn RPM to tps
     config.closedLoop.maxMotion
         .MaxVelocity(2)
         .MaxAcceleration(3)
@@ -63,12 +63,11 @@ void SubClimber::SimulationPeriodic() {
 
   lElvSim.SetInputVoltage(_lClimbMotor.CalcSimVoltage());
   lElvSim.Update(20_ms);
-  _lClimbMotor.UpdateSimEncoder(DistanceToTurn(lElvSim.GetPosition()),
-                               DistanceToTurn(lElvSim.GetVelocity()));
+  _lClimbMotor.IterateSim(DistanceToTurn(lElvSim.GetVelocity()));
 
     rElvSim.SetInputVoltage(_rClimbMotor.CalcSimVoltage());
     rElvSim.Update(20_ms);
-    _rClimbMotor.UpdateSimEncoder(DistanceToTurn(rElvSim.GetPosition()), DistanceToTurn(rElvSim.GetVelocity()));
+    _rClimbMotor.IterateSim(DistanceToTurn(rElvSim.GetVelocity()));
 
     mechLeftElevator->SetLength(TurnToDistance(_lClimbMotor.GetPosition()).value() * 4);
     mechRightElevator->SetLength(TurnToDistance(_rClimbMotor.GetPosition()).value() * 4);
@@ -92,8 +91,8 @@ units::meter_t SubClimber::TurnToDistance(units::turn_t turn) {
 //Drive motor to height
 void SubClimber::DriveToDistance(units::meter_t distance) {
     TargetDistance = distance;
-    _lClimbMotor.SetMaxMotionTarget(DistanceToTurn(distance));
-    _rClimbMotor.SetMaxMotionTarget(DistanceToTurn(distance));
+    _lClimbMotor.SetMotionProfileTarget(DistanceToTurn(distance));
+    _rClimbMotor.SetMotionProfileTarget(DistanceToTurn(distance));
 }
 
 //Run motor with power

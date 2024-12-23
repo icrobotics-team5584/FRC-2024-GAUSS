@@ -55,7 +55,7 @@ void SwerveModule::ConfigTurnMotor(){
   rev::spark::SparkBaseConfig config;
   config.encoder
     .PositionConversionFactor(1.0 / TURNING_GEAR_RATIO)
-    .VelocityConversionFactor(1.0 / TURNING_GEAR_RATIO / 60.0);
+    .VelocityConversionFactor(TURNING_GEAR_RATIO / 60.0);
   config.closedLoop
     .P(TURN_P)
     .I(TURN_I)
@@ -187,7 +187,7 @@ void SwerveModule::UpdateSim(units::second_t deltaTime) {
   _turnMotorSim.Update(deltaTime);
   auto turnAngle = _turnMotorSim.GetAngularPosition();
   auto turnVelocity = _turnMotorSim.GetAngularVelocity();
-  _canTurnMotor.UpdateSimEncoder(turnAngle, turnVelocity);
+  _canTurnMotor.IterateSim(turnVelocity);
 
   // CANcoders are attached directly to the mechanism, so don't account for the steer gearing
   auto& cancoderState = _canTurnEncoder.GetSimState();
