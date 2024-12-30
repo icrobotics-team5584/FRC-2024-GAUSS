@@ -126,7 +126,7 @@ frc2::CommandPtr CmdAimAtSpeakerWithVision(frc2::CommandXboxController& controll
         auto rotateSpeed = SubDrivebase::GetInstance().CalcRotateSpeed(-errorAngle);
 
         return frc::ChassisSpeeds{joystickChassisSpeeds.vx, joystickChassisSpeeds.vy, rotateSpeed};
-      }));
+      }, false));
 }
 
 frc2::CommandPtr CmdShootSpeakerAuto() {

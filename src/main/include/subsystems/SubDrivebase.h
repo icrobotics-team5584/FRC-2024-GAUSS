@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 #pragma once
 
 #include <frc2/command/SubsystemBase.h>
@@ -11,7 +7,7 @@
 #include <frc/kinematics/SwerveDriveOdometry.h>
 #include <frc/estimator/SwerveDrivePoseEstimator.h>
 #include <frc/smartdashboard/Field2d.h>
-#include <frc/controller/HolonomicDriveController.h>
+#include <frc/filter/SlewRateLimiter.h>
 #include <pathplanner/lib/controllers/PPHolonomicDriveController.h>
 #include <numbers>
 #include <frc2/command/CommandPtr.h>
@@ -57,7 +53,7 @@ class SubDrivebase : public frc2::SubsystemBase {
 
   // Commands
   frc2::CommandPtr JoystickDrive(frc2::CommandXboxController& controller);
-  frc2::CommandPtr Drive(std::function<frc::ChassisSpeeds()> speeds);
+  frc2::CommandPtr Drive(std::function<frc::ChassisSpeeds()> speeds, bool fieldOriented);
   frc2::CommandPtr SyncSensorBut();
   frc2::CommandPtr ResetGyroCmd();
   frc2::CommandPtr SysIdQuasistatic(frc2::sysid::Direction direction) {
@@ -73,6 +69,7 @@ class SubDrivebase : public frc2::SubsystemBase {
   static constexpr units::turns_per_second_squared_t MAX_ANG_ACCEL{std::numbers::pi};
   static constexpr double MAX_JOYSTICK_ACCEL = 3;
   static constexpr double MAX_ANGULAR_JOYSTICK_ACCEL = 3;
+  static constexpr double JOYSTICK_DEADBAND = 0.08;
 
  private:
   void Drive(units::meters_per_second_t xSpeed, units::meters_per_second_t ySpeed,
@@ -104,7 +101,7 @@ class SubDrivebase : public frc2::SubsystemBase {
   frc::SwerveDriveKinematics<4> _kinematics{_frontLeftLocation, _frontRightLocation,
                                             _backLeftLocation, _backRightLocation};
 
-  frc::PIDController _teleopTranslationcontroller{2.0, 0, 0};
+  frc::PIDController _teleopTranslationController{2.0, 0, 0};
   frc::ProfiledPIDController<units::radian> _teleopRotationController{
       6, 0, 0.3, {MAX_ANGULAR_VELOCITY, MAX_ANG_ACCEL}};
   std::shared_ptr<pathplanner::PPHolonomicDriveController> _pathplannerController =
@@ -123,6 +120,13 @@ class SubDrivebase : public frc2::SubsystemBase {
        frc::SwerveModulePosition{0_m, _backRight.GetAngle()}},
       frc::Pose2d()};
   frc::Field2d _fieldDisplay;
+
+  // Joystick controller rate limiters
+  double _tunedMaxJoystickAccel = MAX_JOYSTICK_ACCEL;
+  double _tunedMaxAngularJoystickAccel = MAX_ANGULAR_JOYSTICK_ACCEL;
+  frc::SlewRateLimiter<units::scalar> _xStickLimiter{_tunedMaxJoystickAccel / 1_s};
+  frc::SlewRateLimiter<units::scalar> _yStickLimiter{_tunedMaxJoystickAccel / 1_s};
+  frc::SlewRateLimiter<units::scalar> _rotStickLimiter{_tunedMaxAngularJoystickAccel / 1_s};
 
   // Sysid
   frc2::sysid::SysIdRoutine _sysIdRoutine{

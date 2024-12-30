@@ -4,7 +4,6 @@
 #include <frc/RobotBase.h>
 #include <frc/DriverStation.h>
 #include <frc2/command/Commands.h>
-#include <frc/filter/SlewRateLimiter.h>
 #include <frc/geometry/Pose2d.h>
 #include <frc/kinematics/ChassisSpeeds.h>
 #include <frc/DriverStation.h>
@@ -14,7 +13,8 @@
 #include "utilities/RobotLogs.h"
 
 SubDrivebase::SubDrivebase() {
-  frc::SmartDashboard::PutData("Drivebase/Vision/Rotation Controller: ", &_teleopRotationController);
+  frc::SmartDashboard::PutData("Drivebase/Teleop PID/Rotation Controller", &_teleopRotationController);
+  frc::SmartDashboard::PutData("Drivebase/Teleop PID/Translation Controller", &_teleopTranslationController);
 
   _teleopRotationController.EnableContinuousInput(0_deg, 360_deg);
   frc::SmartDashboard::PutData("field", &_fieldDisplay);
@@ -107,30 +107,47 @@ void SubDrivebase::SimulationPeriodic() {
 }
 
 frc::ChassisSpeeds SubDrivebase::CalcJoystickSpeeds(frc2::CommandXboxController& controller) {
-  double deadband = 0.08;
-  auto velocity = Logger::Tune("Drivebase/Config/MaxVelocity", MAX_VELOCITY);
-  auto angularVelocity = Logger::Tune("Drivebase/Config/MaxAngularVelocity", MAX_ANGULAR_VELOCITY);
-  static frc::SlewRateLimiter<units::scalar> _xspeedLimiter{MAX_JOYSTICK_ACCEL / 1_s};
-  static frc::SlewRateLimiter<units::scalar> _yspeedLimiter{MAX_JOYSTICK_ACCEL / 1_s};
-  static frc::SlewRateLimiter<units::scalar> _rotLimiter{MAX_ANGULAR_JOYSTICK_ACCEL / 1_s};
-  auto forwardSpeed =
-      _yspeedLimiter.Calculate(frc::ApplyDeadband(controller.GetLeftY(), deadband)) * velocity;
-  auto rotationSpeed =
-      _rotLimiter.Calculate(frc::ApplyDeadband(controller.GetRightX(), deadband)) * angularVelocity;
-  auto sidewaysSpeed =
-      _xspeedLimiter.Calculate(frc::ApplyDeadband(controller.GetLeftX(), deadband)) * velocity;
+  std::string path = "Drivebase/Config/";
+  auto deadband = Logger::Tune(path + "Joystick Deadband", JOYSTICK_DEADBAND);
+  auto maxVelocity = Logger::Tune(path + "Max Velocity", MAX_VELOCITY);
+  auto maxAngularVelocity = Logger::Tune(path + "Max Angular Velocity", MAX_ANGULAR_VELOCITY);
+  auto maxJoystickAccel = Logger::Tune(path + "Max Joystick Accel", MAX_JOYSTICK_ACCEL);
+  auto maxAngularJoystickAccel =
+      Logger::Tune(path + "Max Joystick Angular Accel", MAX_ANGULAR_JOYSTICK_ACCEL);
+
+  // Recreate slew rate limiters if limits have changed
+  if (maxJoystickAccel != _tunedMaxJoystickAccel) {
+    _xStickLimiter = frc::SlewRateLimiter<units::scalar>{maxJoystickAccel / 1_s};
+    _yStickLimiter = frc::SlewRateLimiter<units::scalar>{maxJoystickAccel / 1_s};
+    _tunedMaxJoystickAccel = maxJoystickAccel;
+  }
+  if (maxAngularJoystickAccel != _tunedMaxAngularJoystickAccel) {
+    _rotStickLimiter = frc::SlewRateLimiter<units::scalar>{maxAngularJoystickAccel / 1_s};
+    _tunedMaxAngularJoystickAccel = maxAngularJoystickAccel;
+  }
+
+  // Apply deadbands
+  double forwardStick = frc::ApplyDeadband(controller.GetLeftY(), deadband);
+  double sidewaysStick = frc::ApplyDeadband(controller.GetLeftX(), deadband);
+  double rotationStick = frc::ApplyDeadband(controller.GetRightX(), deadband);
+
+  // Apply joystick rate limits
+  auto forwardSpeed = _yStickLimiter.Calculate(forwardStick) * maxVelocity;
+  auto sidewaysSpeed = _xStickLimiter.Calculate(sidewaysStick) * maxVelocity;
+  auto rotationSpeed = _rotStickLimiter.Calculate(rotationStick) * maxAngularVelocity;
 
   return frc::ChassisSpeeds{forwardSpeed, sidewaysSpeed, rotationSpeed};
 }
 
 frc2::CommandPtr SubDrivebase::JoystickDrive(frc2::CommandXboxController& controller) {
-  return Drive([this, &controller] { return CalcJoystickSpeeds(controller); });
+  return Drive([this, &controller] { return CalcJoystickSpeeds(controller); }, true);
 }
 
-frc2::CommandPtr SubDrivebase::Drive(std::function<frc::ChassisSpeeds()> speeds) {
-  return Run([this, speeds] {
+frc2::CommandPtr SubDrivebase::Drive(std::function<frc::ChassisSpeeds()> speeds,
+                                     bool fieldOriented) {
+  return Run([this, speeds, fieldOriented] {
            auto speedVals = speeds();
-           Drive(speedVals.vx, speedVals.vy, speedVals.omega, false);
+           Drive(speedVals.vx, speedVals.vy, speedVals.omega, fieldOriented);
          })
       .FinallyDo([this] { Drive(0_mps, 0_mps, 0_deg_per_s, false); });
 }
@@ -248,8 +265,8 @@ frc::ChassisSpeeds SubDrivebase::CalcDriveToPoseSpeeds(frc::Pose2d targetPose) {
   units::turn_t currentRotation = currentPosition.Rotation().Radians();
 
   // Use PID controllers to calculate speeds
-  auto xSpeed = _teleopTranslationcontroller.Calculate(currentXMeters, targetXMeters) * 1_mps;
-  auto ySpeed = _teleopTranslationcontroller.Calculate(currentYMeters, targetYMeters) * 1_mps;
+  auto xSpeed = _teleopTranslationController.Calculate(currentXMeters, targetXMeters) * 1_mps;
+  auto ySpeed = _teleopTranslationController.Calculate(currentYMeters, targetYMeters) * 1_mps;
   auto rSpeed = CalcRotateSpeed(targetRotation - currentRotation);
 
   // Clamp to max velocity
@@ -343,7 +360,7 @@ frc2::CommandPtr SubDrivebase::WheelCharecterisationCmd() {
            //     4;
            initialWheelDistance = _frontRight.GetDrivenRotations();
          })
-      .AndThen(Drive([] { return frc::ChassisSpeeds{0_mps, 0_mps, 15_deg_per_s}; }))
+      .AndThen(Drive([] { return frc::ChassisSpeeds{0_mps, 0_mps, 15_deg_per_s}; }, false))
       .FinallyDo([this] {
         units::meter_t drivebaseRadius = _frontLeftLocation.Norm();
         units::radian_t finalGyroHeading = GetHeading().Radians();
