@@ -1,7 +1,7 @@
 #include "frc/DataLogManager.h"
 #include "wpi/DataLog.h"
 #include <ctre/phoenix6/TalonFX.hpp>
-
+#include <frc/DriverStation.h>
 #include <units/angle.h>
 #include <units/angular_velocity.h>
 #include <units/length.h>
@@ -45,6 +45,7 @@ void Log(std::string keyName, units::kilogram_t value);
 void Log(std::string keyName, units::celsius_t value);
 void Log(std::string keyName, ctre::phoenix6::StatusSignal<units::celsius_t>& signal);
 void Log(std::string keyName, frc::Rotation2d value);
+void Log(std::string keyName, frc::DriverStation::Alliance value);
 
 double Tune(std::string keyName, double defaultValue);
 bool Tune(std::string keyName, bool defaultValue);

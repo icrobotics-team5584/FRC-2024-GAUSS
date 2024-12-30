@@ -112,6 +112,10 @@ void Log(std::string keyName, frc::Rotation2d value) {
   Log(keyName, value.Degrees());
 }
 
+void Log(std::string keyName, frc::DriverStation::Alliance value) {
+  Log(keyName, value == frc::DriverStation::Alliance::kRed ? "Red" : "Blue");
+}
+
 
 double Tune(std::string keyName, double defaultValue) {
   if (frc::SmartDashboard::ContainsKey(keyName)) {

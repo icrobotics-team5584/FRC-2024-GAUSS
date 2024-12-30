@@ -46,13 +46,11 @@ SubDrivebase::SubDrivebase() {
       []() {
         auto alliance = frc::DriverStation::GetAlliance();
         if (alliance) {
-          frc::SmartDashboard::PutString(
-              "Drivebase/Alliance",
-              alliance.value() == frc::DriverStation::Alliance::kBlue ? "Blue" : "Red");
+          Logger::Log("Drivebase/Pathplanner flipped to alliance", alliance.value());
           return alliance.value() == frc::DriverStation::Alliance::kRed;
         }
-        frc::SmartDashboard::PutString("Drivebase/Alliance",
-                                       "Failed to detect alliance, assuming blue");
+        Logger::Log("Drivebase/Pathplanner flipped to alliance",
+                    "Failed to detect alliance, assuming blue");
         return false;
       },
 
