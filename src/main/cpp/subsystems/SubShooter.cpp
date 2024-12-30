@@ -29,12 +29,9 @@ SubShooter::SubShooter(){
 
 // This method will be called once per scheduler run
 void SubShooter::Periodic() {
-frc::SmartDashboard::PutNumber("Shooter/SpeedLeft", _ShooterFlywheelMotorLeft.GetVelocity().GetValue().value());
-frc::SmartDashboard::PutNumber("Shooter/SpeedRight", _ShooterFlywheelMotorRight.GetVelocity().GetValue().value());
-frc::SmartDashboard::PutBoolean("Target/FlywheelOnTarget", IsOnTarget());
-frc::SmartDashboard::PutNumber("Shooter/LeftCurrent", _ShooterFlywheelMotorLeft.GetStatorCurrent().GetValue().value());
-frc::SmartDashboard::PutNumber("Shooter/RightCurrent", _ShooterFlywheelMotorRight.GetStatorCurrent().GetValue().value());
-Logger::logFalcon(_ShooterFlywheelMotorLeft, "leftFlywheelMotor");
+    Logger::Log("Target/FlywheelOnTarget", IsOnTarget());
+    Logger::LogFalcon("Shooter/leftFlywheelMotor", _ShooterFlywheelMotorLeft);
+    Logger::LogFalcon("Shooter/rightFlywheelMotor", _ShooterFlywheelMotorRight);
 }
 
 frc2::CommandPtr SubShooter::CmdSetShooterSpeaker(){

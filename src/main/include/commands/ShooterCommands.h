@@ -28,7 +28,6 @@ namespace cmd {
   frc2::CommandPtr CmdFeedOnceOnAmpTarget();
   frc2::CommandPtr CmdShootSubwoofer();
   frc2::CommandPtr CmdAimAtSpeakerWithVision(frc2::CommandXboxController& controller);
-  frc2::CommandPtr CmdAimWithoutControl();
   frc2::CommandPtr CmdClimb();
   frc2::CommandPtr CmdSourcePickUp();
 }

@@ -35,8 +35,8 @@ RobotContainer::RobotContainer(){
               [] { return SubPivot::GetInstance().IsOnTarget(); })));
 
   SubDrivebase::GetInstance().SetDefaultCommand(
-      SubDrivebase::GetInstance().JoystickDrive(_driverController, false));
-  
+      SubDrivebase::GetInstance().JoystickDrive(_driverController));
+
   ConfigureBindings();
   SubVision::GetInstance();
 

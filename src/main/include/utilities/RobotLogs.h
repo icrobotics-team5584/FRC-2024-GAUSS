@@ -18,7 +18,7 @@
 #include <frc/geometry/Rotation2d.h>
 
 namespace Logger {
-void logFalcon(ctre::phoenix6::hardware::TalonFX& talonFX, std::string name);
+void LogFalcon(std::string name, ctre::phoenix6::hardware::TalonFX& talonFX);
 
 void Log(std::string_view keyName, wpi::Sendable* data);
 void Log(std::string_view keyName, double value);
@@ -45,5 +45,22 @@ void Log(std::string keyName, units::kilogram_t value);
 void Log(std::string keyName, units::celsius_t value);
 void Log(std::string keyName, ctre::phoenix6::StatusSignal<units::celsius_t>& signal);
 void Log(std::string keyName, frc::Rotation2d value);
+
+double Tune(std::string keyName, double defaultValue);
+bool Tune(std::string keyName, bool defaultValue);
+std::string Tune(std::string keyName, std::string defaultValue);
+units::turn_t Tune(std::string keyName, units::turn_t defaultValue);
+units::degree_t Tune(std::string keyName, units::degree_t defaultValue);
+units::turns_per_second_t Tune(std::string keyName, units::turns_per_second_t defaultValue);
+units::turns_per_second_squared_t Tune(std::string keyName, units::turns_per_second_squared_t defaultValue);
+units::meter_t Tune(std::string keyName, units::meter_t defaultValue);
+units::meters_per_second_t Tune(std::string keyName, units::meters_per_second_t defaultValue);
+units::meters_per_second_squared_t Tune(std::string keyName, units::meters_per_second_squared_t defaultValue);
+units::volt_t Tune(std::string keyName, units::volt_t defaultValue);
+units::ampere_t Tune(std::string keyName, units::ampere_t defaultValue);
+units::second_t Tune(std::string keyName, units::second_t defaultValue);
+units::kilogram_t Tune(std::string keyName, units::kilogram_t defaultValue);
+units::celsius_t Tune(std::string keyName, units::celsius_t defaultValue);
+frc::Rotation2d Tune(std::string keyName, frc::Rotation2d defaultValue);
 
 };  // namespace Logger

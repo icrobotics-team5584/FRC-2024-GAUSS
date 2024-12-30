@@ -30,15 +30,11 @@ class SubDrivebase : public frc2::SubsystemBase {
   }
   void Periodic() override;
   void SimulationPeriodic() override;
-  void Drive(units::meters_per_second_t xSpeed, units::meters_per_second_t ySpeed,
-             units::degrees_per_second_t rot, bool fieldRelative);
-  void StopDriving();
+
+  // Instantaneous functions
   void AddVisionMeasurement(frc::Pose2d pose, double ambiguity, units::second_t timeStamp);
   void ResetGyroHeading(units::degree_t startingAngle = 0_deg);
   void UpdatePosition(frc::Pose2d robotPosition);
-  void DriveToPose(frc::Pose2d targetPose);
-  void RotateToZero(units::degree_t rotationError);
-  void TranslateToZero(units::degree_t translationError);
   void DisplayTrajectory(std::string name, frc::Trajectory trajectory);
   void SetNeutralMode(ctre::phoenix6::signals::NeutralModeValue mode);
   void SetPose(frc::Pose2d pose);
@@ -46,7 +42,11 @@ class SubDrivebase : public frc2::SubsystemBase {
   void UpdateOdometry();
   void SyncSensors();
   
+  // Getters
   bool IsAtPose(frc::Pose2d pose);
+  frc::ChassisSpeeds CalcDriveToPoseSpeeds(frc::Pose2d targetPose);
+  frc::ChassisSpeeds CalcJoystickSpeeds(frc2::CommandXboxController& controller);
+  units::turns_per_second_t CalcRotateSpeed(units::turn_t rotationError);
   units::degree_t GetPitch();
   frc::Pose2d GetPose();
   frc::Rotation2d GetHeading();
@@ -55,15 +55,9 @@ class SubDrivebase : public frc2::SubsystemBase {
   frc::ChassisSpeeds GetRobotRelativeSpeeds();
   frc2::CommandPtr WheelCharecterisationCmd();
 
-  static constexpr units::meters_per_second_t MAX_VELOCITY = 6.1_mps;
-  static constexpr units::degrees_per_second_t MAX_ANGULAR_VELOCITY = 360_deg_per_s;
-  static constexpr units::radians_per_second_squared_t MAX_ANG_ACCEL{std::numbers::pi};
-
-  double MAX_JOYSTICK_ACCEL = 3;
-  double MAX_ANGULAR_JOYSTICK_ACCEL = 3;
-
   // Commands
-  frc2::CommandPtr JoystickDrive(frc2::CommandXboxController& controller, bool optionalRotationControl);
+  frc2::CommandPtr JoystickDrive(frc2::CommandXboxController& controller);
+  frc2::CommandPtr Drive(std::function<frc::ChassisSpeeds()> speeds);
   frc2::CommandPtr SyncSensorBut();
   frc2::CommandPtr ResetGyroCmd();
   frc2::CommandPtr SysIdQuasistatic(frc2::sysid::Direction direction) {
@@ -73,7 +67,17 @@ class SubDrivebase : public frc2::SubsystemBase {
     return _sysIdRoutine.Dynamic(direction);
   }
 
+  // Constants
+  static constexpr units::meters_per_second_t MAX_VELOCITY = 6.1_mps;
+  static constexpr units::turns_per_second_t MAX_ANGULAR_VELOCITY = 360_deg_per_s;
+  static constexpr units::turns_per_second_squared_t MAX_ANG_ACCEL{std::numbers::pi};
+  static constexpr double MAX_JOYSTICK_ACCEL = 3;
+  static constexpr double MAX_ANGULAR_JOYSTICK_ACCEL = 3;
+
  private:
+  void Drive(units::meters_per_second_t xSpeed, units::meters_per_second_t ySpeed,
+             units::turns_per_second_t rot, bool fieldRelative);
+
   studica::AHRS _gyro{studica::AHRS::NavXComType::kMXP_SPI};
 
   // Swerve modules
@@ -100,11 +104,9 @@ class SubDrivebase : public frc2::SubsystemBase {
   frc::SwerveDriveKinematics<4> _kinematics{_frontLeftLocation, _frontRightLocation,
                                             _backLeftLocation, _backRightLocation};
 
-  frc::PIDController Xcontroller{0.2, 0, 0};
-  frc::PIDController Ycontroller{0.5, 0, 0};
-  frc::ProfiledPIDController<units::radian> Rcontroller{
+  frc::PIDController _teleopTranslationcontroller{2.0, 0, 0};
+  frc::ProfiledPIDController<units::radian> _teleopRotationController{
       6, 0, 0.3, {MAX_ANGULAR_VELOCITY, MAX_ANG_ACCEL}};
-  frc::HolonomicDriveController _driveController{Xcontroller, Ycontroller, Rcontroller};
   std::shared_ptr<pathplanner::PPHolonomicDriveController> _pathplannerController =
       std::make_shared<pathplanner::PPHolonomicDriveController>(
           pathplanner::PIDConstants{2.0, 0.0, 0.0},  // Translation PID constants
@@ -120,15 +122,7 @@ class SubDrivebase : public frc2::SubsystemBase {
        frc::SwerveModulePosition{0_m, _backLeft.GetAngle()},
        frc::SwerveModulePosition{0_m, _backRight.GetAngle()}},
       frc::Pose2d()};
-
   frc::Field2d _fieldDisplay;
-  frc::Pose2d _prevPose;  // Used for velocity calculations
-
-  // Drive requests
-  units::meters_per_second_t _forwardSpeedRequest = 0_mps;
-  units::meters_per_second_t _sidewaysSpeedRequest = 0_mps;
-  units::degrees_per_second_t _rotationSpeedRequest = 0_deg_per_s;
-  bool _fieldOrientedRequest = true; 
 
   // Sysid
   frc2::sysid::SysIdRoutine _sysIdRoutine{
