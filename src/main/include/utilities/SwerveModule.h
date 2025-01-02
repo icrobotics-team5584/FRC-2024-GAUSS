@@ -39,6 +39,7 @@ class SwerveModule {
   units::meters_per_second_t GetSpeed();
   units::volt_t GetDriveVoltage();
   frc::SwerveModuleState GetState();
+  frc::SwerveModuleState GetCANCoderState();
   units::radian_t GetDrivenRotations();
 
  private:

@@ -1,7 +1,12 @@
-#include <frc/smartdashboard/SmartDashboard.h>
 #include "utilities/RobotLogs.h"
+#include <frc/smartdashboard/SmartDashboard.h>
+#include <networktables/StructArrayTopic.h>
+#include <frc/kinematics/struct/SwerveModuleStateStruct.h>
+#include <map>
 
 namespace Logger {
+std::map<std::string, nt::StructArrayPublisher<frc::SwerveModuleState>> swerveModuleStatePublishers;
+
 void LogFalcon(std::string name, ctre::phoenix6::hardware::TalonFX& talonFX) {
   Log(name + "/Voltage", talonFX.GetMotorVoltage());
   Log(name + "/StatorCurrent", talonFX.GetStatorCurrent());
@@ -30,6 +35,19 @@ void Log(std::string_view keyName, bool value) {
 
 void Log(std::string_view keyName, std::string_view value) {
   frc::SmartDashboard::PutString(keyName, value);
+}
+
+void Log(std::string_view keyName, frc::DriverStation::Alliance value) {
+  Log(keyName, value == frc::DriverStation::Alliance::kRed ? "Red" : "Blue");
+}
+
+void Log(std::string_view keyName, wpi::array<frc::SwerveModuleState, 4> value) {
+  std::string fullKeyName = "SmartDashboard/" + std::string(keyName);
+  auto [it, inserted] = swerveModuleStatePublishers.try_emplace(
+      std::string(fullKeyName), nt::NetworkTableInstance::GetDefault()
+                                    .GetStructArrayTopic<frc::SwerveModuleState>(fullKeyName)
+                                    .Publish());
+  it->second.Set(value);
 }
 
 void Log(std::string keyName, units::turn_t value) {
@@ -112,16 +130,30 @@ void Log(std::string keyName, frc::Rotation2d value) {
   Log(keyName, value.Degrees());
 }
 
-void Log(std::string keyName, frc::DriverStation::Alliance value) {
-  Log(keyName, value == frc::DriverStation::Alliance::kRed ? "Red" : "Blue");
-}
-
 
 double Tune(std::string keyName, double defaultValue) {
   if (frc::SmartDashboard::ContainsKey(keyName)) {
     return frc::SmartDashboard::GetNumber(keyName, defaultValue);
   } else {
     frc::SmartDashboard::PutNumber(keyName, defaultValue);
+    return defaultValue;
+  }
+}
+
+bool Tune(std::string keyName, bool defaultValue) {
+  if (frc::SmartDashboard::ContainsKey(keyName)) {
+    return frc::SmartDashboard::GetBoolean(keyName, defaultValue);
+  } else {
+    frc::SmartDashboard::PutBoolean(keyName, defaultValue);
+    return defaultValue;
+  }
+}
+
+std::string Tune(std::string keyName, std::string defaultValue) {
+  if (frc::SmartDashboard::ContainsKey(keyName)) {
+    return frc::SmartDashboard::GetString(keyName, defaultValue);
+  } else {
+    frc::SmartDashboard::PutString(keyName, defaultValue);
     return defaultValue;
   }
 }

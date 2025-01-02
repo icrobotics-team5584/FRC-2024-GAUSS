@@ -60,33 +60,14 @@ SubDrivebase::SubDrivebase() {
 
 void SubDrivebase::Periodic() {
   auto loopStart = frc::GetTime();
-  // Dashboard Displays:
-  frc::SmartDashboard::PutNumber("Drivebase/heading", GetHeading().Degrees().value());
-  frc::SmartDashboard::PutNumber("Drivebase/velocity", GetVelocity().value());
-
-  frc::SmartDashboard::PutNumberArray("Drivebase/true swerve states",
-                                      std::array{
-                                          _frontLeft.GetAngle().Degrees().value(),
-                                          _frontLeft.GetSpeed().value(),
-                                          _frontRight.GetAngle().Degrees().value(),
-                                          _frontRight.GetSpeed().value(),
-                                          _backLeft.GetAngle().Degrees().value(),
-                                          _backLeft.GetSpeed().value(),
-                                          _backRight.GetAngle().Degrees().value(),
-                                          _backRight.GetSpeed().value(),
-                                      });
-
-  frc::SmartDashboard::PutNumberArray("Drivebase/can coders swerve states",
-                                      std::array{
-                                          _frontLeft.GetCanCoderAngle().Degrees().value(),
-                                          _frontLeft.GetSpeed().value(),
-                                          _frontRight.GetCanCoderAngle().Degrees().value(),
-                                          _frontRight.GetSpeed().value(),
-                                          _backLeft.GetCanCoderAngle().Degrees().value(),
-                                          _backLeft.GetSpeed().value(),
-                                          _backRight.GetCanCoderAngle().Degrees().value(),
-                                          _backRight.GetSpeed().value(),
-                                      });
+  Logger::Log("Drivebase/heading", GetHeading());
+  Logger::Log("Drivebase/velocity", GetVelocity());
+  Logger::Log("Drivebase/Internal Encoder Swerve States",
+              wpi::array{_frontLeft.GetState(), _frontRight.GetState(), _backLeft.GetState(),
+                         _backRight.GetState()});
+  Logger::Log("Drivebase/CANCoder Swerve States",
+              wpi::array{_frontLeft.GetCANCoderState(), _frontRight.GetCANCoderState(),
+                         _backLeft.GetCANCoderState(), _backRight.GetCANCoderState()});
 
   _frontLeft.SendSensorsToDash();
   _frontRight.SendSensorsToDash();
@@ -102,6 +83,15 @@ void SubDrivebase::SimulationPeriodic() {
   _frontRight.UpdateSim(20_ms);
   _backLeft.UpdateSim(20_ms);
   _backRight.UpdateSim(20_ms);
+
+  // Adjust gyro angle
+  auto rotSpeed = _kinematics
+                      .ToChassisSpeeds(_frontLeft.GetState(), _frontRight.GetState(),
+                                       _backLeft.GetState(), _backRight.GetState())
+                      .omega;
+  units::radian_t changeInRot = rotSpeed * 20_ms;
+  units::degree_t newHeading = GetHeading().RotateBy(changeInRot).Degrees();
+  _gyro.SetAngleAdjustment(-newHeading.value());  // negative to switch to CW from CCW
 }
 
 frc::ChassisSpeeds SubDrivebase::CalcJoystickSpeeds(frc2::CommandXboxController& controller) {
@@ -159,7 +149,7 @@ void SubDrivebase::Drive(units::meters_per_second_t xSpeed, units::meters_per_se
 
   // Discretize to get rid of translational drift while rotating
   constexpr bool inSim = frc::RobotBase::IsSimulation();
-  speeds = frc::ChassisSpeeds::Discretize(speeds, inSim ? 200_ms : -200_ms);
+  speeds = frc::ChassisSpeeds::Discretize(speeds, inSim ? 20_ms : -200_ms);
 
   // Get states of all swerve modules
   auto states = _kinematics.ToSwerveModuleStates(speeds);
@@ -170,33 +160,12 @@ void SubDrivebase::Drive(units::meters_per_second_t xSpeed, units::meters_per_se
       frc::SmartDashboard::GetNumber("Drivebase/Config/MaxVelocity", MAX_VELOCITY.value()) * 1_mps);
 
   // Setting modules from aquired states
+  Logger::Log("Drivebase/Desired Swerve States", states);
   auto [fl, fr, bl, br] = states;
-
-  frc::SmartDashboard::PutNumberArray("Drivebase/desired swerve states",
-                                      std::array{
-                                          fl.angle.Degrees().value(),
-                                          fl.speed.value(),
-                                          fr.angle.Degrees().value(),
-                                          fr.speed.value(),
-                                          bl.angle.Degrees().value(),
-                                          bl.speed.value(),
-                                          br.angle.Degrees().value(),
-                                          br.speed.value(),
-                                      });
-
   _frontLeft.SetDesiredState(fl);
   _frontRight.SetDesiredState(fr);
   _backLeft.SetDesiredState(bl);
   _backRight.SetDesiredState(br);
-
-  // Check if robot is in simulation.
-  // Manualy adjusting gyro by calculating rotation in simulator as gyro is not enabled in
-  // simulation
-  if (frc::RobotBase::IsSimulation()) {
-    units::radian_t radPer20ms = rot * 20_ms;
-    units::degree_t newHeading = GetHeading().RotateBy(radPer20ms).Degrees();
-    _gyro.SetAngleAdjustment(-newHeading.value());  // negative to switch to CW from CCW
-  }
 }
 
 frc::ChassisSpeeds SubDrivebase::GetRobotRelativeSpeeds() {

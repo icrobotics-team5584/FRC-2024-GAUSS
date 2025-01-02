@@ -1,7 +1,7 @@
-#include "frc/DataLogManager.h"
-#include "wpi/DataLog.h"
 #include <ctre/phoenix6/TalonFX.hpp>
 #include <frc/DriverStation.h>
+#include <frc/geometry/Rotation2d.h>
+#include <frc/kinematics/SwerveModuleState.h>
 #include <units/angle.h>
 #include <units/angular_velocity.h>
 #include <units/length.h>
@@ -15,7 +15,7 @@
 #include <units/torque.h>
 #include <units/mass.h>
 #include <units/temperature.h>
-#include <frc/geometry/Rotation2d.h>
+#include <array>
 
 namespace Logger {
 void LogFalcon(std::string name, ctre::phoenix6::hardware::TalonFX& talonFX);
@@ -25,6 +25,8 @@ void Log(std::string_view keyName, double value);
 void Log(std::string_view keyName, ctre::phoenix6::StatusSignal<double>& signal);
 void Log(std::string_view keyName, bool value);
 void Log(std::string_view keyName, std::string_view value);
+void Log(std::string_view keyName, frc::DriverStation::Alliance value);
+void Log(std::string_view keyName, wpi::array<frc::SwerveModuleState, 4> states);
 void Log(std::string keyName, units::turn_t value);
 void Log(std::string keyName, ctre::phoenix6::StatusSignal<units::turn_t>& signal);
 void Log(std::string keyName, units::degree_t value);
@@ -45,7 +47,6 @@ void Log(std::string keyName, units::kilogram_t value);
 void Log(std::string keyName, units::celsius_t value);
 void Log(std::string keyName, ctre::phoenix6::StatusSignal<units::celsius_t>& signal);
 void Log(std::string keyName, frc::Rotation2d value);
-void Log(std::string keyName, frc::DriverStation::Alliance value);
 
 double Tune(std::string keyName, double defaultValue);
 bool Tune(std::string keyName, bool defaultValue);

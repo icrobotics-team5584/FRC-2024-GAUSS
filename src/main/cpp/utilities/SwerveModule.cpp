@@ -123,6 +123,10 @@ frc::SwerveModuleState SwerveModule::GetState() {
   return {GetSpeed(), GetAngle()};
 }
 
+frc::SwerveModuleState SwerveModule::GetCANCoderState() {
+  return {GetSpeed(), GetCanCoderAngle()};
+}
+
 units::volt_t SwerveModule::GetDriveVoltage() {
   return _canDriveMotor.GetMotorVoltage().GetValue();
 }
