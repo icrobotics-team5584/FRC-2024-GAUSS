@@ -12,39 +12,29 @@
 #include "subsystems/SubFeeder.h"
 #include "subsystems/SubVision.h"
 #include "subsystems/SubClimber.h"
-#include <pathplanner/lib/commands/PathPlannerAuto.h>
 #include <pathplanner/lib/auto/NamedCommands.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 
 RobotContainer::RobotContainer(){
 
-  pathplanner::NamedCommands::registerCommand("Intake", SubIntake::GetInstance().Intake());
-  pathplanner::NamedCommands::registerCommand("IntakeSequence", cmd::CmdIntake());
-  pathplanner::NamedCommands::registerCommand(
-      "SetShooterToSpeakerSpeed",
-      SubShooter::GetInstance().CmdSetShooterSpeaker().AndThen(
-          frc2::cmd::Wait(1_s)));
-  pathplanner::NamedCommands::registerCommand("FeedToShooter", SubFeeder::GetInstance().FeedToShooter().WithTimeout(0.2_s));
-  pathplanner::NamedCommands::registerCommand("Shoot", cmd::CmdShootNeutral());
-  pathplanner::NamedCommands::registerCommand("Feed", SubFeeder::GetInstance().FeedToShooter().WithTimeout(1_s));
-  pathplanner::NamedCommands::registerCommand("FullSequenceShoot", cmd::CmdShootSpeakerAuto());
-  pathplanner::NamedCommands::registerCommand(
-      "SetSubwooferAngle",
-      SubPivot::GetInstance().CmdSetPivotAngle(41_deg).AndThen(
-          frc2::cmd::WaitUntil(
-              [] { return SubPivot::GetInstance().IsOnTarget(); })));
-
+  // Initialize subsystems
+  SubVision::GetInstance();
   SubDrivebase::GetInstance().SetDefaultCommand(
       SubDrivebase::GetInstance().JoystickDrive(_driverController));
 
-  ConfigureBindings();
-  SubVision::GetInstance();
-
-  _autoChooser.AddOption("M44Note", "M44Note");
-  _autoChooser.AddOption("Dont Move", "Dont Move");
-  _autoChooser.AddOption("S1 (C5 first)", "S1 (C5 first)");
-
+  // Auto chooser
+  _autoChooser.AddOption("bigPath", "bigPath");
+  _autoChooser.SetDefaultOption("indivPaths", "indivPaths");
   frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
+
+  // Register pathplanner named commands
+  using ppcmd = pathplanner::NamedCommands;
+  ppcmd::registerCommand("intake", cmd::CmdIntake());
+  ppcmd::registerCommand("feedOnceOnTarget", cmd::CmdFeedOnceOnTarget());
+  ppcmd::registerCommand("setShooterSpeaker", SubShooter::GetInstance().CmdSetShooterSpeaker());
+  ppcmd::registerCommand("FullSequenceShoot", cmd::CmdShootSpeakerAuto());
+
+  ConfigureBindings();
 }
 
 void RobotContainer::ConfigureBindings() {
@@ -113,14 +103,28 @@ void RobotContainer::ConfigureBindings() {
   }).WhileTrue(SubClimber::GetInstance().ClimberJoystickDrive(_operatorController));
 }
 
-frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
+pathplanner::PathPlannerAuto RobotContainer::GetAutonomousCommand() {
   auto _autoSelected = _autoChooser.GetSelected();
-  //units::second_t delay = _delayChooser.GetSelected() * 0.01_s;
-  units::second_t delay = 0.00_s;
-  return frc2::cmd::Wait(delay)
-      .AndThen(pathplanner::PathPlannerAuto(_autoSelected).ToPtr())
-      .AlongWith(SubClimber::GetInstance().ClimberAutoReset().AndThen(
-          SubClimber::GetInstance().ClimberPosition(SubClimber::STOW_HEIGHT)));
+  auto followPath = pathplanner::PathPlannerAuto(_autoSelected);
+
+  followPath.event("beginVisionAim").OnTrue(frc2::cmd::RunOnce([] {
+    SubDrivebase::GetInstance().SetPathplannerRotationFeedbackSource([] {
+      return SubDrivebase::GetInstance().CalcRotateSpeed(
+          SubVision::GetInstance().GetSpeakerYaw().value_or(0_deg));
+    });
+  }));
+
+  followPath.event("endVisionAim").OnTrue(frc2::cmd::RunOnce([] {
+    SubDrivebase::GetInstance().SetPathplannerRotationFeedbackSource([] {
+      return SubDrivebase::GetInstance().CalcRotateSpeed(
+          SubVision::GetInstance().GetSpeakerYaw().value_or(0_deg));
+    });
+  }));
+
+  followPath.isRunning().OnTrue(SubClimber::GetInstance().ClimberAutoReset().AndThen(
+      SubClimber::GetInstance().ClimberPosition(SubClimber::STOW_HEIGHT)));
+
+  return followPath;
 }
 
 frc2::CommandPtr RobotContainer::Rumble(double force, units::second_t duration) {

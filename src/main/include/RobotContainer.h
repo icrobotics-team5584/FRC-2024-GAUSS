@@ -10,12 +10,13 @@
 #include <frc2/command/button/JoystickButton.h>
 #include "subsystems/SubDriveBase.h"
 #include <frc/smartdashboard/SendableChooser.h>
+#include <pathplanner/lib/commands/PathPlannerAuto.h>
 
 class RobotContainer {
  public:
   RobotContainer();
 
-  frc2::CommandPtr GetAutonomousCommand();
+  pathplanner::PathPlannerAuto GetAutonomousCommand();
   frc2::CommandPtr Rumble(double force, units::second_t duration);
 
  private:

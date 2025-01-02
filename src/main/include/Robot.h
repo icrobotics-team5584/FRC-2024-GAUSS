@@ -8,6 +8,7 @@
 
 #include <frc/TimedRobot.h>
 #include <frc2/command/CommandPtr.h>
+#include <pathplanner/lib/commands/PathPlannerAuto.h>
 
 #include "RobotContainer.h"
 
@@ -27,10 +28,8 @@ class Robot : public frc::TimedRobot {
   void TestInit() override;
   void TestPeriodic() override;
   void TestExit() override;
-  auto LoadAprilTagLayoutField();
-  auto LoadField();
  private:
-  std::optional<frc2::CommandPtr> m_autonomousCommand;
+  std::optional<pathplanner::PathPlannerAuto> m_autonomousCommand;
 
   RobotContainer m_container;
 };

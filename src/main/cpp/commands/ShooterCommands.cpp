@@ -16,8 +16,11 @@
 
 namespace cmd {
 using namespace frc2::cmd;
+auto intake = []() -> SubIntake& { return SubIntake::GetInstance(); };
+auto vision = []() -> SubVision& { return SubVision::GetInstance(); };
+
 frc2::CommandPtr CmdIntake(){
-    return SubIntake::GetInstance().Intake().AlongWith(SubFeeder::GetInstance().FeedToShooter())
+    return intake().Intake().AlongWith(SubFeeder::GetInstance().FeedToShooter())
     .Until([]{return SubFeeder::GetInstance().CheckHasNote();})
     .AndThen(SubFeeder::GetInstance().ReverseFeeder().WithTimeout(0.2_s));
 }
@@ -27,7 +30,7 @@ frc2::CommandPtr CmdFeedOnceOnTarget() {
     return Sequence(
             WaitUntil([]{return SubPivot::GetInstance().IsOnTarget();}),
             WaitUntil([]{return SubShooter::GetInstance().IsOnTarget();}),
-            WaitUntil([]{return SubVision::GetInstance().IsFacingTarget();}),
+            WaitUntil([]{return vision().IsFacingTarget();}),
             SubFeeder::GetInstance().FeedToShooter()
         );
 }

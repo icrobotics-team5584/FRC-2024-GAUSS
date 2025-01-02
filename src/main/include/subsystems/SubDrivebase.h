@@ -37,7 +37,9 @@ class SubDrivebase : public frc2::SubsystemBase {
   void DisplayPose(std::string label, frc::Pose2d pose);
   void UpdateOdometry();
   void SyncSensors();
-  
+  void SetPathplannerRotationFeedbackSource(
+      std::function<units::turns_per_second_t()> rotationFeedbackSource);
+
   // Getters
   bool IsAtPose(frc::Pose2d pose);
   frc::ChassisSpeeds CalcDriveToPoseSpeeds(frc::Pose2d targetPose);
@@ -45,7 +47,8 @@ class SubDrivebase : public frc2::SubsystemBase {
   units::turns_per_second_t CalcRotateSpeed(units::turn_t rotationError);
   units::degree_t GetPitch();
   frc::Pose2d GetPose();
-  frc::Rotation2d GetHeading();
+  frc::Rotation2d GetHeading(); // Heading as recorded by the pose estimator (matches field orientation)
+  frc::Rotation2d GetGyroAngle(); // Heading as recorded by the gyro (zero is direction when switched on)
   units::meters_per_second_t GetVelocity();
   frc::SwerveDriveKinematics<4> GetKinematics();
   frc::ChassisSpeeds GetRobotRelativeSpeeds();

@@ -90,8 +90,13 @@ void SubDrivebase::SimulationPeriodic() {
                                        _backLeft.GetState(), _backRight.GetState())
                       .omega;
   units::radian_t changeInRot = rotSpeed * 20_ms;
-  units::degree_t newHeading = GetHeading().RotateBy(changeInRot).Degrees();
+  units::degree_t newHeading = GetGyroAngle().RotateBy(changeInRot).Degrees();
   _gyro.SetAngleAdjustment(-newHeading.value());  // negative to switch to CW from CCW
+}
+
+void SubDrivebase::SetPathplannerRotationFeedbackSource(
+    std::function<units::turns_per_second_t()> rotationFeedbackSource) {
+  pathplanner::PPHolonomicDriveController::overrideRotationFeedback(rotationFeedbackSource);
 }
 
 frc::ChassisSpeeds SubDrivebase::CalcJoystickSpeeds(frc2::CommandXboxController& controller) {
@@ -194,6 +199,10 @@ frc2::CommandPtr SubDrivebase::SyncSensorBut() {
 }
 
 frc::Rotation2d SubDrivebase::GetHeading() {
+  return _poseEstimator.GetEstimatedPosition().Rotation();
+}
+
+frc::Rotation2d SubDrivebase::GetGyroAngle() {
   return _gyro.GetRotation2d();
 }
 
@@ -216,7 +225,7 @@ void SubDrivebase::UpdateOdometry() {
   auto bl = _backLeft.GetPosition();
   auto br = _backRight.GetPosition();
 
-  _poseEstimator.Update(GetHeading(), {fl, fr, bl, br});
+  _poseEstimator.Update(GetGyroAngle(), {fl, fr, bl, br});
   _fieldDisplay.SetRobotPose(_poseEstimator.GetEstimatedPosition());
 }
 
@@ -282,8 +291,7 @@ void SubDrivebase::SetPose(frc::Pose2d pose) {
   auto fr = _frontRight.GetPosition();
   auto bl = _backLeft.GetPosition();
   auto br = _backRight.GetPosition();
-  _poseEstimator.ResetPosition(GetHeading(), {fl, fr, bl, br}, pose);
-  ResetGyroHeading(pose.Rotation().Degrees());
+  _poseEstimator.ResetPosition(GetGyroAngle(), {fl, fr, bl, br}, pose);
 }
 
 void SubDrivebase::DisplayPose(std::string label, frc::Pose2d pose) {
