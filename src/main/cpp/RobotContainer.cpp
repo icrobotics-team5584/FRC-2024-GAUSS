@@ -115,10 +115,7 @@ pathplanner::PathPlannerAuto RobotContainer::GetAutonomousCommand() {
   }));
 
   followPath.event("endVisionAim").OnTrue(frc2::cmd::RunOnce([] {
-    SubDrivebase::GetInstance().SetPathplannerRotationFeedbackSource([] {
-      return SubDrivebase::GetInstance().CalcRotateSpeed(
-          SubVision::GetInstance().GetSpeakerYaw().value_or(0_deg));
-    });
+    SubDrivebase::GetInstance().ResetPathplannerRotationFeedbackSource();
   }));
 
   followPath.isRunning().OnTrue(SubClimber::GetInstance().ClimberAutoReset().AndThen(

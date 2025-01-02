@@ -99,6 +99,10 @@ void SubDrivebase::SetPathplannerRotationFeedbackSource(
   pathplanner::PPHolonomicDriveController::overrideRotationFeedback(rotationFeedbackSource);
 }
 
+void SubDrivebase::ResetPathplannerRotationFeedbackSource() {
+  pathplanner::PPHolonomicDriveController::clearRotationFeedbackOverride();
+}
+
 frc::ChassisSpeeds SubDrivebase::CalcJoystickSpeeds(frc2::CommandXboxController& controller) {
   std::string path = "Drivebase/Config/";
   auto deadband = Logger::Tune(path + "Joystick Deadband", JOYSTICK_DEADBAND);

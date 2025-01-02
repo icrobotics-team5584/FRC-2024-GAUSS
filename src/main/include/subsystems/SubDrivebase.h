@@ -39,6 +39,7 @@ class SubDrivebase : public frc2::SubsystemBase {
   void SyncSensors();
   void SetPathplannerRotationFeedbackSource(
       std::function<units::turns_per_second_t()> rotationFeedbackSource);
+  void ResetPathplannerRotationFeedbackSource();
 
   // Getters
   bool IsAtPose(frc::Pose2d pose);
