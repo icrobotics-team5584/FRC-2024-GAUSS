@@ -72,7 +72,6 @@ std::optional<photon::PhotonTrackedTarget> SubVision::GetSpeakerTarget() {
 }
 
 std::optional<units::degree_t> SubVision::GetSpeakerYaw(){
-  return 0_deg;
   auto tagResult = SubVision::GetInstance().GetSpeakerTarget();
   if (tagResult){
     return tagResult.value().GetYaw() * 1_deg;

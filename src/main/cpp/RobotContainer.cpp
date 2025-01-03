@@ -121,7 +121,7 @@ pathplanner::PathPlannerAuto RobotContainer::GetAutonomousCommand() {
   followPath.isRunning().OnTrue(SubClimber::GetInstance().ClimberAutoReset().AndThen(
       SubClimber::GetInstance().ClimberPosition(SubClimber::STOW_HEIGHT)));
 
-  return followPath;
+  return std::move(followPath);
 }
 
 frc2::CommandPtr RobotContainer::Rumble(double force, units::second_t duration) {
