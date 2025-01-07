@@ -41,7 +41,7 @@ SwerveModule::SwerveModule(int canDriveMotorID, int canTurnMotorID, int canTurnE
   _configCanDriveMotor.CurrentLimits.StatorCurrentLimitEnable = true;
   _configCanDriveMotor.CurrentLimits.SupplyCurrentLimit = 60.0_A;
   _configCanDriveMotor.CurrentLimits.SupplyCurrentLowerLimit = 40.0_A;
-  _configCanDriveMotor.CurrentLimits.SupplyCurrentLowerTime = 0.1_s;
+  _configCanDriveMotor.CurrentLimits.SupplyCurrentLowerTime = 1_s;
   _configCanDriveMotor.CurrentLimits.StatorCurrentLimit = 70.0_A;
   _configCanDriveMotor.Slot0.kS = DRIVE_S;
   _configCanDriveMotor.Slot0.kV = DRIVE_V;
@@ -70,17 +70,30 @@ void SwerveModule::ConfigTurnMotor(){
   _canTurnMotor.AdjustConfig(config);
 }
 
-void SwerveModule::SetDesiredState(frc::SwerveModuleState referenceState) {
+void SwerveModule::SetDesiredState(frc::SwerveModuleState referenceState, 
+                                    units::newton_t xForceFF,
+                                    units::newton_t yForceFF
+                                    ) {
   // Optimize the reference state to avoid spinning further than 90 degrees
   auto currentAngle = GetAngle();
   referenceState.Optimize(currentAngle);
+
+  // Find component of force feedforward that matches the direction of our wheel
+  namespace m = units::math;
+  units::turn_t forceFFAngle = m::atan(yForceFF / xForceFF);
+  units::turn_t angleError = forceFFAngle - currentAngle.Radians();
+  units::newton_t forceFFNorm = m::sqrt(m::pow<2>(xForceFF) + m::pow<2>(yForceFF));
+  units::newton_t scaledForceFF = forceFFNorm * m::cos(angleError);
+
+  // Make sure force feedforward has the same sign as the velocity
+  scaledForceFF = m::copysign(scaledForceFF, referenceState.speed);
 
   // Slow down drive speed when not pointing the right way. This results in smoother driving.
   referenceState.CosineScale(currentAngle);
 
   // Drive! These functions do some conversions and send targets to falcons
   SetDesiredAngle(referenceState.angle.Degrees());
-  SetDesiredVelocity(referenceState.speed);
+  SetDesiredVelocity(referenceState.speed, scaledForceFF);
 }
 
 frc::SwerveModulePosition SwerveModule::GetPosition() {
@@ -96,11 +109,7 @@ void SwerveModule::SendSensorsToDash() {
   std::string turnMotorName = "swerve/turn motor " + std::to_string(_canTurnMotor.GetDeviceId());
   std::string turnEncoderName = "swerve/turn encoder " + std::to_string(_canTurnEncoder.GetDeviceID());
 
-  Logger::Log(driveMotorName + " Target velocity", _canDriveMotor.GetClosedLoopReference());
-  Logger::Log(driveMotorName + " velocity", _canDriveMotor.GetVelocity());
-  Logger::Log(turnMotorName  + " position", GetAngle());
-  Logger::Log(turnMotorName  + " target", _canTurnMotor.GetPositionTarget());
-  Logger::Log(turnMotorName  + " error", _canTurnMotor.GetPosError());
+  Logger::LogFalcon(driveMotorName, _canDriveMotor);
   Logger::Log(turnEncoderName+ " Abs position", _canTurnEncoder.GetAbsolutePosition());
   // clang-format on
 }
@@ -139,10 +148,16 @@ void SwerveModule::SetDesiredAngle(units::degree_t angle) {
   _canTurnMotor.SetPositionTarget(angle);
 }
 
-void SwerveModule::SetDesiredVelocity(units::meters_per_second_t velocity) {
-  units::turns_per_second_t TurnsPerSec = (velocity.value() / WHEEL_CIRCUMFERENCE.value()) * 1_tps;
-
-  _canDriveMotor.SetControl(ctre::phoenix6::controls::VelocityVoltage{(TurnsPerSec)});
+void SwerveModule::SetDesiredVelocity(units::meters_per_second_t velocity,
+                                      units::newton_t forceFF) {
+  units::newton_meter_t torque = forceFF * WHEEL_RADIUS;
+  units::ampere_t torqueCurrentFF = _driveMotorModel.Current(torque);
+  Logger::Log("swerve/drive " + std::to_string(_canDriveMotor.GetDeviceID()) + " torqueCurrent", torqueCurrentFF);
+  torqueCurrentFF *= Logger::Tune("swerve/currentFF enabled", true);
+  units::turns_per_second_t wheelVelocity{velocity.value() / WHEEL_CIRCUMFERENCE.value()};
+  _canDriveMotor.SetControl(
+      ctre::phoenix6::controls::VelocityTorqueCurrentFOC{wheelVelocity}.WithFeedForward(
+          torqueCurrentFF));
 }
 
 void SwerveModule::DriveStraightVolts(units::volt_t volts) {
@@ -185,13 +200,12 @@ void SwerveModule::UpdateSim(units::second_t deltaTime) {
   _driveMotorSim.Update(deltaTime);
   driveState.SetRawRotorPosition(_driveMotorSim.GetAngularPosition() * DRIVE_GEAR_RATIO);
   driveState.SetRotorVelocity(_driveMotorSim.GetAngularVelocity() * DRIVE_GEAR_RATIO);
+  driveState.SetRotorAcceleration(_driveMotorSim.GetAngularAcceleration() * DRIVE_GEAR_RATIO);
   // Turn Motor
   auto turnVolts = _canTurnMotor.CalcSimVoltage();
   _turnMotorSim.SetInputVoltage(turnVolts);
   _turnMotorSim.Update(deltaTime);
-  auto turnAngle = _turnMotorSim.GetAngularPosition();
-  auto turnVelocity = _turnMotorSim.GetAngularVelocity();
-  _canTurnMotor.IterateSim(turnVelocity);
+  _canTurnMotor.IterateSim(_turnMotorSim.GetAngularVelocity());
 
   // CANcoders are attached directly to the mechanism, so don't account for the steer gearing
   auto& cancoderState = _canTurnEncoder.GetSimState();

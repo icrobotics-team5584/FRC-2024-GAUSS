@@ -13,7 +13,6 @@
 #include <frc/apriltag/AprilTagFields.h>
 #include <map>
 #include <photon/PhotonPoseEstimator.h>
-#include <photon/simulation/PhotonCameraSim.h>
 #include <photon/simulation/VisionSystemSim.h>
 #include <frc/Filesystem.h>
 #include <frc2/command/SubsystemBase.h>
@@ -55,9 +54,7 @@ private:
   //     _camToBot.Inverse()};
   
   photon::PhotonCamera _camera{CAM_NAME1};
-
   photon::PhotonCameraSim _cameraSim{&_camera};
   photon::VisionSystemSim _visionSim{"photonvision sim"};
-
   std::vector<photon::PhotonPipelineResult> _latestResults;
 };

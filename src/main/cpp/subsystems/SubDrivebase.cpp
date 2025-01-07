@@ -9,7 +9,6 @@
 #include <frc/DriverStation.h>
 #include <units/time.h>
 #include <pathplanner/lib/auto/AutoBuilder.h>
-#include <pathplanner/lib/config/RobotConfig.h>
 #include "utilities/RobotLogs.h"
 
 SubDrivebase::SubDrivebase() {
@@ -19,8 +18,7 @@ SubDrivebase::SubDrivebase() {
   _teleopRotationController.EnableContinuousInput(0_deg, 360_deg);
   frc::SmartDashboard::PutData("field", &_fieldDisplay);
 
-  using namespace pathplanner;
-  AutoBuilder::configure(
+  pathplanner::AutoBuilder::configure(
       // Robot pose supplier
       [this]() { return GetPose(); },
 
@@ -32,13 +30,30 @@ SubDrivebase::SubDrivebase() {
 
       // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally
       // outputs individual module feedforwards
-      [this](auto speeds, auto feedforwards) { Drive(speeds.vx, speeds.vy, speeds.omega, false); },
+      [this](auto speeds, auto feedforwards) {
+        Logger::Log("Drivebase/torqueCurrent0", feedforwards.torqueCurrents[0]);
+        Logger::Log("Drivebase/torqueCurrent1", feedforwards.torqueCurrents[1]);
+        Logger::Log("Drivebase/torqueCurrent2", feedforwards.torqueCurrents[2]);
+        Logger::Log("Drivebase/torqueCurrent3", feedforwards.torqueCurrents[3]);
+        if (feedforwards.robotRelativeForcesX.size() == 4 &&
+            feedforwards.robotRelativeForcesY.size() == 4) {
+          std::array<units::newton_t, 4> xForces = {
+              feedforwards.robotRelativeForcesX[0], feedforwards.robotRelativeForcesX[1],
+              feedforwards.robotRelativeForcesX[2], feedforwards.robotRelativeForcesX[3]};
+          std::array<units::newton_t, 4> yForces = {
+              feedforwards.robotRelativeForcesY[0], feedforwards.robotRelativeForcesY[1],
+              feedforwards.robotRelativeForcesY[2], feedforwards.robotRelativeForcesY[3]};
+          Drive(speeds.vx, speeds.vy, speeds.omega, false, xForces, yForces);
+        } else {
+          Drive(speeds.vx, speeds.vy, speeds.omega, false);
+        }
+      },
 
       // PID Feedback controller for translation and rotation
       _pathplannerController,
 
       // robot mass, MOT, wheel locations, etc
-      RobotConfig::fromGUISettings(),
+      _pathplannerConfig,
 
       // Boolean supplier that controls when the path will be mirrored for the red alliance
       // This will flip the path being followed to the red side of the field.
@@ -150,7 +165,9 @@ frc2::CommandPtr SubDrivebase::Drive(std::function<frc::ChassisSpeeds()> speeds,
 }
 
 void SubDrivebase::Drive(units::meters_per_second_t xSpeed, units::meters_per_second_t ySpeed,
-                         units::turns_per_second_t rot, bool fieldRelative) {
+                         units::turns_per_second_t rot, bool fieldRelative,
+                         std::optional<std::array<units::newton_t, 4>> xForceFeedforwards,
+                         std::optional<std::array<units::newton_t, 4>> yForceFeedforwards) {
   // Optionally convert speeds to field relative
   auto speeds = fieldRelative
                     ? frc::ChassisSpeeds::FromFieldRelativeSpeeds(xSpeed, ySpeed, rot, GetHeading())
@@ -168,13 +185,18 @@ void SubDrivebase::Drive(units::meters_per_second_t xSpeed, units::meters_per_se
       &states,
       frc::SmartDashboard::GetNumber("Drivebase/Config/MaxVelocity", MAX_VELOCITY.value()) * 1_mps);
 
+  // Extract force feedforwards
+  std::array<units::newton_t, 4> defaults{0_N, 0_N, 0_N, 0_N};
+  auto [flXForce, frXForce, blXForce, brXForce] = xForceFeedforwards.value_or(defaults);
+  auto [flYForce, frYForce, blYForce, brYForce] = yForceFeedforwards.value_or(defaults);
+
   // Setting modules from aquired states
   Logger::Log("Drivebase/Desired Swerve States", states);
   auto [fl, fr, bl, br] = states;
-  _frontLeft.SetDesiredState(fl);
-  _frontRight.SetDesiredState(fr);
-  _backLeft.SetDesiredState(bl);
-  _backRight.SetDesiredState(br);
+  _frontLeft.SetDesiredState(fl, flXForce, flYForce);
+  _frontRight.SetDesiredState(fr, frXForce, frYForce);
+  _backLeft.SetDesiredState(bl, blXForce, blYForce);
+  _backRight.SetDesiredState(br, brXForce, brYForce);
 }
 
 frc::ChassisSpeeds SubDrivebase::GetRobotRelativeSpeeds() {
@@ -196,10 +218,6 @@ void SubDrivebase::SyncSensors() {
   _frontRight.ConfigTurnMotor();
   _backLeft.ConfigTurnMotor();
   _backRight.ConfigTurnMotor();
-}
-
-frc2::CommandPtr SubDrivebase::SyncSensorBut() {
-  return RunOnce([this] { SyncSensors(); });
 }
 
 frc::Rotation2d SubDrivebase::GetHeading() {
@@ -282,7 +300,7 @@ void SubDrivebase::ResetGyroHeading(units::degree_t startingAngle) {
   _gyro.SetAngleAdjustment(startingAngle.value());
 }
 
-frc2::CommandPtr SubDrivebase::ResetGyroCmd() {
+frc2::CommandPtr SubDrivebase::ResetGyro() {
   return RunOnce([this] { ResetGyroHeading(); });
 }
 
@@ -327,7 +345,7 @@ units::degree_t SubDrivebase::GetPitch() {
   return _gyro.GetPitch() * 1_deg;
 }
 
-frc2::CommandPtr SubDrivebase::WheelCharecterisationCmd() {
+frc2::CommandPtr SubDrivebase::WheelCharecterisation() {
   static units::radian_t initialGyroHeading = 0_rad;
   static units::radian_t initialWheelDistance = 0_rad;
 

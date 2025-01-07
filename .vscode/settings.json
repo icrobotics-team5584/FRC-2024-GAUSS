@@ -102,6 +102,19 @@
     "ranges": "cpp",
     "valarray": "cpp",
     "expected": "cpp",
-    "regex": "cpp"
+    "regex": "cpp",
+    "*.tcc": "cpp",
+    "bitset": "cpp",
+    "cfenv": "cpp",
+    "codecvt": "cpp",
+    "cstdarg": "cpp",
+    "cwctype": "cpp",
+    "memory_resource": "cpp",
+    "source_location": "cpp",
+    "string_view": "cpp",
+    "future": "cpp",
+    "semaphore": "cpp",
+    "cinttypes": "cpp",
+    "typeindex": "cpp"
   }
 }

@@ -27,6 +27,8 @@ void Log(std::string_view keyName, bool value);
 void Log(std::string_view keyName, std::string_view value);
 void Log(std::string_view keyName, frc::DriverStation::Alliance value);
 void Log(std::string_view keyName, wpi::array<frc::SwerveModuleState, 4> states);
+void Log(std::string_view keyName, ctre::phoenix6::StatusSignal<units::scalar_t>& signal);
+void Log(std::string_view keyName, ctre::phoenix6::StatusSignal<ctre::phoenix6::signals::ControlModeValue>& signal);
 void Log(std::string keyName, units::turn_t value);
 void Log(std::string keyName, ctre::phoenix6::StatusSignal<units::turn_t>& signal);
 void Log(std::string keyName, units::degree_t value);

@@ -5,6 +5,7 @@
 #include "subsystems/SubVision.h"
 #include "subsystems/SubDrivebase.h"
 #include <photon/simulation/VisionTargetSim.h>
+#include <photon/simulation/PhotonCameraSim.h>
 #include <frc/DriverStation.h>
 
 SubVision::SubVision() {
@@ -15,6 +16,10 @@ SubVision::SubVision() {
     SubDrivebase::GetInstance().DisplayPose(fmt::format("tag{}", target.fiducialId),
                                             target.GetPose().ToPose2d());
   }
+  
+  // Call this once just to get rid of the warnings that it is unused.
+  // Its a photonlib bug.
+  photon::VisionEstimation::EstimateCamPosePNP({}, {}, {}, {}, photon::TargetModel{1_m});
 }
 
 // This method will be called once per scheduler run
@@ -72,7 +77,7 @@ std::optional<photon::PhotonTrackedTarget> SubVision::GetSpeakerTarget() {
 }
 
 std::optional<units::degree_t> SubVision::GetSpeakerYaw(){
-  auto tagResult = SubVision::GetInstance().GetSpeakerTarget();
+  auto tagResult = GetSpeakerTarget();
   if (tagResult){
     return tagResult.value().GetYaw() * 1_deg;
   } else {
@@ -81,7 +86,7 @@ std::optional<units::degree_t> SubVision::GetSpeakerYaw(){
 }
 
 std::optional<units::degree_t> SubVision::GetSpeakerPitch(){
-  auto tagResult = SubVision::GetInstance().GetSpeakerTarget();
+  auto tagResult = GetSpeakerTarget();
   if (tagResult){
     return tagResult.value().GetPitch() * 1_deg;
   } else {

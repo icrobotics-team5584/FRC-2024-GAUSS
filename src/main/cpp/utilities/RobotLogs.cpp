@@ -9,12 +9,19 @@ std::map<std::string, nt::StructArrayPublisher<frc::SwerveModuleState>> swerveMo
 
 void LogFalcon(std::string name, ctre::phoenix6::hardware::TalonFX& talonFX) {
   Log(name + "/Voltage", talonFX.GetMotorVoltage());
+  Log(name + "/DutyCycle", talonFX.GetDutyCycle());
   Log(name + "/StatorCurrent", talonFX.GetStatorCurrent());
+  Log(name + "/TorqueCurrent", talonFX.GetTorqueCurrent());
   Log(name + "/SupplyCurrent", talonFX.GetSupplyCurrent());
   Log(name + "/Position", talonFX.GetPosition());
+  Log(name + "/Velocity", talonFX.GetVelocity());
+  Log(name + "/Acceleration", talonFX.GetAcceleration());
   Log(name + "/Temperature", talonFX.GetDeviceTemp());
-  Log(name + "/TrueVelocity", talonFX.GetVelocity());
+  Log(name + "/ControlMode", talonFX.GetControlMode());
   Log(name + "/Target", talonFX.GetClosedLoopReference());
+  Log(name + "/TargetSlope", talonFX.GetClosedLoopReferenceSlope());
+  Log(name + "/ClosedLoopError", talonFX.GetClosedLoopError());
+  Log(name + "/ClosedLoopFeedForward", talonFX.GetClosedLoopFeedForward());
 }
 
 void Log(std::string_view keyName, wpi::Sendable* data) {
@@ -48,6 +55,14 @@ void Log(std::string_view keyName, wpi::array<frc::SwerveModuleState, 4> value) 
                                     .GetStructArrayTopic<frc::SwerveModuleState>(fullKeyName)
                                     .Publish());
   it->second.Set(value);
+}
+
+void Log(std::string_view keyName, ctre::phoenix6::StatusSignal<units::scalar_t>& signal) {
+  Log(keyName, signal.GetValue().value());
+}
+
+void Log(std::string_view keyName, ctre::phoenix6::StatusSignal<ctre::phoenix6::signals::ControlModeValue>& value) {
+  Log(keyName, value.GetValue().ToString());
 }
 
 void Log(std::string keyName, units::turn_t value) {

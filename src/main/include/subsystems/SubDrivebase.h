@@ -1,7 +1,12 @@
 #pragma once
 
+#include "Constants.h"
+#include "utilities/SwerveModule.h"
 #include <frc2/command/SubsystemBase.h>
-#include <studica/AHRS.h>
+#include <frc2/command/CommandPtr.h>
+#include <frc2/command/Commands.h>
+#include <frc2/command/button/CommandXboxController.h>
+#include <frc2/command/sysid/SysIdRoutine.h>
 #include <frc/geometry/Translation2d.h>
 #include <frc/kinematics/SwerveDriveKinematics.h>
 #include <frc/kinematics/SwerveDriveOdometry.h>
@@ -9,13 +14,10 @@
 #include <frc/smartdashboard/Field2d.h>
 #include <frc/filter/SlewRateLimiter.h>
 #include <pathplanner/lib/controllers/PPHolonomicDriveController.h>
+#include <pathplanner/lib/util/DriveFeedforwards.h>
+#include <pathplanner/lib/config/RobotConfig.h>
+#include <studica/AHRS.h>
 #include <numbers>
-#include <frc2/command/CommandPtr.h>
-#include <frc2/command/Commands.h>
-#include "Constants.h"
-#include "utilities/SwerveModule.h"
-#include <frc2/command/button/CommandXboxController.h>
-#include <frc2/command/sysid/SysIdRoutine.h>
 
 class SubDrivebase : public frc2::SubsystemBase {
  public:
@@ -43,9 +45,6 @@ class SubDrivebase : public frc2::SubsystemBase {
 
   // Getters
   bool IsAtPose(frc::Pose2d pose);
-  frc::ChassisSpeeds CalcDriveToPoseSpeeds(frc::Pose2d targetPose);
-  frc::ChassisSpeeds CalcJoystickSpeeds(frc2::CommandXboxController& controller);
-  units::turns_per_second_t CalcRotateSpeed(units::turn_t rotationError);
   units::degree_t GetPitch();
   frc::Pose2d GetPose();
   frc::Rotation2d GetHeading(); // Heading as recorded by the pose estimator (matches field orientation)
@@ -53,13 +52,17 @@ class SubDrivebase : public frc2::SubsystemBase {
   units::meters_per_second_t GetVelocity();
   frc::SwerveDriveKinematics<4> GetKinematics();
   frc::ChassisSpeeds GetRobotRelativeSpeeds();
-  frc2::CommandPtr WheelCharecterisationCmd();
+
+  // Calculators
+  frc::ChassisSpeeds CalcDriveToPoseSpeeds(frc::Pose2d targetPose);
+  frc::ChassisSpeeds CalcJoystickSpeeds(frc2::CommandXboxController& controller);
+  units::turns_per_second_t CalcRotateSpeed(units::turn_t rotationError);
 
   // Commands
   frc2::CommandPtr JoystickDrive(frc2::CommandXboxController& controller);
+  frc2::CommandPtr WheelCharecterisation();
   frc2::CommandPtr Drive(std::function<frc::ChassisSpeeds()> speeds, bool fieldOriented);
-  frc2::CommandPtr SyncSensorBut();
-  frc2::CommandPtr ResetGyroCmd();
+  frc2::CommandPtr ResetGyro();
   frc2::CommandPtr SysIdQuasistatic(frc2::sysid::Direction direction) {
     return _sysIdRoutine.Quasistatic(direction);
   }
@@ -77,7 +80,9 @@ class SubDrivebase : public frc2::SubsystemBase {
 
  private:
   void Drive(units::meters_per_second_t xSpeed, units::meters_per_second_t ySpeed,
-             units::turns_per_second_t rot, bool fieldRelative);
+             units::turns_per_second_t rot, bool fieldRelative,
+             std::optional<std::array<units::newton_t, 4>> xForceFeedforwards = std::nullopt,
+             std::optional<std::array<units::newton_t, 4>> yForceFeedforwards = std::nullopt);
 
   studica::AHRS _gyro{studica::AHRS::NavXComType::kMXP_SPI};
 
@@ -113,6 +118,7 @@ class SubDrivebase : public frc2::SubsystemBase {
           pathplanner::PIDConstants{2.0, 0.0, 0.0},  // Translation PID constants
           pathplanner::PIDConstants{0.5, 0.0, 0.0}   // Rotation PID constants
       );
+  pathplanner::RobotConfig _pathplannerConfig = pathplanner::RobotConfig::fromGUISettings();
 
   // Pose estimation
   frc::SwerveDrivePoseEstimator<4> _poseEstimator{

@@ -14,7 +14,7 @@
 #include "subsystems/SubClimber.h"
 #include <pathplanner/lib/auto/NamedCommands.h>
 #include <frc/smartdashboard/SmartDashboard.h>
-
+#include <frc/geometry/Translation2d.h>
 RobotContainer::RobotContainer(){
 
   // Initialize subsystems
@@ -24,6 +24,8 @@ RobotContainer::RobotContainer(){
 
   // Auto chooser
   _autoChooser.AddOption("bigPath", "bigPath");
+  _autoChooser.AddOption("ppAuto", "ppAuto");
+  _autoChooser.AddOption("forward", "forward");
   _autoChooser.SetDefaultOption("indivPaths", "indivPaths");
   frc::SmartDashboard::PutData("Chosen Path", &_autoChooser);
 
@@ -40,7 +42,7 @@ RobotContainer::RobotContainer(){
 void RobotContainer::ConfigureBindings() {
   
   //Driver
-
+  _driverController.A().WhileTrue(SubDrivebase::GetInstance().Drive([]{return frc::ChassisSpeeds{100_mps, 0_mps, 0_tps};}, false));
   //Triggers
   _driverController.RightTrigger().WhileTrue(cmd::CmdIntake());
   _driverController.LeftTrigger().WhileTrue(cmd::CmdOuttake());
@@ -107,21 +109,21 @@ pathplanner::PathPlannerAuto RobotContainer::GetAutonomousCommand() {
   auto _autoSelected = _autoChooser.GetSelected();
   auto followPath = pathplanner::PathPlannerAuto(_autoSelected);
 
-  followPath.event("beginVisionAim").OnTrue(frc2::cmd::RunOnce([] {
+  followPath.isRunning().OnTrue(frc2::cmd::RunOnce([] {
     SubDrivebase::GetInstance().SetPathplannerRotationFeedbackSource([] {
       return SubDrivebase::GetInstance().CalcRotateSpeed(
           SubVision::GetInstance().GetSpeakerYaw().value_or(0_deg));
     });
   }));
 
-  followPath.event("endVisionAim").OnTrue(frc2::cmd::RunOnce([] {
+  followPath.isRunning().OnFalse(frc2::cmd::RunOnce([] {
     SubDrivebase::GetInstance().ResetPathplannerRotationFeedbackSource();
   }));
 
   followPath.isRunning().OnTrue(SubClimber::GetInstance().ClimberAutoReset().AndThen(
       SubClimber::GetInstance().ClimberPosition(SubClimber::STOW_HEIGHT)));
 
-  return std::move(followPath);
+  return followPath;
 }
 
 frc2::CommandPtr RobotContainer::Rumble(double force, units::second_t duration) {
